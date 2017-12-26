@@ -17,13 +17,13 @@
 		</constructor-arg>
 		<constructor-arg index="2">
 			<set>
-				<value>172.18.100.176:26379</value>
-				<value>172.18.100.176:26379</value>
+				<value>139.129.200.212:26379</value>
+				<value>139.129.200.212:26379</value>
 			</set>
 		</constructor-arg>
-		<!-- <constructor-arg index="3">
-				<value>PWD</value>
-		</constructor-arg> -->
+		<constructor-arg index="3">
+				<value>000000aA</value>
+		</constructor-arg>
 	</bean>
 
 	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
