@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysauth.dao.SysRoleGroupDao">
+<resultMap id="SysRoleGroupDTO" type="com.fintech.modules.platform.sysauth.dto.SysRoleGroupDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="roleGroupName" column="ROLE_GROUP_NAME" jdbcType="VARCHAR" />
+				<result property="roleGroupCode" column="ROLE_GROUP_CODE" jdbcType="VARCHAR" />
+				<result property="roleGroupType" column="ROLE_GROUP_TYPE" jdbcType="VARCHAR" />
+				<result property="appId" column="APP_ID" jdbcType="DECIMAL" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 SYS_ROLE_GROUP -->	
+<select id="searchSysRoleGroupByPaging" parameterType="java.util.Map" resultMap="SysRoleGroupDTO">
+    	 		select 
+						t1.id                             ,
+						t1.role_group_name                ,
+						t1.role_group_code                ,
+						t1.role_group_type                ,
+						t1.app_id                         ,
+						t1.validate_state                 ,
+						t1.version                        
+					
+				from sys_role_group 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.roleGroupName != null and dto.roleGroupName != ''">
+						and t1.ROLE_GROUP_NAME like concat('%',#{dto.roleGroupName},'%')
+    			</if>
+    			<if test="dto.roleGroupCode != null and dto.roleGroupCode != ''">
+						and t1.ROLE_GROUP_CODE like concat('%',#{dto.roleGroupCode},'%') 
+    			</if>
+    			<if test="dto.roleGroupType != null and dto.roleGroupType != ''">
+						and t1.ROLE_GROUP_TYPE =#{dto.roleGroupType}
+    			</if>
+    			<if test="dto.appId != null and dto.appId != ''">
+						and t1.APP_ID =#{dto.appId}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_ROLE_GROUP  -->
+<select id="searchSysRoleGroup" parameterType="java.util.Map" resultMap="SysRoleGroupDTO">
+    	     select 
+						t1.id                             ,
+						t1.role_group_name                ,
+						t1.role_group_code                ,
+						t1.role_group_type                ,
+						t1.app_id                         ,
+						t1.validate_state                 ,
+						t1.version                        
+				from sys_role_group 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.roleGroupName != null and dto.roleGroupName != ''">
+						and t1.ROLE_GROUP_NAME like concat('%',#{dto.roleGroupName},'%')
+    			</if>
+    			<if test="dto.roleGroupCode != null and dto.roleGroupCode != ''">
+						and t1.ROLE_GROUP_CODE = #{dto.roleGroupCode}
+    			</if>
+    			<if test="dto.roleGroupType != null and dto.roleGroupType != ''">
+						and t1.ROLE_GROUP_TYPE = #{dto.roleGroupType}
+    			</if>
+    			<if test="dto.appId != null and dto.appId != ''">
+						and t1.APP_ID = #{dto.appId}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+    			<if test="userID != null and userID != ''">
+						and t1.ID in (select distinct d.role_group_id from sys_role_group_role d where d.role_id in (select  role_id from sys_role_user c where c.target_id=#{userID} and c.target_type='user'))
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_ROLE_GROUP -->
+<select id="findSysRoleGroupByPrimaryKey" parameterType="java.util.Map" resultMap="SysRoleGroupDTO">
+   	 		select 
+					t1.id                             ,
+					t1.role_group_name                ,
+					t1.role_group_code                ,
+					t1.role_group_type                ,
+					t1.app_id                         ,
+					t1.validate_state                 ,
+					t1.version                        
+			from sys_role_group 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_ROLE_GROUP -->
+<insert id="insertSysRoleGroup" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.`TABLES` WHERE  TABLE_NAME='SYS_ROLE_GROUP'
+	</selectKey>
+			insert into sys_role_group
+			(   		
+					id                             ,
+					role_group_name                ,
+					role_group_code                ,
+					role_group_type                ,
+					app_id                         ,
+					validate_state                 ,
+					version                        
+			)
+			values(#{dto.id}
+					,#{dto.roleGroupName,jdbcType=VARCHAR}
+					,#{dto.roleGroupCode,jdbcType=VARCHAR}
+					,#{dto.roleGroupType,jdbcType=VARCHAR}
+					,#{dto.appId,jdbcType=DECIMAL}
+					,'1'
+					,#{dto.version,jdbcType=DECIMAL}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_ROLE_GROUP -->
+<update id="updateSysRoleGroup" parameterType="java.util.Map">
+	     update sys_role_group t1
+	           set 
+			           t1.role_group_name                =#{dto.roleGroupName,jdbcType=VARCHAR},
+			           t1.role_group_code                =#{dto.roleGroupCode,jdbcType=VARCHAR},
+			           t1.role_group_type                =#{dto.roleGroupType,jdbcType=VARCHAR},
+			           t1.app_id                         =#{dto.appId,jdbcType=DECIMAL},
+			           t1.validate_state                 ='1',
+			           t1.version                        =#{dto.version,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_ROLE_GROUP -->
+<delete id="deleteSysRoleGroupByID" parameterType="java.util.Map">
+    	delete t1 from sys_role_group t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_ROLE_GROUP -->
+<update id="deleteSysRoleGroupByPrimaryKey" parameterType="java.util.Map">
+	     update sys_role_group t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

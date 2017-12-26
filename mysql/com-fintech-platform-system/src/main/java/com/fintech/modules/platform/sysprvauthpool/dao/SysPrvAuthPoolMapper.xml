@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysprvauthpool.dao.SysPrvAuthPoolDao">
+<resultMap id="SysPrvAuthPoolDTO" type="com.fintech.modules.platform.sysprvauthpool.dto.SysPrvAuthPoolDTO">
+				<result property="userid" column="USERID" jdbcType="DECIMAL" />
+				<result property="ownerid" column="OWNERID" jdbcType="DECIMAL" />
+				<result property="orgid" column="ORGID" jdbcType="DECIMAL" />
+				<result property="tableid" column="TABLEID" jdbcType="VARCHAR" />
+				<result property="bizid" column="BIZID" jdbcType="DECIMAL" />
+				<result property="status" column="STATUS" jdbcType="CHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_PRV_AUTH_POOL -->	
+<select id="searchSysPrvAuthPoolByPaging" parameterType="java.util.Map" resultMap="SysPrvAuthPoolDTO">
+    	 		select 
+						t1.userid                         ,
+						t1.ownerid                        ,
+						t1.orgid                          ,
+						t1.tableid                        ,
+						t1.bizid                          ,
+						t1.status                         
+					
+				from sys_prv_auth_pool 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.userid != null and dto.userid != ''">
+						and t1.USERID =#{dto.userid}
+    			</if>
+    			<if test="dto.ownerid != null and dto.ownerid != ''">
+						and t1.OWNERID =#{dto.ownerid}
+    			</if>
+    			<if test="dto.orgid != null and dto.orgid != ''">
+						and t1.ORGID =#{dto.orgid}
+    			</if>
+    			<if test="dto.tableid != null and dto.tableid != ''">
+						and t1.TABLEID =#{dto.tableid}
+    			</if>
+    			<if test="dto.bizid != null and dto.bizid != ''">
+						and t1.BIZID =#{dto.bizid}
+    			</if>
+    			<if test="dto.status != null and dto.status != ''">
+						and t1.STATUS =#{dto.status}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_PRV_AUTH_POOL  -->
+<select id="searchSysPrvAuthPool" parameterType="java.util.Map" resultMap="SysPrvAuthPoolDTO">
+    	     select 
+						t1.userid                         ,
+						t1.ownerid                        ,
+						t1.orgid                          ,
+						t1.tableid                        ,
+						t1.bizid                          ,
+						t1.status                         
+				from sys_prv_auth_pool 		t1
+				where 1=1
+    			<if test="dto.userid != null and dto.userid != ''">
+						and t1.USERID = #{dto.userid}
+    			</if>
+    			<if test="dto.ownerid != null and dto.ownerid != ''">
+						and t1.OWNERID = #{dto.ownerid}
+    			</if>
+    			<if test="dto.orgid != null and dto.orgid != ''">
+						and t1.ORGID = #{dto.orgid}
+    			</if>
+    			<if test="dto.tableid != null and dto.tableid != ''">
+						and t1.TABLEID = #{dto.tableid}
+    			</if>
+    			<if test="dto.bizid != null and dto.bizid != ''">
+						and t1.BIZID = #{dto.bizid}
+    			</if>
+    			<if test="dto.status != null and dto.status != ''">
+						and t1.STATUS = #{dto.status}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_PRV_AUTH_POOL -->
+<select id="findSysPrvAuthPoolByPrimaryKey" parameterType="java.util.Map" resultMap="SysPrvAuthPoolDTO">
+   	 		select 
+					t1.userid                         ,
+					t1.ownerid                        ,
+					t1.orgid                          ,
+					t1.tableid                        ,
+					t1.bizid                          ,
+					t1.status                         
+			from sys_prv_auth_pool 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_PRV_AUTH_POOL -->
+<insert id="insertSysPrvAuthPool" parameterType="java.util.Map">
+			insert into sys_prv_auth_pool
+			(   		
+					userid                         ,
+					ownerid                        ,
+					orgid                          ,
+					tableid                        ,
+					bizid                          ,
+					status                         ,
+					datesource                     ,
+					datesourceid
+			)
+			values(	#{dto.userid,jdbcType=DECIMAL}
+					,#{dto.ownerid,jdbcType=DECIMAL}
+					,#{dto.orgid,jdbcType=DECIMAL}
+					,#{dto.tableid,jdbcType=VARCHAR}
+					,#{dto.bizid,jdbcType=DECIMAL}
+					,#{dto.status,jdbcType=CHAR}
+					,#{dto.datesource,jdbcType=VARCHAR}
+					,#{dto.datesourceid,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_PRV_AUTH_POOL -->
+<update id="updateSysPrvAuthPool" parameterType="java.util.Map">
+	     update sys_prv_auth_pool t1
+	           set 
+			           t1.userid                         =#{dto.userid,jdbcType=DECIMAL},
+			           t1.ownerid                        =#{dto.ownerid,jdbcType=DECIMAL},
+			           t1.orgid                          =#{dto.orgid,jdbcType=DECIMAL},
+			           t1.tableid                        =#{dto.tableid,jdbcType=VARCHAR},
+			           t1.bizid                          =#{dto.bizid,jdbcType=DECIMAL},
+			           t1.status                         =#{dto.status,jdbcType=CHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_PRV_AUTH_POOL -->
+<delete id="deleteSysPrvAuthPoolByID" parameterType="java.util.Map">
+    	delete t1 from sys_prv_auth_pool t1 where t1.ID in (${ids} )
+</delete>
+
+
+
+<delete id="deleteSysPrvAuthPoolByMap" parameterType="java.util.Map">
+    	delete t1 from sys_prv_auth_pool t1 
+    			where 1=1
+    			<if test="dto.userid != null and dto.userid != ''">
+					and t1.userid =#{dto.userid}
+				</if>
+				<if test="dto.ownerid != null and dto.ownerid != ''">
+			       and t1.ownerid =#{dto.ownerid}
+		        </if>
+		        <if test="dto.orgid != null and dto.orgid != ''">
+					and t1.orgid =#{dto.orgid}
+				</if>
+				<if test="dto.tableid != null and dto.tableid != ''">
+					and t1.tableid =#{dto.tableid}
+				</if>
+				<if test="dto.bizid != null and dto.bizid != ''">
+					and t1.bizid =#{dto.bizid}
+				</if>
+				<if test="dto.status != null and dto.status != ''">
+					and t1.status =#{dto.status}
+				</if>
+				<if test="dto.datesource != null and dto.datesource != ''">
+					and t1.datesource =#{dto.datesource}
+				</if>
+				<if test="dto.datesourceid != null and dto.datesourceid != ''">
+					and t1.datesourceid =#{dto.datesourceid}
+				</if>        		
+</delete>
+
+
+<!-- 主键假删除 SYS_PRV_AUTH_POOL -->
+<update id="deleteSysPrvAuthPoolByPrimaryKey" parameterType="java.util.Map">
+	     update sys_prv_auth_pool t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

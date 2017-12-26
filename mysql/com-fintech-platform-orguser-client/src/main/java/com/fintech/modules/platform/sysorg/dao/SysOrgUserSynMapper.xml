@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysorg.dao.SysOrgUserSynDao">
+<resultMap id="SysOrgUserSynDTO" type="com.fintech.modules.platform.sysorg.dto.SysOrgUserSynDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+				<result property="userId" column="USER_ID" jdbcType="DECIMAL" />
+				<result property="positionId" column="POSITION_ID" jdbcType="DECIMAL" />
+				<result property="isMainOrg" column="IS_MAIN_ORG" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+				<result property="createDate" column="CREATE_DATE" jdbcType="TIMESTAMP" />
+				<result property="orgUserId" column="ORG_USER_ID" jdbcType="DECIMAL" />
+				<result property="orgName" column="ORG_NAME" jdbcType="VARCHAR" />
+				<result property="userName" column="USER_NAME" jdbcType="VARCHAR" />
+				<result property="positionName" column="POSITION_NAME" jdbcType="VARCHAR" />
+				<result property="positionCode" column="POSITION_CODE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_ORG_USER_SYN -->	
+<select id="searchSysOrgUserSynByPaging" parameterType="java.util.Map" resultMap="SysOrgUserSynDTO">
+    	 		select 
+						t1.id                             ,
+						t1.org_id                         ,
+						t1.user_id                        ,
+						t1.position_id                    ,
+						t1.position_code                    ,
+						t1.is_main_org                    ,
+						t1.validate_state                 ,
+						t1.version                        ,
+						t1.create_date                    ,
+						t1.org_user_id                    ,
+						t1.org_name                       ,
+						t1.user_name                      ,
+						t1.position_name                  
+					
+				from sys_org_user_syn 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="dto.positionId != null and dto.positionId != ''">
+						and t1.POSITION_ID =#{dto.positionId}
+    			</if>
+    			<if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+						and t1.IS_MAIN_ORG =#{dto.isMainOrg}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+    			<if test="dto.createDate != null and dto.createDate != ''">
+						and t1.CREATE_DATE =#{dto.createDate}
+    			</if>
+    			<if test="dto.orgUserId != null and dto.orgUserId != ''">
+						and t1.ORG_USER_ID =#{dto.orgUserId}
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME =#{dto.orgName}
+    			</if>
+    			<if test="dto.userName != null and dto.userName != ''">
+						and t1.USER_NAME =#{dto.userName}
+    			</if>
+    			<if test="dto.positionName != null and dto.positionName != ''">
+						and t1.POSITION_NAME =#{dto.positionName}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_ORG_USER_SYN  -->
+<select id="searchSysOrgUserSyn" parameterType="java.util.Map" resultMap="SysOrgUserSynDTO">
+    	     select 
+						t1.id                             ,
+						t1.org_id                         ,
+						t1.user_id                        ,
+						t1.position_id                    ,
+						t1.position_code                    ,
+						t1.is_main_org                    ,
+						t1.validate_state                 ,
+						t1.version                        ,
+						t1.create_date                    ,
+						t1.org_user_id                    ,
+						t1.org_name                       ,
+						t1.user_name                      ,
+						t1.position_name                  
+				from sys_org_user_syn 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.positionId != null and dto.positionId != ''">
+						and t1.POSITION_ID = #{dto.positionId}
+    			</if>
+    			<if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+						and t1.IS_MAIN_ORG = #{dto.isMainOrg}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+    			<if test="dto.createDate != null and dto.createDate != ''">
+						and t1.CREATE_DATE = #{dto.createDate}
+    			</if>
+    			<if test="dto.orgUserId != null and dto.orgUserId != ''">
+						and t1.ORG_USER_ID = #{dto.orgUserId}
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME = #{dto.orgName}
+    			</if>
+    			<if test="dto.userName != null and dto.userName != ''">
+						and t1.USER_NAME = #{dto.userName}
+    			</if>
+    			<if test="dto.positionName != null and dto.positionName != ''">
+						and t1.POSITION_NAME = #{dto.positionName}
+    			</if>
+</select>
+<!-- 查找最大时间记录 -->
+<select id="searchSysOrgUserSynByMaxCreateDate" parameterType="java.util.Map" resultMap="SysOrgUserSynDTO">
+  				SELECT  t1.id                             ,
+						t1.org_id                         ,
+						t1.user_id                        ,
+						t1.position_id                    ,
+						t1.position_code                    ,
+						t1.is_main_org                    ,
+						t1.validate_state                 ,
+						t1.version                        ,
+						t1.create_date                    ,
+						t1.org_user_id                    
+				from sys_org_user_syn 		t1
+				where 1=1
+				and t1.create_date  =  ( SELECT  MAX( t2.create_date  )  FROM  sys_org_user_syn  t2 )
+				limit 1
+  
+</select>
+  
+<!-- 主键查询对象  SYS_ORG_USER_SYN -->
+<select id="findSysOrgUserSynByPrimaryKey" parameterType="java.util.Map" resultMap="SysOrgUserSynDTO">
+   	 		select 
+					t1.id                             ,
+					t1.org_id                         ,
+					t1.user_id                        ,
+					t1.position_id                    ,
+					t1.position_code                    ,
+					t1.is_main_org                    ,
+					t1.validate_state                 ,
+					t1.version                        ,
+					t1.create_date                    ,
+					t1.org_user_id                    ,
+					t1.org_name                       ,
+					t1.user_name                      ,
+					t1.position_name                  
+			from sys_org_user_syn 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_ORG_USER_SYN -->
+<insert id="insertSysOrgUserSyn" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select nextval('seq_SYS_ORG_USER_SYN') as id from dual
+	</selectKey>
+			insert into sys_org_user_syn
+			(   		
+					id                             ,
+					org_id                         ,
+					user_id                        ,
+					position_id                    ,
+					position_code                 ,
+					is_main_org                    ,
+					validate_state                 ,
+					version                        ,
+					create_date                    ,
+					org_user_id                    ,
+					org_name                       ,
+					user_name                      ,
+					position_name                  ,
+					syn_status
+			)
+			values(#{dto.id}
+					,#{dto.orgId,jdbcType=DECIMAL}
+					,#{dto.userId,jdbcType=DECIMAL}
+					,#{dto.positionId,jdbcType=DECIMAL}
+					,#{dto.positionCode,jdbcType=VARCHAR}
+					,#{dto.isMainOrg,jdbcType=VARCHAR}
+					,#{dto.validateState,jdbcType=VARCHAR}
+					,#{dto.version,jdbcType=DECIMAL}
+					,#{dto.createDate,jdbcType=TIMESTAMP}
+					,#{dto.orgUserId,jdbcType=DECIMAL}
+					,#{dto.orgName,jdbcType=VARCHAR}
+					,#{dto.userName,jdbcType=VARCHAR}
+					,#{dto.positionName,jdbcType=VARCHAR}
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 SYS_ORG_USER_SYN -->
+<update id="updateSysOrgUserSyn" parameterType="java.util.Map">
+	     update sys_org_user_syn t1
+	           set 
+			           t1.org_id                         =#{dto.orgId,jdbcType=DECIMAL},
+			           t1.user_id                        =#{dto.userId,jdbcType=DECIMAL},
+			           t1.position_id                    =#{dto.positionId,jdbcType=DECIMAL},
+			           t1.position_Code                 =#{dto.positionCode,jdbcType=VARCHAR},
+			           t1.is_main_org                    =#{dto.isMainOrg,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1',
+			           t1.version                        =#{dto.version,jdbcType=DECIMAL},
+			           t1.create_date                    =#{dto.createDate,jdbcType=TIMESTAMP},
+			           t1.org_user_id                    =#{dto.orgUserId,jdbcType=DECIMAL},
+			           t1.org_name                       =#{dto.orgName,jdbcType=VARCHAR},
+			           t1.user_name                      =#{dto.userName,jdbcType=VARCHAR},
+			           t1.position_name                  =#{dto.positionName,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_ORG_USER_SYN -->
+<delete id="deleteSysOrgUserSynByID" parameterType="java.util.Map">
+    	delete from sys_org_user_syn t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_ORG_USER_SYN -->
+<update id="deleteSysOrgUserSynByPrimaryKey" parameterType="java.util.Map">
+	     update sys_org_user_syn t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

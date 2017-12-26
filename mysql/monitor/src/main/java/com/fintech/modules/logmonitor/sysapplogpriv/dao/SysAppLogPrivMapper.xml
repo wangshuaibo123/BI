@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.logmonitor.sysapplogpriv.dao.SysAppLogPrivDao">
+<resultMap id="SysAppLogPrivDTO" type="com.fintech.modules.logmonitor.sysapplogpriv.dto.SysAppLogPrivDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="appId" column="APP_ID" jdbcType="VARCHAR" />
+				<result property="appName" column="app_name" jdbcType="VARCHAR" />
+				<result property="appIds" column="appIds" jdbcType="VARCHAR" />
+				<result property="userId" column="USER_ID" jdbcType="DECIMAL" />
+				<result property="userName" column="USER_NAME" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_APP_LOG_PRIV -->	
+<select id="searchSysAppLogPrivByPaging" parameterType="java.util.Map" resultMap="SysAppLogPrivDTO">
+    	 		select 
+						t1.id                             ,
+						t1.app_id                         ,
+						t3.DICT_DETAIL_NAME     app_name  ,
+						t1.user_id                        ,
+						t2.user_name					  ,
+						t1.validate_state                 
+					
+				from sys_app_log_priv 	t1
+				join sys_user           t2
+				on t1.user_id = t2.id
+				left join SYS_DICT_DETAIL t3
+				on t1.app_id = t3.DICT_DETAIL_VALUE
+				left join SYS_DICT      t4
+				on t3.DICT_ID = t4.id and t4.DICT_CODE='SYSTEMFLAG'
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.appId != null and dto.appId != ''">
+						and t1.APP_ID =#{dto.appId}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="dto.userName != null and dto.userName != ''">
+						and t2.USER_NAME like  concat('%',#{dto.userName},'%')
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_APP_LOG_PRIV  -->
+<select id="searchSysAppLogPriv" parameterType="java.util.Map" resultMap="SysAppLogPrivDTO">
+    	     select 
+						t1.id                             ,
+						t1.app_id                         ,
+						t1.user_id                        ,
+						t1.validate_state                 
+				from sys_app_log_priv 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.appId != null and dto.appId != ''">
+						and t1.APP_ID = #{dto.appId}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+</select>
+
+<!-- 获取用户权限  -->
+<select id="getUserAppPriv" parameterType="java.util.Map" resultMap="SysAppLogPrivDTO">
+			select
+				GROUP_CONCAT(t1.APP_ID)  appIds
+			from SYS_APP_LOG_PRIV t1
+			where 1=1
+			<if test="userId != null and userId != ''">
+			and t1.USER_ID = #{userId}
+			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_APP_LOG_PRIV -->
+<select id="findSysAppLogPrivByPrimaryKey" parameterType="java.util.Map" resultMap="SysAppLogPrivDTO">
+   	 		select 
+					t1.id                             ,
+					t1.app_id                         ,
+					t3.DICT_DETAIL_NAME     app_name  ,
+					t1.user_id                        ,
+					t2.user_name                      ,
+					t1.validate_state                 
+			from sys_app_log_priv 		t1
+			join sys_user               t2
+			on t1.user_id = t2.id
+			left join SYS_DICT_DETAIL t3
+			on t1.app_id = t3.DICT_DETAIL_VALUE
+			left join SYS_DICT      t4
+			on t3.DICT_ID = t4.id and t4.DICT_CODE='SYSTEMFLAG'
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_APP_LOG_PRIV -->
+<insert id="insertSysAppLogPriv" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+		select auto_increment as id from information_schema.tables where table_name='sys_app_log_priv' and table_schema=schema();
+	</selectKey>
+			insert into sys_app_log_priv
+			(
+					id								,
+					app_id                         ,
+					user_id                        ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.appId,jdbcType=VARCHAR}
+					,#{dto.userId,jdbcType=DECIMAL}
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 SYS_APP_LOG_PRIV -->
+<update id="updateSysAppLogPriv" parameterType="java.util.Map">
+	     update sys_app_log_priv t1
+	           set 
+			           t1.app_id                         =#{dto.appId,jdbcType=VARCHAR},
+			           t1.user_id                        =#{dto.userId,jdbcType=DECIMAL},
+			           t1.validate_state                 ='1'
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_APP_LOG_PRIV -->
+<delete id="deleteSysAppLogPrivByID" parameterType="java.util.Map">
+    	delete t1 from sys_app_log_priv t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_APP_LOG_PRIV -->
+<update id="deleteSysAppLogPrivByPrimaryKey" parameterType="java.util.Map">
+	     update sys_app_log_priv t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

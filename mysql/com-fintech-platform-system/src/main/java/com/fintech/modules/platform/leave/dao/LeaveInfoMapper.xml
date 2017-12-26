@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.leave.dao.LeaveInfoDao">
+<resultMap id="LeaveInfoDTO" type="com.fintech.modules.platform.leave.dto.LeaveInfoDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="leaveUserId" column="LEAVE_USER_ID" jdbcType="VARCHAR" />
+				<result property="userLevel" column="USER_LEVEL" jdbcType="VARCHAR" />
+				<result property="userName" column="USER_NAME" jdbcType="VARCHAR" />
+				<result property="orgName" column="ORG_NAME" jdbcType="VARCHAR" />
+				<result property="reason" column="REASON" jdbcType="VARCHAR" />
+				<result property="email" column="EMAIL" jdbcType="VARCHAR" />
+				<result property="status" column="STATUS" jdbcType="VARCHAR" />
+				<result property="startTime" column="START_TIME" jdbcType="DATE" />
+				<result property="endTime" column="END_TIME" jdbcType="DATE" />
+				<result property="leaveType" column="LEAVE_TYPE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="ownerId" column="OWNER_ID" jdbcType="DECIMAL" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="modifyTime" column="MODIFY_TIME" jdbcType="TIMESTAMP" />
+				<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+				<result property="remark" column="REMARK" jdbcType="VARCHAR" />
+				<result property="modifyBy" column="MODIFY_BY" jdbcType="DECIMAL" />
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 SYS_LEAVE_INFO -->	
+<select id="searchLeaveInfoByPaging" parameterType="java.util.Map" resultMap="LeaveInfoDTO">
+    	 		select 
+						t1.id                             ,
+						t1.leave_user_id                  ,
+						t1.user_level                     ,
+						t1.user_name                      ,
+						t1.org_name                       ,
+						t1.reason                         ,
+						t1.email                          ,
+						t1.status                         ,
+						t1.start_time                     ,
+						t1.end_time                       ,
+						t1.leave_type                     ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.remark                         ,
+						t1.modify_by                      ,
+						t1.org_id                         
+					
+				from SYS_LEAVE_INFO 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.leaveUserId != null and dto.leaveUserId != ''">
+						and t1.LEAVE_USER_ID =#{dto.leaveUserId}
+    			</if>
+    			<if test="dto.userLevel != null and dto.userLevel != ''">
+						and t1.USER_LEVEL =#{dto.userLevel}
+    			</if>
+    			<if test="dto.userName != null and dto.userName != ''">
+						and t1.USER_NAME like concat('%',${dto.userName},'%')
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME =#{dto.orgName}
+    			</if>
+    			<if test="dto.reason != null and dto.reason != ''">
+						and t1.REASON =#{dto.reason}
+    			</if>
+    			<if test="dto.email != null and dto.email != ''">
+						and t1.EMAIL =#{dto.email}
+    			</if>
+    			<if test="dto.status != null and dto.status != ''">
+						and t1.STATUS =#{dto.status}
+    			</if>
+    			<if test="dto.startTime != null and dto.startTime != ''">
+						and t1.START_TIME =#{dto.startTime}
+    			</if>
+    			<if test="dto.endTime != null and dto.endTime != ''">
+						and t1.END_TIME =#{dto.endTime}
+    			</if>
+    			<if test="dto.leaveType != null and dto.leaveType != ''">
+						and t1.LEAVE_TYPE =#{dto.leaveType}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID =#{dto.ownerId}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.modifyTime != null and dto.modifyTime != ''">
+						and t1.MODIFY_TIME =#{dto.modifyTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY =#{dto.createBy}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK =#{dto.remark}
+    			</if>
+    			<if test="dto.modifyBy != null and dto.modifyBy != ''">
+						and t1.MODIFY_BY =#{dto.modifyBy}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="isAdmin != 1">
+        				and (t1.LEAVE_USER_ID = #{curUserId} or t1.CREATE_BY = #{curUserId})
+        		</if>
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_LEAVE_INFO  -->
+<select id="searchLeaveInfo" parameterType="java.util.Map" resultMap="LeaveInfoDTO">
+    	     select 
+						t1.id                             ,
+						t1.leave_user_id                  ,
+						t1.user_level                     ,
+						t1.user_name                      ,
+						t1.org_name                       ,
+						t1.reason                         ,
+						t1.email                          ,
+						t1.status                         ,
+						t1.start_time                     ,
+						t1.end_time                       ,
+						t1.leave_type                     ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.remark                         ,
+						t1.modify_by                      ,
+						t1.org_id                         
+				from SYS_LEAVE_INFO 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.leaveUserId != null and dto.leaveUserId != ''">
+						and t1.LEAVE_USER_ID = #{dto.leaveUserId}
+    			</if>
+    			<if test="dto.userLevel != null and dto.userLevel != ''">
+						and t1.USER_LEVEL = #{dto.userLevel}
+    			</if>
+    			<if test="dto.userName != null and dto.userName != ''">
+						and t1.USER_NAME = #{dto.userName}
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME = #{dto.orgName}
+    			</if>
+    			<if test="dto.reason != null and dto.reason != ''">
+						and t1.REASON = #{dto.reason}
+    			</if>
+    			<if test="dto.email != null and dto.email != ''">
+						and t1.EMAIL = #{dto.email}
+    			</if>
+    			<if test="dto.status != null and dto.status != ''">
+						and t1.STATUS = #{dto.status}
+    			</if>
+    			<if test="dto.startTime != null and dto.startTime != ''">
+						and t1.START_TIME = #{dto.startTime}
+    			</if>
+    			<if test="dto.endTime != null and dto.endTime != ''">
+						and t1.END_TIME = #{dto.endTime}
+    			</if>
+    			<if test="dto.leaveType != null and dto.leaveType != ''">
+						and t1.LEAVE_TYPE = #{dto.leaveType}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID = #{dto.ownerId}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.modifyTime != null and dto.modifyTime != ''">
+						and t1.MODIFY_TIME = #{dto.modifyTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK = #{dto.remark}
+    			</if>
+    			<if test="dto.modifyBy != null and dto.modifyBy != ''">
+						and t1.MODIFY_BY = #{dto.modifyBy}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_LEAVE_INFO -->
+<select id="findLeaveInfoByPrimaryKey" parameterType="java.util.Map" resultMap="LeaveInfoDTO">
+   	 		select 
+					t1.id                             ,
+					t1.leave_user_id                  ,
+					t1.user_level                     ,
+					t1.user_name                      ,
+					t1.org_name                       ,
+					t1.reason                         ,
+					t1.email                          ,
+					t1.status                         ,
+					t1.start_time                     ,
+					t1.end_time                       ,
+					t1.leave_type                     ,
+					t1.validate_state                 ,
+					t1.owner_id                       ,
+					t1.create_time                    ,
+					t1.modify_time                    ,
+					t1.create_by                      ,
+					t1.remark                         ,
+					t1.modify_by                      ,
+					t1.org_id                         
+			from SYS_LEAVE_INFO 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_LEAVE_INFO -->
+<insert id="insertLeaveInfo" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.`TABLES` WHERE  TABLE_NAME='SYS_LEAVE_INFO'
+	</selectKey>
+			insert into SYS_LEAVE_INFO
+			(   		
+					id                             ,
+					leave_user_id                  ,
+					user_level                     ,
+					user_name                      ,
+					org_name                       ,
+					reason                         ,
+					email                          ,
+					status                         ,
+					start_time                     ,
+					end_time                       ,
+					leave_type                     ,
+					validate_state                 ,
+					owner_id                       ,
+					create_time                    ,
+					modify_time                    ,
+					create_by                      ,
+					remark                         ,
+					modify_by                      ,
+					org_id                         
+			)
+			values(#{dto.id}
+					,#{dto.leaveUserId,jdbcType=VARCHAR}
+					,#{dto.userLevel,jdbcType=VARCHAR}
+					,#{dto.userName,jdbcType=VARCHAR}
+					,#{dto.orgName,jdbcType=VARCHAR}
+					,#{dto.reason,jdbcType=VARCHAR}
+					,#{dto.email,jdbcType=VARCHAR}
+					,#{dto.status,jdbcType=VARCHAR}
+					,#{dto.startTime,jdbcType=DATE}
+					,#{dto.endTime,jdbcType=DATE}
+					,#{dto.leaveType,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.ownerId,jdbcType=DECIMAL}
+					,now()
+					,#{dto.modifyTime,jdbcType=TIMESTAMP}
+					,#{dto.createBy,jdbcType=DECIMAL}
+					,#{dto.remark,jdbcType=VARCHAR}
+					,#{dto.modifyBy,jdbcType=DECIMAL}
+					,#{dto.orgId,jdbcType=DECIMAL}
+			)
+</insert>
+
+
+
+<insert id="batchInsertLeaveInfo" parameterType="java.util.Map">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.`TABLES` WHERE  TABLE_NAME='SYS_LEAVE_INFO'
+	</selectKey>
+	 insert into SYS_LEAVE_INFO
+			(   		
+					id                             ,
+					leave_user_id                  ,
+					user_level                     ,
+					user_name                      ,
+					org_name                       ,
+					reason                         ,
+					email                          ,
+					status                         ,
+					start_time                     ,
+					end_time                       ,
+					leave_type                     ,
+					validate_state                 ,
+					owner_id                       ,
+					create_time                    ,
+					modify_time                    ,
+					create_by                      ,
+					remark                         ,
+					modify_by                      ,
+					org_id                         
+			)
+			VALUES
+	<foreach collection="list" item="dto" index="index" separator=", ">
+		(
+				     #{dto.leaveUserId,jdbcType=VARCHAR}
+					,#{dto.userLevel,jdbcType=VARCHAR}
+					,#{dto.userName,jdbcType=VARCHAR}
+					,#{dto.orgName,jdbcType=VARCHAR}
+					,#{dto.reason,jdbcType=VARCHAR}
+					,#{dto.email,jdbcType=VARCHAR}
+					,#{dto.status,jdbcType=VARCHAR}
+					,#{dto.startTime,jdbcType=DATE}
+					,#{dto.endTime,jdbcType=DATE}
+					,#{dto.leaveType,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.ownerId,jdbcType=DECIMAL}
+					,#{dto.createTime,jdbcType=TIMESTAMP}
+					,#{dto.modifyTime,jdbcType=TIMESTAMP}
+					,#{dto.createBy,jdbcType=DECIMAL}
+					,#{dto.remark,jdbcType=VARCHAR}
+					,#{dto.modifyBy,jdbcType=DECIMAL}
+					,#{dto.orgId,jdbcType=DECIMAL}
+		)
+	</foreach>
+</insert>
+    
+<!-- 更新对象 SYS_LEAVE_INFO -->
+<update id="updateLeaveInfo" parameterType="java.util.Map">
+	     update SYS_LEAVE_INFO t1
+	           set 
+			           t1.leave_user_id                  =#{dto.leaveUserId,jdbcType=VARCHAR},
+			           t1.user_level                     =#{dto.userLevel,jdbcType=VARCHAR},
+			           t1.user_name                      =#{dto.userName,jdbcType=VARCHAR},
+			           t1.org_name                       =#{dto.orgName,jdbcType=VARCHAR},
+			           t1.reason                         =#{dto.reason,jdbcType=VARCHAR},
+			           t1.email                          =#{dto.email,jdbcType=VARCHAR},
+			           t1.status                         =#{dto.status,jdbcType=VARCHAR},
+			           t1.start_time                     =#{dto.startTime,jdbcType=DATE},
+			           t1.end_time                       =#{dto.endTime,jdbcType=DATE},
+			           t1.leave_type                     =#{dto.leaveType,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1',
+			           t1.owner_id                       =#{dto.ownerId,jdbcType=DECIMAL},
+			           t1.modify_time                    =now(),
+			           t1.create_by                      =#{dto.createBy,jdbcType=DECIMAL},
+			           t1.remark                         =#{dto.remark,jdbcType=VARCHAR},
+			           t1.modify_by                      =#{dto.modifyBy,jdbcType=DECIMAL},
+			           t1.org_id                         =#{dto.orgId,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_LEAVE_INFO -->
+<delete id="deleteLeaveInfoByUserId" parameterType="java.util.Map">
+    	delete t1 from SYS_LEAVE_INFO t1 where t1.leave_user_id in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_LEAVE_INFO -->
+<update id="deleteLeaveInfoByPrimaryKey" parameterType="java.util.Map">
+	     update SYS_LEAVE_INFO t1
+	           set   t1.validate_state='0',	status='1'
+	     where t1.id in( ${ids})
+</update>
+
+
+<select id="searchLeaveInfoByStatus" parameterType="java.util.Map" resultMap="LeaveInfoDTO">
+    	     select 
+						t1.id                             ,
+						t1.leave_user_id                  ,
+						t1.user_level                     ,
+						t1.user_name                      ,
+						t1.org_name                       ,
+						t1.reason                         ,
+						t1.email                          ,
+						t1.status                         ,
+						t1.start_time                     ,
+						t1.end_time                       ,
+						t1.leave_type                     ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.remark                         ,
+						t1.modify_by                      ,
+						t1.org_id                         
+				from SYS_LEAVE_INFO 		t1
+				where  t1.status =  #{status}
+    			<if test="leaveUserId != null and leaveUserId != ''">
+						and t1.LEAVE_USER_ID = #{leaveUserId}
+    			</if>
+    			<if test="orgId != null and orgId != ''">
+						and t1.ORG_ID = #{orgId}
+    			</if>
+</select>
+
+<select id="checkLeaveByUserId" parameterType="java.util.Map" resultType="java.util.Map">
+    	    select 
+    	    		cast(count(*) as char) CUN
+			       from SYS_LEAVE_INFO l 
+			      where l.validate_state='1'
+			      and l.status='2'
+			     <![CDATA[ and date_format(l.start_time,'%Y-%m-%d') <= date_format(now(),'%Y-%m-%d') ]]>
+			     <![CDATA[ and date_format(l.end_time,'%Y-%m-%d') >= date_format(now(),'%Y-%m-%d') ]]>
+			      and l.leave_user_id='${userId}'
+</select>
+</mapper>

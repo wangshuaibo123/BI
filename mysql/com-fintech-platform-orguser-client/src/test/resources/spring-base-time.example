@@ -1,0 +1,22 @@
+<!-- 主数据同步 -->
+	<bean id="synMainDataHandle"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<bean class="com.pt.modules.platform.sysorg.time.SynMainDataHandle" />
+		</property>
+		<property name="targetMethod" value="execute" />
+		<property name="concurrent" value="false" /><!-- 作业不并发调度 -->
+	</bean>
+	<bean id="synCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="synMainDataHandle" />
+		<!-- 每10 m执行一次 0/30 * * * * ?-->
+		<property name="cronExpression" value="0 0/10 * * * ?" />
+	</bean>
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<!-- 启用定时同步主数据 -->
+		<property name="triggers">
+			<list>
+				<ref bean="synCronTrigger" />
+			</list>
+		</property>
+	</bean>

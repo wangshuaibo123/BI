@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.testtable1.dao.TestTable1Dao">
+<resultMap id="TestTable1DTO" type="com.fintech.modules.platform.testtable1.dto.TestTable1DTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="name" column="NAME" jdbcType="VARCHAR" />
+				<result property="address" column="ADDRESS" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+</resultMap>
+
+<resultMap type="com.fintech.modules.platform.testtable1.dto.SysDataPrvDTO" id="SysDataPrvDTO">
+	<result property="tableName" column="TABLE_NAME" jdbcType="VARCHAR" />
+	<result property="bizId" column="BIZ_ID" jdbcType="DECIMAL" />
+	<result property="createUserId" column="CREATE_USER_ID" jdbcType="DECIMAL" />
+	<result property="authUserId" column="AUTH_USER_ID" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 test_table1 -->	
+<select id="searchTestTable1ByPaging" parameterType="java.util.Map" resultMap="TestTable1DTO">
+    	 		select 
+						t1.id                             ,
+						t1.name                           ,
+						t1.address                        ,
+						t1.validate_state                 
+					
+				from test_table1 	t1
+				INNER JOIN SYS_DATA_PRV SDP ON SDP.TABLE_NAME='TEST_TABLE1' 
+				AND SDP.BIZ_ID=T1.ID
+				AND SDP.AUTH_USER_ID=#{dto.opUserId}
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.name != null and dto.name != ''">
+						and t1.NAME =#{dto.name}
+    			</if>
+    			<if test="dto.address != null and dto.address != ''">
+						and t1.ADDRESS =#{dto.address}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 test_table1  -->
+<select id="searchTestTable1" parameterType="java.util.Map" resultMap="TestTable1DTO">
+    	     select 
+						t1.id                             ,
+						t1.name                           ,
+						t1.address                        ,
+						t1.validate_state                 
+				from test_table1 		t1
+				INNER JOIN SYS_DATA_PRV SDP ON SDP.TABLE_NAME='TEST_TABLE1' 
+				AND SDP.BIZ_ID=T1.ID
+				AND SDP.AUTH_USER_ID=#{dto.opUserId}
+				where t1.VALIDATE_STATE = '1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.name != null and dto.name != ''">
+						and t1.NAME = #{dto.name}
+    			</if>
+    			<if test="dto.address != null and dto.address != ''">
+						and t1.ADDRESS = #{dto.address}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  test_table1 -->
+<select id="findTestTable1ByPrimaryKey" parameterType="java.util.Map" resultMap="TestTable1DTO">
+   	 		select 
+					t1.id                             ,
+					t1.name                           ,
+					t1.address                        ,
+					t1.validate_state                 
+			from test_table1 		t1
+			where 
+				t1.id = #{id}
+</select>
+
+
+<!-- 根据用户ID(CREATE_USER_ID)查询用户权限集合，测试使用 -->
+<select id="searchUserPrvs" parameterType="java.util.Map" resultMap="SysDataPrvDTO">
+		select S1.TABLE_NAME,S1.BIZ_ID,S1.CREATE_USER_ID,S1.AUTH_USER_ID
+		from SYS_DATA_PRV s1 
+		where CREATE_USER_ID IN
+		( select DISTINCT CREATE_USER_ID  FROM SYS_DATA_PRV ) 
+		and S1.CREATE_USER_ID = #{CREATE_USER_ID}
+</select>
+
+  
+<!-- 新增对象 test_table1 -->
+<insert id="insertTestTable1" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_CONFIG.nextval as id from dual
+	</selectKey>			insert into test_table1
+			(   		
+					id                             ,
+					name                           ,
+					address                        ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.name,jdbcType=VARCHAR}
+					,#{dto.address,jdbcType=VARCHAR}
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 test_table1 -->
+<update id="updateTestTable1" parameterType="java.util.Map">
+	     update test_table1 t1
+	           set 
+			           t1.name                           =#{dto.name,jdbcType=VARCHAR},
+			           t1.address                        =#{dto.address,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1'
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 test_table1 -->
+<delete id="deleteTestTable1ByID" parameterType="java.util.Map">
+    	delete from test_table1 t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 test_table1 -->
+<update id="deleteTestTable1ByPrimaryKey" parameterType="java.util.Map">
+	     update test_table1 t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

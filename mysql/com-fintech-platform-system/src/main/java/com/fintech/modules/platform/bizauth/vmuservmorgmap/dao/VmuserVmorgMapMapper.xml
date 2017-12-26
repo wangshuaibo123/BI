@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.bizauth.vmuservmorgmap.dao.VmuserVmorgMapDao">
+<resultMap id="VmuserVmorgMapDTO" type="com.fintech.modules.platform.bizauth.vmuservmorgmap.dto.VmuserVmorgMapDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="userId" column="USER_ID" jdbcType="DECIMAL" />
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+				<result property="orgType" column="ORG_TYPE" jdbcType="VARCHAR" />
+				<result property="orgName" column="ORG_NAME" jdbcType="VARCHAR" />
+				<result property="userName" column="USER_NAME" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="positionCN" column="POSITION_CN" jdbcType="VARCHAR"/>
+</resultMap>
+<resultMap id="SysUserDTO" type="com.fintech.modules.platform.sysorg.dto.SysUserDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="userName" column="USER_NAME" jdbcType="VARCHAR" />
+				<result property="userNo" column="USER_NO" jdbcType="VARCHAR" />
+				<result property="loginName" column="LOGIN_NAME" jdbcType="VARCHAR" />
+				<result property="password" column="PASSWORD" jdbcType="VARCHAR" />
+				<result property="salt" column="SALT" jdbcType="VARCHAR" />
+				<result property="mobile" column="MOBILE" jdbcType="VARCHAR" />
+				<result property="email" column="EMAIL" jdbcType="VARCHAR" />
+				<result property="userImage" column="USER_IMAGE" jdbcType="VARCHAR" />
+				<result property="sex" column="SEX" jdbcType="VARCHAR" />
+				<result property="birthday" column="BIRTHDAY" jdbcType="VARCHAR" />
+				<result property="nationality" column="NATIONALITY" jdbcType="VARCHAR" />
+				<result property="education" column="EDUCATION" jdbcType="VARCHAR" />
+				<result property="job" column="JOB" jdbcType="VARCHAR" />
+				<result property="homeAddress" column="HOME_ADDRESS" jdbcType="VARCHAR" />
+				<result property="homeZipcode" column="HOME_ZIPCODE" jdbcType="VARCHAR" />
+				<result property="homeTel" column="HOME_TEL" jdbcType="VARCHAR" />
+				<result property="officeTel" column="OFFICE_TEL" jdbcType="VARCHAR" />
+				<result property="officeAddress" column="OFFICE_ADDRESS" jdbcType="VARCHAR" />
+				<result property="orderBy" column="ORDER_BY" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="isLocked" column="IS_LOCKED" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+				<result property="positionCN" column="POSITION_CN" jdbcType="VARCHAR"/>
+</resultMap>
+
+<select id="searchVmuserByPaging" parameterType="java.util.Map" resultMap="SysUserDTO">
+    	 		select 
+						t1.id                             ,
+						t1.user_name                      ,
+						t1.user_no                        ,
+						t1.login_name                     ,
+						t1.password                       ,
+						t1.salt                           ,
+						t1.mobile                         ,
+						t1.email                          ,
+						t1.user_image                     ,
+						t1.sex                            ,
+						t1.birthday                       ,
+						t1.nationality                    ,
+						t1.education                      ,
+						t1.job                            ,
+						t1.home_address                   ,
+						t1.home_zipcode                   ,
+						t1.home_tel                       ,
+						t1.office_tel                     ,
+						t1.office_address                 ,
+						t1.order_by                       ,
+						t1.validate_state                 ,
+						t1.is_locked                      ,
+						t1.version                        ,
+						(SELECT B.POSITION_NAME FROM SYS_POSITION B WHERE B.ID=(
+							SELECT A.POSITION_ID FROM SYS_ORG_USER A WHERE A.USER_ID=t1.id limit 1,1)) AS POSITION_CN
+					
+				from sys_user 	t1 ,vmuser_vmorg_map t2 
+				where t1.validate_state='1' and t1.id=t2.user_id 
+                  
+				<if test="orgId !=null and orgId!='' and (showLowerUser == null or showLowerUser =='false') ">
+					 	 and exists (select t2.id from vmuser_vmorg_map t2 where  <if test="orgId!='-1'">t2.org_id =#{orgId} and </if> t2.user_id = t1.id)
+				</if>
+				<if test="orgId !=null and orgId!='' and showLowerUser!=null and showLowerUser!='false'">
+				and exists (select t2.id from vmuser_vmorg_map t2 where  1=1 and t2.user_id = t1.id
+				and t2.org_id in (
+							<if test="orgId=='-1'">
+						    	select a.org_id from (select *from vmtree_info where org_type=#{orgType} ) a
+						    </if>	
+							<if test="orgId!='-1'">
+						    <!-- getChildList(${orgId},'${orgType}') -->
+						    ${orgIds}
+						    </if>
+						)
+				)
+				</if>
+				<if test="orgType !=null and orgType!=''">
+					 	and exists (select t2.id from vmuser_vmorg_map t2 where  t2.org_type=#{orgType} and t2.user_id = t1.id) and t2.org_type=#{orgType} 
+				</if>
+				<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.userName != null and dto.userName != ''">
+						and t1.USER_NAME like concat('%',#{dto.userName},'%')
+    			</if>
+    			<if test="dto.userNo != null and dto.userNo != ''">
+						and t1.USER_NO  like concat('%',#{dto.userNo},'%')
+    			</if>
+    			<if test="dto.loginName != null and dto.loginName != ''">
+						and t1.LOGIN_NAME like concat('%',#{dto.loginName},'%')
+    			</if>
+    			<if test="dto.password != null and dto.password != ''">
+						and t1.PASSWORD =#{dto.password}
+    			</if>
+    			<if test="dto.salt != null and dto.salt != ''">
+						and t1.SALT =#{dto.salt}
+    			</if>
+    			<if test="dto.mobile != null and dto.mobile != ''">
+						and t1.MOBILE  like concat('%',#{dto.mobile},'%')
+    			</if>
+    			<if test="dto.email != null and dto.email != ''">
+						and t1.EMAIL =#{dto.email}
+    			</if>
+    			<if test="dto.userImage != null and dto.userImage != ''">
+						and t1.USER_IMAGE =#{dto.userImage}
+    			</if>
+    			<if test="dto.sex != null and dto.sex != ''">
+						and t1.SEX =#{dto.sex}
+    			</if>
+    			<if test="dto.birthday != null and dto.birthday != ''">
+						and t1.BIRTHDAY =#{dto.birthday}
+    			</if>
+    			<if test="dto.nationality != null and dto.nationality != ''">
+						and t1.NATIONALITY =#{dto.nationality}
+    			</if>
+    			<if test="dto.education != null and dto.education != ''">
+						and t1.EDUCATION =#{dto.education}
+    			</if>
+    			<if test="dto.job != null and dto.job != ''">
+						and t1.JOB =#{dto.job}
+    			</if>
+    			<if test="dto.homeAddress != null and dto.homeAddress != ''">
+						and t1.HOME_ADDRESS =#{dto.homeAddress}
+    			</if>
+    			<if test="dto.homeZipcode != null and dto.homeZipcode != ''">
+						and t1.HOME_ZIPCODE =#{dto.homeZipcode}
+    			</if>
+    			<if test="dto.homeTel != null and dto.homeTel != ''">
+						and t1.HOME_TEL =#{dto.homeTel}
+    			</if>
+    			<if test="dto.officeTel != null and dto.officeTel != ''">
+						and t1.OFFICE_TEL =#{dto.officeTel}
+    			</if>
+    			<if test="dto.officeAddress != null and dto.officeAddress != ''">
+						and t1.OFFICE_ADDRESS =#{dto.officeAddress}
+    			</if>
+    			<if test="dto.orderBy != null and dto.orderBy != ''">
+						and t1.ORDER_BY =#{dto.orderBy}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.isLocked != null and dto.isLocked != ''">
+						and t1.IS_LOCKED =#{dto.isLocked}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+</select>
+
+
+
+
+
+
+				
+<!-- 分页查询 vmuser_vmorg_map -->	
+<select id="searchVmuserVmorgMapByPaging" parameterType="java.util.Map" resultMap="VmuserVmorgMapDTO">
+    	 		select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.org_id                         ,
+						t2.user_name                      ,
+						t3.org_name                       ,
+						t2.VALIDATE_STATE				  ,
+						t1.org_type                       ,
+						(SELECT B.POSITION_NAME FROM SYS_POSITION B WHERE B.ID=(
+							SELECT A.POSITION_ID FROM SYS_ORG_USER A WHERE A.USER_ID=t1.user_id limit 1,1)) AS POSITION_CN 
+					
+				from vmuser_vmorg_map 	t1
+				 left join sys_user t2
+				on  t1.user_id=t2.id 
+				left join vmtree_info t3
+                on  t1.org_id = t3.org_id and t1.org_type=t3.org_type
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="orgId != null and orgId != ''">
+						and t1.ORG_ID
+						in (	
+							${orgIds}
+						)
+    			</if>
+    			<if test="orgType != null and orgType != ''">
+						and t1.ORG_TYPE =#{orgType}
+    			</if>
+    			<if test="userName != null and userName != ''">
+						and t2.user_name like concat('%',#{userName},'%')
+    			</if>
+    			<if test="orgName != null and orgName != ''">
+						and t3.org_name like concat('%',#{orgName},'%')
+    			</if>
+				order by t1.id desc
+</select>
+
+
+<!-- 根据ORGID查询列表 vmuser_vmorg_map  -->
+<select id="searchVmuserVmorgMapByOrgId" parameterType="java.util.Map" resultMap="VmuserVmorgMapDTO">
+    	     select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.org_id                         ,
+						t1.org_type                       
+				from vmuser_vmorg_map 		t1
+				where t1.org_id = #{orgId} and t1.org_type=#{orgType}
+    		
+</select>
+
+
+<!-- 根据ORGID,ORGID,ORGTYPE查询列表 vmuser_vmorg_map 是否有重复记录  -->
+<select id="validateVmuserVmorgMapBycondtions" parameterType="java.util.Map" resultMap="VmuserVmorgMapDTO">
+    	     select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.org_id                         ,
+						t1.org_type                       
+				from vmuser_vmorg_map 		t1
+				where 1=1 
+				<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE =#{dto.orgType}
+    			</if>
+    	
+    		
+</select>
+
+
+
+<!-- 根据查询下一级组织用户列表 vmuser_vmorg_map  -->
+<select id="searchVmuserVmorgMapByparent" parameterType="java.util.Map" resultMap="VmuserVmorgMapDTO">
+    	     select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.org_id                         ,
+						t1.org_type                       
+				from vmuser_vmorg_map 		t1
+				where  t1.org_id in (select org_id  from vmtree_info where parent_id=#{orgId}) 
+			    and t1.org_type=#{orgType}
+    		
+</select>
+
+
+  
+<!-- 查询列表 vmuser_vmorg_map  -->
+<select id="searchVmuserVmorgMap" parameterType="java.util.Map" resultMap="VmuserVmorgMapDTO">
+    	     select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.org_id                         ,
+						t1.org_type                       
+				from vmuser_vmorg_map 		t1
+				where 1=1 
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE = #{dto.orgType}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  vmuser_vmorg_map -->
+<select id="findVmuserVmorgMapByPrimaryKey" parameterType="java.util.Map" resultMap="VmuserVmorgMapDTO">
+   	 		select 
+					t1.id                             ,
+					t1.user_id                        ,
+					t1.org_id                         ,
+					t1.org_type                       
+			from vmuser_vmorg_map 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 vmuser_vmorg_map -->
+<insert id="insertVmuserVmorgMap" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				<!-- select seq_vmuser_vmorg_map.nextval as id from dual -->
+				SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE  TABLE_NAME='vmuser_vmorg_map'
+	</selectKey>
+			insert into vmuser_vmorg_map
+			(   		
+					id                             ,
+					user_id                        ,
+					org_id                         ,
+					org_type                       
+			)
+			values(#{dto.id}
+					,#{dto.userId,jdbcType=DECIMAL}
+					,#{dto.orgId,jdbcType=DECIMAL}
+					,#{dto.orgType,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 vmuser_vmorg_map -->
+<update id="updateVmuserVmorgMap" parameterType="java.util.Map">
+	     update vmuser_vmorg_map t1
+	           set 
+			           t1.user_id                        =#{dto.userId,jdbcType=DECIMAL},
+			           t1.org_id                         =#{dto.orgId,jdbcType=DECIMAL},
+			           t1.org_type                       =#{dto.orgType,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 vmuser_vmorg_map -->
+<delete id="deleteVmuserVmorgMapByID" parameterType="java.util.Map">
+    	delete t1 from vmuser_vmorg_map t1 where t1.ID in (${ids} )
+</delete>
+
+<!-- 按userid和orgType删除 vmuser_vmorg_map -->
+<delete id="deleteVmuserVmorgMapByUserId" parameterType="java.util.Map">
+    	delete t1 from vmuser_vmorg_map t1 where t1.user_id=#{userid}  and t1.org_type=#{orgType}
+</delete>
+
+<!-- 按userId、orgId和orgType删除 vmuser_vmorg_map -->
+<delete id="deleteVmuserVmorgMapByUserIdAndOrgId" parameterType="java.util.Map">
+    	delete t1 from vmuser_vmorg_map t1 where t1.user_id=#{userId} and t1.org_id=#{orgId} and t1.org_type=#{orgType}
+</delete>
+
+
+<!-- 按orgid和orgType删除 vmuser_vmorg_map -->
+<delete id="deleteVmuserVmorgMapByOrgId" parameterType="java.util.Map">
+    	delete t1 from vmuser_vmorg_map t1 where t1.org_id=#{orgid}  and t1.org_type=#{orgType}
+</delete>
+<!-- 清理离职人员业务用户配置信息 -->
+<delete id="modifyCleanVmorgMap" parameterType="java.util.Map">
+    	delete t1 from vmuser_vmorg_map t1 where t1.org_type=#{orgType} and t1.user_id in 
+    	(select b.user_id from sys_org_user b where b.org_id in(select id from sys_org a where a.id=#{startOrg} or a.parent_ids like '%/'||#{startOrg}||'/%')
+    	 and b.user_id in (select id from sys_user a where a.validate_state=0))
+</delete>
+
+<!-- 根据orgId,orgType 查询树形orgIds -->
+<select id="findVmuserVmorgMapTreeByOrgId" parameterType="java.util.Map" resultType="java.util.Map">
+   	 select  getChildList(${orgId},'${orgType}') as ORGIDS from dual
+</select>
+</mapper>

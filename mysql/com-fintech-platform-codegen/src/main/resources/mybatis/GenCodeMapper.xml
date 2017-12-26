@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.genCode.repository.GenCodeMapper">
+
+	<!-- 获得oralce table的字段名称及备注信息 -->
+	<select id="queryColumnListOfGenerateCode" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		<!--  oracle
+		select t.TABLE_NAME,
+		t.COLUMN_NAME,
+		t.DATA_TYPE,
+		t.DATA_LENGTH,
+		t.DATA_PRECISION,
+		t.NULLABLE,
+
+		(select c.comments
+		from
+		user_tab_comments c
+		where c.table_name=upper(#{tableName})
+		and
+		c.table_name=t.TABLE_NAME) table_comments,
+
+		(select c.comments
+		from
+		user_col_comments c
+		where c.table_name=upper(#{tableName})
+		and
+		c.COLUMN_NAME=t.COLUMN_NAME) column_comments
+
+		from user_tab_columns t
+		where t.table_name=upper(#{tableName})
+		order by
+		t.COLUMN_ID -->
+		<!-- mysql -->
+		SELECT
+			TABLE_NAME,
+			COLUMN_NAME,
+			DATA_TYPE,
+			CASE
+				WHEN
+					COLUMN_TYPE LIKE '%(%,%)'
+				THEN
+					SUBSTRING(COLUMN_TYPE, INSTR(COLUMN_TYPE, '(') + 1, INSTR(COLUMN_TYPE, ',') - INSTR(COLUMN_TYPE, '(') - 1)
+				WHEN
+					COLUMN_TYPE LIKE '%(%)'
+				THEN
+					SUBSTRING(COLUMN_TYPE, INSTR(COLUMN_TYPE, '(') + 1, LENGTH(COLUMN_TYPE) - INSTR(COLUMN_TYPE, '(') - 1)
+				WHEN
+					COLUMN_TYPE = 'DATE'
+				THEN
+					10
+				WHEN
+					COLUMN_TYPE = 'DATETIME' or COLUMN_TYPE = 'TIMESTAMP'
+				THEN
+					19
+				WHEN
+					COLUMN_TYPE LIKE '%TEXT' or COLUMN_TYPE LIKE '%BLOB'
+				THEN
+					500
+				ELSE
+					0
+			END AS DATA_LENGTH,
+			CASE
+				WHEN
+					COLUMN_TYPE LIKE '%(%,%)'
+				THEN
+					SUBSTRING(COLUMN_TYPE, INSTR(COLUMN_TYPE, ',') + 1, INSTR(COLUMN_TYPE, ')') - INSTR(COLUMN_TYPE, ',') - 1)
+				ELSE
+					NULL
+			END AS DATA_PRECISION,
+			IS_NULLABLE AS NULLABLE,
+			COLUMN_COMMENT AS COLUMN_COMMENTS,
+			(SELECT TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES
+			WHERE TABLE_NAME = #{tableName} AND TABLE_SCHEMA = (SELECT SCHEMA())) AS TABLE_COMMENTS
+		FROM INFORMATION_SCHEMA.COLUMNS
+		WHERE TABLE_NAME = #{tableName}
+			AND TABLE_SCHEMA = (SELECT SCHEMA())
+		ORDER BY ORDINAL_POSITION
+	</select>
+
+	<!-- 根据oralce tableName获取数据库表 -->
+	<select id="queryTableNameOfDataBase1" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		<!-- SELECT * FROM USER_TABLES where 1=1 -->
+		SELECT * FROM information_schema.TABLES  where 1=1
+		<if test="tableName != null">
+			and TABLE_NAME = #{tableName}
+		</if>
+	</select>
+
+	<!-- 获得 database 中的 所有表信息 -->
+	<select id="queryTableNameOfDataBase" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT TEMP.* FROM (
+		select ROWNUM NUM,
+		T.*,
+		count(1) over() TOTALRECORDNUM
+		from(
+		select
+		t1.*
+		from tabs t1
+		where 1 =1
+		<if test="tableName != null">
+       		and t1.table_name like concat('%',#{tableName},'%')
+		</if>
+		) T
+		) TEMP
+			   where TEMP.NUM <![CDATA[>=]]> #{startIndex}  and TEMP.NUM <![CDATA[<]]> #{endIndex} 
+	</select>
+	
+	<select id="queryTableNameCountOfDataBase" resultType="int" parameterType="java.util.Map">
+       	SELECT COUNT(*) FROM (
+		select ROWNUM NUM,
+		T.*,
+		count(1) over() TOTALRECORDNUM
+		from(
+		select
+		t1.*
+		from tabs t1
+		where 1 =1
+		<if test="tableName != null">
+			and t1.table_name like concat('%',#{tableName},'%')
+		</if>
+		) T
+		) TEMP
+    </select>
+
+</mapper>

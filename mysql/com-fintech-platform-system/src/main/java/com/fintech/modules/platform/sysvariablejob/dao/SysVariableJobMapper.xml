@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysvariablejob.dao.SysVariableJobDao">
+<resultMap id="SysVariableJobDTO" type="com.fintech.modules.platform.sysvariablejob.dto.SysVariableJobDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="var1" column="VAR1" jdbcType="VARCHAR" />
+				<result property="var2" column="VAR2" jdbcType="VARCHAR" />
+				<result property="valid" column="VALID" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="remark" column="REMARK" jdbcType="VARCHAR" />
+				<result property="var2Bytes" column="VAR2" jdbcType="BLOB" />
+				
+</resultMap>
+				
+<!-- 分页查询 SYS_variable_JOB -->	
+<select id="searchSysVariableJobByPaging" parameterType="java.util.Map" resultMap="SysVariableJobDTO">
+    	 		select 
+						t1.id                             ,
+						t1.var1                           ,
+						t1.var2                           ,
+						t1.valid                          ,
+						t1.create_time                    ,
+						t1.remark                         
+					
+				from sys_variable_job 	t1
+				where 1=1
+				and t1.valid='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.var1 != null and dto.var1 != ''">
+						and t1.VAR1 =#{dto.var1}
+    			</if>
+    			<if test="dto.var2 != null and dto.var2 != ''">
+						and t1.VAR2 =#{dto.var2}
+    			</if>
+    			<if test="dto.valid != null and dto.valid != ''">
+						and t1.VALID =#{dto.valid}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK =#{dto.remark}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_variable_JOB  -->
+<select id="searchSysVariableJob" parameterType="java.util.Map" resultMap="SysVariableJobDTO">
+    	     select 
+						t1.id                             ,
+						t1.var1                           ,
+						t1.var2                           ,
+						t1.valid                          ,
+						t1.create_time                    ,
+						t1.remark                         
+				from sys_variable_job 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.var1 != null and dto.var1 != ''">
+						and t1.VAR1 = #{dto.var1}
+    			</if>
+    			<if test="dto.var2 != null and dto.var2 != ''">
+						and t1.VAR2 = #{dto.var2}
+    			</if>
+    			<if test="dto.valid != null and dto.valid != ''">
+						and t1.VALID = #{dto.valid}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK = #{dto.remark}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_variable_JOB -->
+<select id="findSysVariableJobByPrimaryKey" parameterType="java.util.Map" resultMap="SysVariableJobDTO">
+   	 		select 
+					t1.id                             ,
+					t1.var1                           ,
+					t1.var2                           ,
+					t1.valid                          ,
+					t1.create_time                    ,
+					t1.remark                         
+			from sys_variable_job 		t1
+			where 1=1
+			and t1.valid='1'
+			and	t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_variable_JOB -->
+<insert id="insertSysVariableJob" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				<!-- select seq_SYS_variable_JOB.nextval as id from dual -->
+				SELECT auto_increment FROM information_schema.TABLES WHERE  TABLE_NAME='sys_variable_job'
+	</selectKey>
+			insert into sys_variable_job
+			(   		
+					id                             ,
+					var1                           ,
+					var2                           ,
+					valid                          ,
+					create_time                    ,
+					remark                         
+			)
+			values(#{dto.id}
+					,#{dto.var1,jdbcType=VARCHAR}
+					,#{dto.var2,jdbcType=VARCHAR}
+					,1
+					,now()
+					,#{dto.remark,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_variable_JOB -->
+<update id="updateSysVariableJob" parameterType="java.util.Map">
+	     update sys_variable_job t1
+	           set 
+			           t1.var1                           =#{dto.var1,jdbcType=VARCHAR},
+			           t1.var2                           =#{dto.var2,jdbcType=VARCHAR},
+			           t1.valid                          =#{dto.valid,jdbcType=VARCHAR},
+			    
+			           t1.remark                         =#{dto.remark,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_variable_JOB -->
+<delete id="deleteSysVariableJobByID" parameterType="java.util.Map">
+    	delete t1 from sys_variable_job t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_variable_JOB -->
+<update id="deleteSysVariableJobByPrimaryKey" parameterType="java.util.Map">
+	     update sys_variable_job t1
+	           set   t1.valid='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

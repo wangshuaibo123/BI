@@ -1,0 +1,6 @@
+
+<auth>
+	<authlist>
+		<authinfo appid = "ptpt" apppwd = "xx" validtime="2015-12-01" serviceurl="http://127.0.0.1:8180/com-pt-platform-portal-mdata" />
+	</authlist>
+</auth>

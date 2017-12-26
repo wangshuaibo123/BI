@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.common.ygorg.dao.YgOrgDao">
+<resultMap id="YgOrgDTO" type="com.fintech.modules.platform.common.dto.YGorgDTO">
+				<result property="b01100" column="b01100" jdbcType="VARCHAR" />
+				<result property="uniqueid" column="uniqueId" jdbcType="VARCHAR" />
+				<result property="codesetid" column="codesetid" jdbcType="VARCHAR" />
+				<result property="codeitemdesc" column="codeitemdesc" jdbcType="VARCHAR" />
+				<result property="parentid" column="parentid" jdbcType="VARCHAR" />
+				<result property="parentdesc" column="parentdesc" jdbcType="VARCHAR" />
+				<result property="grade" column="grade" jdbcType="VARCHAR" />
+				<result property="sdate" column="sdate" jdbcType="VARCHAR" />
+				<result property="flag" column="flag" jdbcType="VARCHAR" />
+				<result property="sysflag" column="sysFlag" jdbcType="VARCHAR" />
+				<result property="a0000" column="a0000" jdbcType="VARCHAR" />
+				<result property="corcode" column="corcode" jdbcType="VARCHAR" />
+				<result property="b0110" column="b0110" jdbcType="VARCHAR" />
+				<result property="oa" column="oa" jdbcType="VARCHAR" />
+				<result property="fullname" column="fullname" jdbcType="VARCHAR" />
+				<result property="fullpath" column="fullpath" jdbcType="VARCHAR" />
+				<result property="sealdate" column="sealDate" jdbcType="VARCHAR" />
+				<result property="isdelete" column="isDelete" jdbcType="VARCHAR" />
+				<result property="leader" column="leader" jdbcType="VARCHAR" />
+				<result property="code" column="code" jdbcType="VARCHAR" />
+				<result property="orderno" column="orderno" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 yg_org -->	
+<select id="searchYgOrgByPaging" parameterType="java.util.Map" resultMap="YgOrgDTO">
+    	 		select 
+						t1.b01100                         ,
+						t1.uniqueid                       ,
+						t1.codesetid                      ,
+						t1.codeitemdesc                   ,
+						t1.parentid                       ,
+						t1.parentdesc                     ,
+						t1.grade                          ,
+						t1.sdate                          ,
+						t1.flag                           ,
+						t1.sysflag                        ,
+						t1.a0000                          ,
+						t1.corcode                        ,
+						t1.b0110                          ,
+						t1.oa                             ,
+						t1.fullname                       ,
+						t1.fullpath                       ,
+						t1.sealdate                       ,
+						t1.isdelete                       ,
+						t1.leader                         ,
+						t1.code                           ,
+						t1.orderno                        
+					
+				from yg_org 	t1
+				where 1=1
+				and t1.valid='1'
+    			<if test="dto.b01100 != null and dto.b01100 != ''">
+						and t1.b01100 =#{dto.b01100}
+    			</if>
+    			<if test="dto.uniqueid != null and dto.uniqueid != ''">
+						and t1.uniqueId =#{dto.uniqueid}
+    			</if>
+    			<if test="dto.codesetid != null and dto.codesetid != ''">
+						and t1.codesetid =#{dto.codesetid}
+    			</if>
+    			<if test="dto.codeitemdesc != null and dto.codeitemdesc != ''">
+						and t1.codeitemdesc =#{dto.codeitemdesc}
+    			</if>
+    			<if test="dto.parentid != null and dto.parentid != ''">
+						and t1.parentid =#{dto.parentid}
+    			</if>
+    			<if test="dto.parentdesc != null and dto.parentdesc != ''">
+						and t1.parentdesc =#{dto.parentdesc}
+    			</if>
+    			<if test="dto.grade != null and dto.grade != ''">
+						and t1.grade =#{dto.grade}
+    			</if>
+    			<if test="dto.sdate != null and dto.sdate != ''">
+						and t1.sdate =#{dto.sdate}
+    			</if>
+    			<if test="dto.flag != null and dto.flag != ''">
+						and t1.flag =#{dto.flag}
+    			</if>
+    			<if test="dto.sysflag != null and dto.sysflag != ''">
+						and t1.sysFlag =#{dto.sysflag}
+    			</if>
+    			<if test="dto.a0000 != null and dto.a0000 != ''">
+						and t1.a0000 =#{dto.a0000}
+    			</if>
+    			<if test="dto.corcode != null and dto.corcode != ''">
+						and t1.corcode =#{dto.corcode}
+    			</if>
+    			<if test="dto.b0110 != null and dto.b0110 != ''">
+						and t1.b0110 =#{dto.b0110}
+    			</if>
+    			<if test="dto.oa != null and dto.oa != ''">
+						and t1.oa =#{dto.oa}
+    			</if>
+    			<if test="dto.fullname != null and dto.fullname != ''">
+						and t1.fullname =#{dto.fullname}
+    			</if>
+    			<if test="dto.fullpath != null and dto.fullpath != ''">
+						and t1.fullpath =#{dto.fullpath}
+    			</if>
+    			<if test="dto.sealdate != null and dto.sealdate != ''">
+						and t1.sealDate =#{dto.sealdate}
+    			</if>
+    			<if test="dto.isdelete != null and dto.isdelete != ''">
+						and t1.isDelete =#{dto.isdelete}
+    			</if>
+    			<if test="dto.leader != null and dto.leader != ''">
+						and t1.leader =#{dto.leader}
+    			</if>
+    			<if test="dto.code != null and dto.code != ''">
+						and t1.code =#{dto.code}
+    			</if>
+    			<if test="dto.orderno != null and dto.orderno != ''">
+						and t1.orderno =#{dto.orderno}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 yg_org  -->
+<select id="searchYgOrg" parameterType="java.util.Map" resultMap="YgOrgDTO">
+    	     select 
+						t1.b01100                         ,
+						t1.uniqueid                       ,
+						t1.codesetid                      ,
+						t1.codeitemdesc                   ,
+						t1.parentid                       ,
+						t1.parentdesc                     ,
+						t1.grade                          ,
+						t1.sdate                          ,
+						t1.flag                           ,
+						t1.sysflag                        ,
+						t1.a0000                          ,
+						t1.corcode                        ,
+						t1.b0110                          ,
+						t1.oa                             ,
+						t1.fullname                       ,
+						t1.fullpath                       ,
+						t1.sealdate                       ,
+						t1.isdelete                       ,
+						t1.leader                         ,
+						t1.code                           ,
+						t1.orderno                        
+				from yg_org 		t1
+				where 1=1
+    			<if test="dto.b01100 != null and dto.b01100 != ''">
+						and t1.b01100 = #{dto.b01100}
+    			</if>
+    			<if test="dto.uniqueid != null and dto.uniqueid != ''">
+						and t1.uniqueId = #{dto.uniqueid}
+    			</if>
+    			<if test="dto.codesetid != null and dto.codesetid != ''">
+						and t1.codesetid = #{dto.codesetid}
+    			</if>
+    			<if test="dto.codeitemdesc != null and dto.codeitemdesc != ''">
+						and t1.codeitemdesc = #{dto.codeitemdesc}
+    			</if>
+    			<if test="dto.parentid != null and dto.parentid != ''">
+						and t1.parentid = #{dto.parentid}
+    			</if>
+    			<if test="dto.parentdesc != null and dto.parentdesc != ''">
+						and t1.parentdesc = #{dto.parentdesc}
+    			</if>
+    			<if test="dto.grade != null and dto.grade != ''">
+						and t1.grade = #{dto.grade}
+    			</if>
+    			<if test="dto.sdate != null and dto.sdate != ''">
+						and t1.sdate = #{dto.sdate}
+    			</if>
+    			<if test="dto.flag != null and dto.flag != ''">
+						and t1.flag = #{dto.flag}
+    			</if>
+    			<if test="dto.sysflag != null and dto.sysflag != ''">
+						and t1.sysFlag = #{dto.sysflag}
+    			</if>
+    			<if test="dto.a0000 != null and dto.a0000 != ''">
+						and t1.a0000 = #{dto.a0000}
+    			</if>
+    			<if test="dto.corcode != null and dto.corcode != ''">
+						and t1.corcode = #{dto.corcode}
+    			</if>
+    			<if test="dto.b0110 != null and dto.b0110 != ''">
+						and t1.b0110 = #{dto.b0110}
+    			</if>
+    			<if test="dto.oa != null and dto.oa != ''">
+						and t1.oa = #{dto.oa}
+    			</if>
+    			<if test="dto.fullname != null and dto.fullname != ''">
+						and t1.fullname = #{dto.fullname}
+    			</if>
+    			<if test="dto.fullpath != null and dto.fullpath != ''">
+						and t1.fullpath = #{dto.fullpath}
+    			</if>
+    			<if test="dto.sealdate != null and dto.sealdate != ''">
+						and t1.sealDate = #{dto.sealdate}
+    			</if>
+    			<if test="dto.isdelete != null and dto.isdelete != ''">
+						and t1.isDelete = #{dto.isdelete}
+    			</if>
+    			<if test="dto.leader != null and dto.leader != ''">
+						and t1.leader = #{dto.leader}
+    			</if>
+    			<if test="dto.code != null and dto.code != ''">
+						and t1.code = #{dto.code}
+    			</if>
+    			<if test="dto.orderno != null and dto.orderno != ''">
+						and t1.orderno = #{dto.orderno}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  yg_org -->
+<select id="findYgOrgByPrimaryKey" parameterType="java.util.Map" resultMap="YgOrgDTO">
+   	 		select 
+					t1.b01100                         ,
+					t1.uniqueid                       ,
+					t1.codesetid                      ,
+					t1.codeitemdesc                   ,
+					t1.parentid                       ,
+					t1.parentdesc                     ,
+					t1.grade                          ,
+					t1.sdate                          ,
+					t1.flag                           ,
+					t1.sysflag                        ,
+					t1.a0000                          ,
+					t1.corcode                        ,
+					t1.b0110                          ,
+					t1.oa                             ,
+					t1.fullname                       ,
+					t1.fullpath                       ,
+					t1.sealdate                       ,
+					t1.isdelete                       ,
+					t1.leader                         ,
+					t1.code                           ,
+					t1.orderno                        
+			from yg_org 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 yg_org -->
+<insert id="insertYgOrg" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="dto.id">
+			insert into yg_org
+			(   		
+						b01100                         ,
+						uniqueid                       ,
+						codesetid                      ,
+						codeitemdesc                   ,
+						parentid                       ,
+						parentdesc                     ,
+						grade                          ,
+						sdate                          ,
+						flag                           ,
+						sysflag                        ,
+						a0000                          ,
+						corcode                        ,
+						b0110                          ,
+						oa                             ,
+						fullname                       ,
+						fullpath                       ,
+						sealdate                       ,
+						isdelete                       ,
+						leader                         ,
+						code                           ,
+						orderno                        
+			)
+			values(
+						#{dto.b01100,jdbcType=VARCHAR}
+						,
+						#{dto.uniqueId,jdbcType=VARCHAR}
+						,
+						#{dto.codesetid,jdbcType=VARCHAR}
+						,
+						#{dto.codeitemdesc,jdbcType=VARCHAR}
+						,
+						#{dto.parentid,jdbcType=VARCHAR}
+						,
+						#{dto.parentdesc,jdbcType=VARCHAR}
+						,
+						#{dto.grade,jdbcType=VARCHAR}
+						,
+						#{dto.sdate,jdbcType=VARCHAR}
+						,
+						#{dto.flag,jdbcType=VARCHAR}
+						,
+						#{dto.sysFlag,jdbcType=VARCHAR}
+						,
+						#{dto.a0000,jdbcType=VARCHAR}
+						,
+						#{dto.corcode,jdbcType=VARCHAR}
+						,
+						#{dto.b0110,jdbcType=VARCHAR}
+						,
+						#{dto.oa,jdbcType=VARCHAR}
+						,
+						#{dto.fullname,jdbcType=VARCHAR}
+						,
+						#{dto.fullpath,jdbcType=VARCHAR}
+						,
+						#{dto.sealDate,jdbcType=VARCHAR}
+						,
+						#{dto.isDelete,jdbcType=VARCHAR}
+						,
+						#{dto.leader,jdbcType=VARCHAR}
+						,
+						#{dto.code,jdbcType=VARCHAR}
+						,
+						#{dto.order,jdbcType=VARCHAR}
+						
+			)
+</insert>
+    
+<!-- 更新对象 yg_org -->
+<update id="updateYgOrg" parameterType="java.util.Map">
+	     update yg_org t1
+	           set 
+			           t1.b01100                         =#{dto.b01100,jdbcType=VARCHAR},
+			           t1.uniqueid                       =#{dto.uniqueid,jdbcType=VARCHAR},
+			           t1.codesetid                      =#{dto.codesetid,jdbcType=VARCHAR},
+			           t1.codeitemdesc                   =#{dto.codeitemdesc,jdbcType=VARCHAR},
+			           t1.parentid                       =#{dto.parentid,jdbcType=VARCHAR},
+			           t1.parentdesc                     =#{dto.parentdesc,jdbcType=VARCHAR},
+			           t1.grade                          =#{dto.grade,jdbcType=VARCHAR},
+			           t1.sdate                          =#{dto.sdate,jdbcType=VARCHAR},
+			           t1.flag                           =#{dto.flag,jdbcType=VARCHAR},
+			           t1.sysflag                        =#{dto.sysflag,jdbcType=VARCHAR},
+			           t1.a0000                          =#{dto.a0000,jdbcType=VARCHAR},
+			           t1.corcode                        =#{dto.corcode,jdbcType=VARCHAR},
+			           t1.b0110                          =#{dto.b0110,jdbcType=VARCHAR},
+			           t1.oa                             =#{dto.oa,jdbcType=VARCHAR},
+			           t1.fullname                       =#{dto.fullname,jdbcType=VARCHAR},
+			           t1.fullpath                       =#{dto.fullpath,jdbcType=VARCHAR},
+			           t1.sealdate                       =#{dto.sealdate,jdbcType=VARCHAR},
+			           t1.isdelete                       =#{dto.isdelete,jdbcType=VARCHAR},
+			           t1.leader                         =#{dto.leader,jdbcType=VARCHAR},
+			           t1.code                           =#{dto.code,jdbcType=VARCHAR},
+			           t1.orderno                        =#{dto.orderno,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 yg_org -->
+<delete id="deleteYgOrgByID" parameterType="java.util.Map">
+    	delete from yg_org where id in (${ids} )
+</delete>
+<!-- 主键假删除 yg_org -->
+<update id="deleteYgOrgByPrimaryKey" parameterType="java.util.Map">
+	     update yg_org t1
+	           set   t1.valid='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

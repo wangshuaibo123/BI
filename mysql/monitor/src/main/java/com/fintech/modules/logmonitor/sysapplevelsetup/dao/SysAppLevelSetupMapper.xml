@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.logmonitor.sysapplevelsetup.dao.SysAppLevelSetupDao">
+<resultMap id="SysAppLevelSetupDTO" type="com.fintech.modules.logmonitor.sysapplevelsetup.dto.SysAppLevelSetupDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="logLevel" column="LOG_LEVEL" jdbcType="DECIMAL" />
+				<result property="keyWord" column="KEY_WORD" jdbcType="VARCHAR" />
+				<result property="emailFlag" column="EMAIL_FLAG" jdbcType="DECIMAL" />
+				<result property="rate" column="RATE" jdbcType="DECIMAL"/>
+				<result property="rateUnit" column="RATE_UNIT" jdbcType="VARCHAR" />
+				<result property="smsFlag" column="SMS_FLAG" jdbcType="DECIMAL" />
+				<result property="showDetailFlag" column="SHOW_DETAIL_FLAG" jdbcType="DECIMAL" />
+				<result property="appFlag" column="APP_FLAG" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_APP_LEVEL_SETUP -->	
+<select id="searchSysAppLevelSetupByPaging" parameterType="java.util.Map" resultMap="SysAppLevelSetupDTO">
+    	 		select 
+						t1.id                             ,
+						t1.log_level                      ,
+						t1.key_word                       ,
+						t1.email_flag					  ,
+						t1.RATE_UNIT                      ,
+						t1.rate                           ,
+						t1.SMS_FLAG                       ,
+						t1.SHOW_DETAIL_FLAG               ,
+						t1.APP_FLAG
+					
+				from sys_app_level_setup 	t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.logLevel != null and dto.logLevel != ''">
+						and t1.LOG_LEVEL =#{dto.logLevel}
+    			</if>
+    			<if test="dto.keyWord != null and dto.keyWord != ''">
+						and t1.KEY_WORD like concat('%',#{dto.keyWord},'%')
+    			</if>
+    			<if test="dto.emailFlag != null and dto.emailFlag != ''">
+						and t1.EMAIL_FLAG =#{dto.emailFlag}
+    			</if>
+    			<if test="dto.smsFlag != null and dto.smsFlag != ''">
+						and t1.SMS_FLAG =#{dto.smsFlag}
+    			</if>
+    			<if test="dto.showDetailFlag != null and dto.showDetailFlag != ''">
+						and t1.SHOW_DETAIL_FLAG =#{dto.showDetailFlag}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and t1.APP_FLAG = #{dto.appFlag}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_APP_LEVEL_SETUP  -->
+<select id="searchSysAppLevelSetup" parameterType="java.util.Map" resultMap="SysAppLevelSetupDTO">
+    	     select 
+						t1.id                             ,
+						t1.log_level                      ,
+						t1.key_word                       ,
+						t1.rate                           ,
+						t1.RATE_UNIT                      ,
+						t1.email_flag                     ,
+						t1.SMS_FLAG                       ,
+						t1.SHOW_DETAIL_FLAG               ,
+						t1.APP_FLAG
+						
+				from sys_app_level_setup 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.logLevel != null and dto.logLevel != ''">
+						and t1.LOG_LEVEL = #{dto.logLevel}
+    			</if>
+    			<if test="dto.keyWord != null and dto.keyWord != ''">
+						and t1.KEY_WORD = #{dto.keyWord}
+    			</if>
+    			<if test="dto.emailFlag != null and dto.emailFlag != ''">
+						and t1.EMAIL_FLAG = #{dto.emailFlag}
+    			</if>
+    			<if test="dto.smsFlag != null and dto.smsFlag != ''">
+						and t1.SMS_FLAG =#{dto.smsFlag}
+    			</if>
+    			<if test="dto.showDetailFlag != null and dto.showDetailFlag != ''">
+						and t1.SHOW_DETAIL_FLAG =#{dto.showDetailFlag}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and t1.APP_FLAG = #{dto.appFlag}
+    			</if>
+    			order by t1.APP_FLAG
+</select>
+
+<!-- 查询列表 SYS_APP_LEVEL_SETUP  -->
+<select id="searchMaxRateOfUnit" parameterType="java.util.Map" resultType="java.lang.Integer">
+			SELECT
+			    MAX(RATE) as "rate"
+			FROM
+			    sys_app_level_setup t1
+			WHERE
+			    t1.RATE_UNIT = #{rateUnit}
+</select>
+  
+<!-- 主键查询对象  SYS_APP_LEVEL_SETUP -->
+<select id="findSysAppLevelSetupByPrimaryKey" parameterType="java.util.Map" resultMap="SysAppLevelSetupDTO">
+   	 		select 
+					t1.id                             ,
+					t1.log_level                      ,
+					t1.key_word                       ,
+					t1.rate                           ,
+					t1.RATE_UNIT                      ,
+					t1.email_flag                     ,
+					t1.SMS_FLAG                       ,
+					t1.SHOW_DETAIL_FLAG               ,
+					t1.APP_FLAG
+			from sys_app_level_setup 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_APP_LEVEL_SETUP -->
+<insert id="insertSysAppLevelSetup" parameterType="java.util.Map" useGeneratedKeys="true">
+		<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+			select auto_increment as id from information_schema.tables where table_name='sys_app_level_setup' and table_schema=schema();
+		</selectKey>
+			insert into sys_app_level_setup
+			(   		
+					id								,
+					log_level                      ,
+					key_word                       ,
+					rate                           ,
+					RATE_UNIT                      ,
+					email_flag                     ,
+					SMS_FLAG                       ,
+					SHOW_DETAIL_FLAG               ,
+					APP_FLAG
+			)
+			values(#{dto.id}
+					,#{dto.logLevel,jdbcType=DECIMAL}
+					,#{dto.keyWord,jdbcType=VARCHAR}
+					,#{dto.rate,jdbcType=DECIMAL}
+					,#{dto.rateUnit,jdbcType=VARCHAR}
+					,#{dto.emailFlag,jdbcType=DECIMAL}
+					,#{dto.smsFlag,jdbcType=DECIMAL}
+					,#{dto.showDetailFlag,jdbcType=DECIMAL}
+					,#{dto.appFlag,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_APP_LEVEL_SETUP -->
+<update id="updateSysAppLevelSetup" parameterType="java.util.Map">
+	     update sys_app_level_setup t1
+	           set 
+			           t1.log_level                      =#{dto.logLevel,jdbcType=DECIMAL},
+			           t1.key_word                       =#{dto.keyWord,jdbcType=VARCHAR},
+			           t1.email_flag                     =#{dto.emailFlag,jdbcType=DECIMAL},
+			           t1.rate                           =#{dto.rate,jdbcType=DECIMAL},
+			           t1.RATE_UNIT                      =#{dto.rateUnit,jdbcType=VARCHAR},
+			           t1.SMS_FLAG                       =#{dto.smsFlag,jdbcType=DECIMAL},
+			           t1.SHOW_DETAIL_FLAG               =#{dto.showDetailFlag,jdbcType=DECIMAL},
+			           t1.APP_FLAG                       =#{dto.appFlag,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键假删除 SYS_APP_LEVEL_SETUP -->
+<update id="deleteSysAppLevelSetupByPrimaryKey" parameterType="java.util.Map">
+	     delete t1 from sys_app_level_setup t1
+	     where t1.id in( ${ids})
+</update>
+</mapper>

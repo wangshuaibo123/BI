@@ -1,0 +1,136 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  
+  <groupId>com.fintech.platform</groupId>
+  <artifactId>com-fintech-platform-aliyun</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>com-fintech-platform-aliyun</name>
+  <description>com-fintech-platform-aliyun</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
+	<repositories>
+		<repository>
+			<id>pt</id>
+			<name>pt</name>			
+			<url>http://172.18.100.230:8080/nexus-2.5.1/content/groups/public</url>
+		</repository>
+	</repositories>
+
+
+	<dependencies>
+		<dependency>
+		    <groupId>net.coobird</groupId>
+		    <artifactId>thumbnailator</artifactId>
+		    <version>0.4.8</version>
+		</dependency>
+	<dependency>
+		<groupId>com.aliyun.oss</groupId>
+		<artifactId>aliyun-sdk-oss</artifactId>
+		<version>2.5.0</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.apache.commons</groupId>
+		<artifactId>commons-pool2</artifactId>
+		<version>2.0</version>
+	</dependency>
+
+	<dependency>
+		<groupId>log4j</groupId>
+		<artifactId>log4j</artifactId>
+		<version>1.2.17</version>
+		<scope>runtime</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-log4j12</artifactId>
+		<version>1.7.21</version>
+		<scope>runtime</scope>
+	</dependency>
+<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>1.7.6</version>
+			</dependency>
+			<!-- 代码直接调用log4j会被桥接到slf4j -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>log4j-over-slf4j</artifactId>
+				<version>1.7.6</version>
+				<scope>runtime</scope>
+			</dependency>
+			<!-- 代码直接调用common-logging会被桥接到slf4j -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jcl-over-slf4j</artifactId>
+				<version>1.7.6</version>
+				<scope>runtime</scope>
+			</dependency>
+			<!-- 代码直接调用java.util.logging会被桥接到slf4j -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jul-to-slf4j</artifactId>
+				<version>1.7.6</version>
+				<scope>runtime</scope>
+			</dependency>
+			<!-- <dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>1.7.6</version>
+				<scope>runtime</scope>
+			</dependency> -->
+			
+
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-context</artifactId>
+		<version>4.3.9.RELEASE</version>
+		<classifier>sources</classifier>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-context</artifactId>
+		<version>4.3.9.RELEASE</version>
+	</dependency>
+
+	</dependencies>
+	
+  <build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-surefire-plugin</artifactId>
+		        <configuration>
+		          <skip>true</skip>
+		        </configuration>
+		      </plugin>
+		</plugins>
+	</build>
+	
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<name>Nexus Release Repository</name>
+			<url>http://172.18.100.230:8080/nexus-2.5.1/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<name>Nexus Snapshot Repository</name>
+			<url>http://172.18.100.230:8080/nexus-2.5.1/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+</project>

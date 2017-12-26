@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysdict.dao.SysCommonTagDao">
+				
+<!-- 查询HR组织机构全量信息 -->	
+<select id="queryHRCommonDataInfo" parameterType="java.util.Map" resultType="java.util.Map">
+    	 		select  cast(o.org_code as char)		DICVALUE
+				       ,concat((select t2.org_name from sys_org t2 where t2.validate_state='1' and t2.id=o.parent_id),'-',o.org_name)				DICNAME
+				       from sys_org o 
+				       where 1=1
+    			<if test="codeType != null and codeType != ''">
+						start with o.org_name='东方银谷'
+    			</if>
+				       connect by prior o.id = o.parent_id
+				       and o.validate_state='1'
+				order siblings by o.id
+</select>
+<!-- 查询虚拟数据组织机构全量信息 -->
+<select id="queryVMTreeCommonDataInfo" parameterType="java.util.Map" resultType="java.util.Map">
+    	 		select   to_char(t1.org_id)+'${codeType}'		DICVALUE
+       					,concat((select t2.org_name from vmtree_info t2 where t2.org_type=#{codeType} and t2.org_id=t1.parent_id ),'-',t1.org_name) 			DICNAME
+       					from vmtree_info t1
+						where 1=1
+			               start with t1.org_name='东方银谷'
+			               connect by prior t1.org_id = t1.parent_id
+			               and t1.org_type=#{codeType}
+				order siblings by t1.org_id
+</select>
+
+
+</mapper>

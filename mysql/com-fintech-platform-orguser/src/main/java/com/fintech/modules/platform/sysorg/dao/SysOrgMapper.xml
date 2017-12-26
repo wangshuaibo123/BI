@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysorg.dao.SysOrgDao">
+<resultMap id="SysOrgDTO" type="com.fintech.modules.platform.sysorg.dto.SysOrgDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="orgCode" column="ORG_CODE" jdbcType="VARCHAR" />
+				<result property="orgName" column="ORG_NAME" jdbcType="VARCHAR" />
+				<result property="orgType" column="ORG_TYPE" jdbcType="VARCHAR" />
+				<result property="parentId" column="PARENT_ID" jdbcType="VARCHAR" />
+				<result property="parentName" column="PARENT_NAME" jdbcType="VARCHAR" />
+				<result property="parentIds" column="PARENT_IDS" jdbcType="VARCHAR" />
+				<result property="orderBy" column="ORDER_BY" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="isVirtual" column="IS_VIRTUAL" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+				<result property="appFlag" column="APP_FLAG" jdbcType="VARCHAR" />
+				<result property="areaCodes" column="AREA_CODES" jdbcType="VARCHAR" />
+				<result property="areaAdress" column="AREA_ADRESS" jdbcType="VARCHAR" />
+				<result property="isLeef" column="IS_LEEF" jdbcType="VARCHAR" />
+				<result property="orgLevel" column="ORG_LEVEL" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="effectiveDate" column="EFFECTIVE_DATE" jdbcType="TIMESTAMP" />
+</resultMap>
+
+<resultMap id="VmtreeInfoDTO" type="com.fintech.modules.platform.sysorg.dto.VmtreeInfoDTO">
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+				<result property="orgName" column="ORG_NAME" jdbcType="VARCHAR" />
+				<result property="orgType" column="ORG_TYPE" jdbcType="VARCHAR" />
+				<result property="parentId" column="PARENT_ID" jdbcType="DECIMAL" />
+				<result property="sourceType" column="SOURCE_TYPE" jdbcType="VARCHAR" />
+				<result property="endFlag" column="END_FLAG" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+				<result property="baseExt7" column="PARENT_NAME" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_ORG -->	
+<select id="searchSysOrgByPaging" parameterType="java.util.Map" resultMap="SysOrgDTO">
+    	 		select 
+						t1.id                             ,
+						t1.org_code                       ,
+						t1.org_name                       ,
+						t1.org_type                       ,
+						t1.parent_id                      ,
+						t1.parent_ids                     ,
+						t1.order_by                       ,
+						t1.validate_state                 ,
+						t1.is_virtual                     ,
+						t1.version                        ,
+						t1.app_flag						  ,
+						t1.area_codes					  ,
+						t1.area_adress					  ,
+						t1.is_leef							 ,
+						t1.create_time                  ,
+						t1.org_level                      ,
+						t1.effective_date              ,
+						t2.org_name  as parent_name
+				from sys_org 	t1,sys_org t2
+				where t1.parent_id = t2.id
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.orgCode != null and dto.orgCode != ''">
+						and t1.ORG_CODE =#{dto.orgCode}
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME like concat('%',#{dto.orgName},'%')
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE =#{dto.orgType}
+    			</if>
+    			<if test="dto.parentId != null and dto.parentId != ''">
+						and t1.PARENT_ID =#{dto.parentId}
+    			</if>
+    			<if test="dto.parentIds != null and dto.parentIds != ''">
+						and t1.PARENT_IDS =#{dto.parentIds}
+    			</if>
+    			<if test="dto.orderBy != null and dto.orderBy != ''">
+						and t1.ORDER_BY =#{dto.orderBy}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.isVirtual != null and dto.isVirtual != ''">
+						and t1.IS_VIRTUAL =#{dto.isVirtual}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and ( t1.app_flag =#{dto.appFlag} or t1.IS_VIRTUAL = '0' )
+    			</if>
+				order by t1.id desc
+</select>
+
+<!-- 查询列表 SYS_ORG  根据人员id，岗位id查询org的parentIds author : cxt 、cyy-->
+<select id="searchSysOrgByUserIdAndParentIds" parameterType="java.util.Map" resultMap="SysOrgDTO">
+  select 
+			t1.id                             ,
+		    t3.parent_ids 			parent_ids ,
+			t1.org_id                         ,
+			t1.user_id                        ,
+			t1.position_id                    ,
+			t1.is_main_org                    ,
+			t1.validate_state                 ,
+			t1.version                        ,
+			t3.org_name org_name     , 
+			t2.position_name position_name                       
+			from sys_org_user t1 left join sys_org t3 on t1.org_id = t3.id 
+			left join sys_position t2 on t1.position_id = t2.id 
+			where 1=1 
+			and t1.validate_state='1' 
+			<if test="positionCodes != null and positionCodes != ''">
+				and t2.position_code in (${positionCodes})
+   			</if>
+			<if test="userId != null and userId != ''">
+				and t1.user_id = #{userId}
+   			</if>
+</select>
+  
+<!-- 查询列表 SYS_ORG  -->
+<select id="searchSysOrg" parameterType="java.util.Map" resultMap="SysOrgDTO">
+    	     select 
+						t1.id                             ,
+						t1.org_code                       ,
+						t1.org_name                       ,
+						t1.org_type                       ,
+						t1.parent_id                      ,
+						t1.parent_ids                     ,
+						t1.order_by                       ,
+						t1.validate_state                 ,
+						t1.is_virtual                     ,
+						t1.version                        ,
+						t1.app_flag						  ,
+						t1.area_codes					  ,
+						t1.area_adress					  ,
+						t1.is_leef                        ,
+						t1.create_time                  ,
+						t1.org_level                      ,
+						t1.effective_date              
+				from sys_org 		t1
+				where 1=1
+    			<if test="orgId != null and orgId != '' and trace != 'up' ">
+						and (t1.PARENT_IDS like '%/'||#{orgId}||'/%' or t1.ID = ${orgId})
+				</if>
+				<if test="orgId != null and orgId != '' and trace = 'up' and ids != null ">
+						and t1.ID in (${ids} )
+				</if>
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.orgCode != null and dto.orgCode != ''">
+						and t1.ORG_CODE = #{dto.orgCode}
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME = #{dto.orgName}
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE = #{dto.orgType}
+    			</if>
+    			<if test="dto.parentId != null and dto.parentId != ''">
+						and t1.PARENT_ID = #{dto.parentId}
+    			</if>
+    			<if test="dto.parentIds != null and dto.parentIds != ''">
+						and t1.PARENT_IDS = #{dto.parentIds}
+    			</if>
+    			<if test="dto.orderBy != null and dto.orderBy != ''">
+						and t1.ORDER_BY = #{dto.orderBy}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.isVirtual != null and dto.isVirtual != ''">
+						and t1.IS_VIRTUAL = #{dto.isVirtual}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and ( t1.app_flag =#{dto.appFlag} or t1.IS_VIRTUAL = '0' )
+    			</if>
+    			order by t1.id asc
+</select>
+  
+<!-- 主键查询对象  SYS_ORG -->
+<select id="findSysOrgByPrimaryKey" parameterType="java.util.Map" resultMap="SysOrgDTO">
+   	 		select 
+					t1.id                             ,
+					t1.org_code                       ,
+					t1.org_name                       ,
+					t1.org_type                       ,
+					t1.parent_id                      ,
+					t1.parent_ids                     ,
+					t1.order_by                       ,
+					t1.validate_state                 ,
+					t1.is_virtual                     ,
+					t1.version                        ,
+					t1.app_flag						  ,
+					t1.area_codes					  ,
+					t1.area_adress					  ,
+					t1.is_leef                        ,
+					t1.create_time                  ,
+					t1.org_level                      ,
+					t1.effective_date              ,
+					ifnull(t2.org_name,' ') parentName
+			from sys_org t1 left join sys_org  t2
+			on t1.parent_id=t2.id where t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_ORG -->
+<insert id="insertSysOrg" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+			SELECT ${dto.orgCode} as id FROM dual
+	</selectKey>
+			insert into sys_org
+			(   		
+					id                             ,
+					org_code                       ,
+					org_name                       ,
+					org_type                       ,
+					parent_id                      ,
+					parent_ids                     ,
+					order_by                       ,
+					validate_state                 ,
+					is_virtual                     ,
+					version                        ,
+					app_flag					   ,
+					area_codes					  ,
+					area_adress					  ,
+					is_leef                         ,
+					create_time                  ,
+					org_level                      ,
+					effective_date              
+			)
+			values(#{dto.orgCode,jdbcType=DECIMAL}
+					,#{dto.orgCode,jdbcType=VARCHAR}
+					,#{dto.orgName,jdbcType=VARCHAR}
+					,#{dto.orgType,jdbcType=VARCHAR}
+					,#{dto.parentId,jdbcType=VARCHAR}
+					,(select (CASE WHEN (o.parent_Ids is null or o.parent_Ids ='') THEN concat('/',o.id,'/') ELSE  concat(o.parent_Ids,#{dto.orgCode},'/') END ) from sys_org o where o.id = #{dto.parentId})
+					,#{dto.orderBy,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.isVirtual,jdbcType=VARCHAR}
+					,#{dto.version,jdbcType=DECIMAL}
+					,#{dto.appFlag,jdbcType=VARCHAR}
+					,#{dto.areaCodes,jdbcType=VARCHAR}
+					,#{dto.areaAdress,jdbcType=VARCHAR}
+					,#{dto.isLeef,jdbcType=VARCHAR}
+					,#{dto.createTime,jdbcType=TIMESTAMP}
+					,#{dto.orgLevel,jdbcType=DECIMAL}
+					,#{dto.effectiveDate,jdbcType=TIMESTAMP}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_ORG -->
+<update id="updateSysOrg" parameterType="java.util.Map">
+	     update sys_org t1
+	           set 
+			           t1.org_code                       =#{dto.orgCode,jdbcType=VARCHAR},
+			           t1.org_name                       =#{dto.orgName,jdbcType=VARCHAR},
+			           t1.org_type                       =#{dto.orgType,jdbcType=VARCHAR},
+			           t1.parent_id                      =#{dto.parentId,jdbcType=VARCHAR},
+			           <!-- t1.parent_ids                     =(select (CASE WHEN (o.parent_Ids is null or o.parent_Ids ='') THEN concat('/',o.id,'/') ELSE  concat(o.parent_Ids,#{dto.parentId},'/') END ) from sys_org o where o.id = #{dto.parentId}), -->
+			           t1.order_by                       =#{dto.orderBy,jdbcType=VARCHAR},
+			          <if test="dto.validateState!= null and dto.validateState != ''">
+			           t1.validate_state                 =#{dto.validateState,jdbcType=VARCHAR},
+			           </if>
+			           t1.is_virtual                     =#{dto.isVirtual,jdbcType=VARCHAR},
+			           t1.version                        =#{dto.version,jdbcType=DECIMAL},
+			           t1.app_flag                        =#{dto.appFlag,jdbcType=VARCHAR},
+			           t1.area_codes					  =#{dto.areaCodes,jdbcType=VARCHAR},
+					   t1.area_adress					  =#{dto.areaAdress,jdbcType=VARCHAR},
+					   t1.is_leef						  =#{dto.isLeef,jdbcType=VARCHAR},
+					   t1.create_time                     =#{dto.createTime,jdbcType=TIMESTAMP},
+					   t1.org_level                          =#{dto.orgLevel,jdbcType=DECIMAL},
+					   t1.effective_date                  =#{dto.effectiveDate,jdbcType=TIMESTAMP}
+	     where t1.id = #{dto.id}
+</update>
+
+<!-- 更新对象 SYS_ORG -->
+<update id="updateSysOrgParentIds" parameterType="java.util.Map">
+	     update sys_org t1
+	           set t1.parent_ids                     =(select * from (select (CASE WHEN o.parent_Ids is null THEN CONCAT('/',o.id,'/') ELSE CONCAT(o.parent_Ids ,#{dto.parentId},'/') END ) from sys_org o where o.id = #{dto.parentId}) t2)
+	     where t1.id = #{dto.id}
+</update>
+
+<update id="updateSysOrgLeef" parameterType="java.util.Map">
+		update sys_org t1
+	           set 
+			           t1.IS_LEEF                        =#{dto.isLeef,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+
+
+<select id="findVmtreeInfoByOrgId" parameterType="java.util.Map" resultMap="VmtreeInfoDTO">
+   	 		select 
+					DISTINCT(t1.org_id)               ,
+					t1.org_name                       ,
+					t1.org_type                       ,
+					t1.parent_id                      ,
+					t1.source_type                    ,
+					t1.end_flag                       ,
+					t1.create_time                    ,
+					t1.create_by 					  ,  
+					ifnull(p1.org_name,' ') parent_name
+				from vmtree_info 	t1 
+				left join vmtree_info 	p1  on t1.PARENT_ID = p1.ORG_ID  and t1.ORG_TYPE = p1.ORG_TYPE
+				where   t1.org_id = #{orgId}
+</select>
+
+
+
+   
+<!-- 主键删除 SYS_ORG -->
+<delete id="deleteSysOrgByID" parameterType="java.util.Map">
+    	delete from sys_org  where ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_ORG -->
+<update id="deleteSysOrgByPrimaryKey" parameterType="java.util.Map">
+	     update sys_org t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+
+
+<select id="searchSysOrgByIds"  parameterType="java.util.Map" resultMap="SysOrgDTO">
+	          select 
+						t1.id                             ,
+						t1.org_code                       ,
+						t1.org_name                       ,
+						t1.org_type                       ,
+						t1.parent_id                      ,
+						t1.parent_ids                     ,
+						t1.order_by                       ,
+						t1.validate_state                 ,
+						t1.is_virtual                     ,
+						t1.version                        ,
+						t1.app_flag						  ,
+						t1.area_codes					  ,
+						t1.area_adress					  ,
+						t1.is_leef                        ,
+						t1.create_time                  ,
+						t1.org_level                      ,
+						t1.effective_date              
+				from sys_org 		t1 
+				where t1.ID in (${ids} )
+
+</select>
+
+<select id="queryTreeSysOrgByOrgLevel" parameterType="java.util.Map" resultMap="SysOrgDTO">
+    	     select 
+						t1.id                             ,
+						t1.org_code                       ,
+						t1.org_name                       ,
+						t1.org_type                       ,
+						t1.parent_id                      ,
+						t1.parent_ids                     ,
+						t1.order_by                       ,
+						t1.validate_state                 ,
+						t1.is_virtual                     ,
+						t1.version                        ,
+						t1.app_flag						  ,
+						t1.area_codes					  ,
+						t1.area_adress					  ,
+						t1.is_leef                        ,
+						t1.create_time                    ,
+						t1.org_level                      ,
+						t1.effective_date              
+				from sys_org 		t1
+				where 1=1
+    			and t1.validate_state='1'
+				<if test="orgLevel != null and orgLevel != '' ">
+					and org_level = #{orgLevel}
+				</if>
+				<if test="orgType != null and orgType != '' ">
+					and t1.org_type = #{orgType}
+				</if>
+				<if test="orgId != null and orgId != '' ">
+					start with t1.id =#{orgId}
+				</if>
+				<if test="orgId == null or orgId == '' ">
+					start with t1.parent_id=0
+				</if>
+				
+       			connect by prior t1.id = t1.parent_id
+    			
+</select>
+
+<!-- 查询 SYS_ORG -->	
+<select id="searchSysOrgByWhere" parameterType="java.util.Map" resultMap="SysOrgDTO">
+    	 		select 
+						t1.id                             ,
+						t1.org_code                       ,
+						t1.org_name                       ,
+						t1.org_type                       ,
+						t1.parent_id                      ,
+						t1.parent_ids                     ,
+						t1.order_by                       ,
+						t1.validate_state                 ,
+						t1.is_virtual                     ,
+						t1.version                        ,
+						t1.app_flag						  ,
+						t1.area_codes					  ,
+						t1.area_adress					  ,
+						t1.is_leef							 ,
+						t1.create_time                  ,
+						t1.org_level                      ,
+						t1.effective_date              ,
+						t2.org_name  as parent_name
+				from sys_org 	t1,sys_org t2
+				where t1.parent_id = t2.id
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.orgCode != null and dto.orgCode != ''">
+						and t1.ORG_CODE =#{dto.orgCode}
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME like concat('%',#{dto.orgName},'%')
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE =#{dto.orgType}
+    			</if>
+    			<if test="dto.parentId != null and dto.parentId != ''">
+						and t1.PARENT_ID =#{dto.parentId}
+    			</if>
+    			<if test="dto.parentIds != null and dto.parentIds != ''">
+						and t1.PARENT_IDS =#{dto.parentIds}
+    			</if>
+    			<if test="dto.orderBy != null and dto.orderBy != ''">
+						and t1.ORDER_BY =#{dto.orderBy}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.isVirtual != null and dto.isVirtual != ''">
+						and t1.IS_VIRTUAL =#{dto.isVirtual}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and ( t1.app_flag =#{dto.appFlag} or t1.IS_VIRTUAL = '0' )
+    			</if>
+				order by t1.order_by
+</select>
+</mapper>

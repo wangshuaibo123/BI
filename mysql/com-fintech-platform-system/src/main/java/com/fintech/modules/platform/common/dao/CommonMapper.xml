@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.common.dao.CommonDao">
+<select id="checkUnique" parameterType="java.util.Map"  resultType="java.lang.Integer">
+			select count(1) from ${tableName} where ${uniqueColumn} = #{checkValue}
+   			<if test="nocheckId != null and nocheckId != ''">
+				and id != #{nocheckId}
+   			</if>
+</select>
+
+<select id="executeQuerySql" parameterType="java.util.Map" resultType="java.util.Map">
+    ${executeSql}
+</select>
+<insert id="executeInsertSql" parameterType="java.util.Map">
+	${executeSql}
+</insert>
+<update id="executeUpdateSql" parameterType="java.util.Map">
+	${executeSql}
+</update>
+<delete id="executeDeleteSql" parameterType="java.util.Map">
+	${executeSql}
+</delete>
+</mapper>

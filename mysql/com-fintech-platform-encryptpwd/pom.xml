@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+  	<groupId>com.fintech.platform</groupId>
+	<artifactId>com-fintech-platform</artifactId>
+	<version>1.0.0</version>
+  </parent>
+  <groupId>com.fintech.platform</groupId>
+  <artifactId>com-fintech-platform-encryptpwd</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>com-fintech-platform-encryptpwd</name>
+  <description>com-fintech-platform-encryptpwd</description>
+
+  <properties>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> 
+  </properties>
+
+  <dependencies>
+      <dependency>
+	      <groupId>commons-codec</groupId>
+	      <artifactId>commons-codec</artifactId>
+	      <version>1.9</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>org.slf4j</groupId>
+		  <artifactId>slf4j-api</artifactId>
+	  </dependency>
+	  <dependency>
+	      <groupId>org.springframework</groupId>
+	      <artifactId>spring-beans</artifactId>
+	  </dependency>
+  	
+  </dependencies>
+  
+  <build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			
+			<!-- 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<configLocation>uni2_check.xml</configLocation>
+				</configuration>
+			</plugin>
+			 -->
+		</plugins>
+		
+		<resources>
+			<resource>
+			<directory>src/main/java</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+					<exclude>**/.svn/*</exclude>
+				</excludes>
+				</resource>
+			<resource>
+			<directory>src/main/resources</directory>
+				<includes>
+				<include>**/*.properties</include>
+				<include>**/*.xml</include>
+				</includes>
+			</resource>	
+		</resources>
+	</build>
+</project>

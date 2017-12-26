@@ -1,0 +1,789 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.common.yghr.dao.YgHrDao">
+<resultMap id="YGhrDTO" type="com.fintech.modules.platform.common.dto.YGhrDTO">
+				<result property="nbase" column="nbase" jdbcType="VARCHAR" />
+				<result property="nbase0" column="nbase0" jdbcType="VARCHAR" />
+				<result property="uniqueid" column="uniqueId" jdbcType="VARCHAR" />
+				<result property="a0100" column="a0100" jdbcType="VARCHAR" />
+				<result property="b01100" column="b01100" jdbcType="VARCHAR" />
+				<result property="e01220" column="e01220" jdbcType="VARCHAR" />
+				<result property="e01a10" column="e01a10" jdbcType="VARCHAR" />
+				<result property="b0110code" column="b0110Code" jdbcType="VARCHAR" />
+				<result property="e0122code" column="e0122Code" jdbcType="VARCHAR" />
+				<result property="e01a1code" column="e01a1Code" jdbcType="VARCHAR" />
+				<result property="a0101" column="a0101" jdbcType="VARCHAR" />
+				<result property="username" column="username" jdbcType="VARCHAR" />
+				<result property="userpassword" column="userpassword" jdbcType="VARCHAR" />
+				<result property="sdate" column="sdate" jdbcType="VARCHAR" />
+				<result property="flag" column="flag" jdbcType="VARCHAR" />
+				<result property="sysflag" column="sysFlag" jdbcType="VARCHAR" />
+				<result property="a0000" column="a0000" jdbcType="VARCHAR" />
+				<result property="c0104" column="c0104" jdbcType="VARCHAR" />
+				<result property="h01um" column="h01um" jdbcType="VARCHAR" />
+				<result property="h01ub" column="h01ub" jdbcType="VARCHAR" />
+				<result property="a0111" column="a0111" jdbcType="VARCHAR" />
+				<result property="c0183" column="c0183" jdbcType="VARCHAR" />
+				<result property="b0110" column="b0110" jdbcType="VARCHAR" />
+				<result property="h01ua" column="h01ua" jdbcType="VARCHAR" />
+				<result property="a0107" column="a0107" jdbcType="VARCHAR" />
+				<result property="e01a1" column="e01a1" jdbcType="VARCHAR" />
+				<result property="e0127" column="e0127" jdbcType="VARCHAR" />
+				<result property="oa" column="oa" jdbcType="VARCHAR" />
+				<result property="fullname" column="fullname" jdbcType="VARCHAR" />
+				<result property="fullpath" column="fullpath" jdbcType="VARCHAR" />
+				<result property="sealdate" column="sealDate" jdbcType="VARCHAR" />
+				<result property="isdelete" column="isDelete" jdbcType="VARCHAR" />
+				<result property="idcardnumber" column="idCardNumber" jdbcType="VARCHAR" />
+				<result property="maritalstatus" column="maritalStatus" jdbcType="VARCHAR" />
+				<result property="national" column="national" jdbcType="VARCHAR" />
+				<result property="political" column="political" jdbcType="VARCHAR" />
+				<result property="degree" column="degree" jdbcType="VARCHAR" />
+				<result property="nativeplace" column="nativePlace" jdbcType="VARCHAR" />
+				<result property="domicileplace" column="domicilePlace" jdbcType="VARCHAR" />
+				<result property="workdate" column="workDate" jdbcType="VARCHAR" />
+				<result property="emergencycontact" column="emergencyContact" jdbcType="VARCHAR" />
+				<result property="emergencycontactphone" column="emergencyContactPhone" jdbcType="VARCHAR" />
+				<result property="leader" column="leader" jdbcType="VARCHAR" />
+				<result property="regular" column="regular" jdbcType="VARCHAR" />
+				<result property="age" column="age" jdbcType="VARCHAR" />
+				<result property="level" column="level" jdbcType="VARCHAR" />
+				<result property="regulardate" column="regularDate" jdbcType="VARCHAR" />
+				<result property="workage" column="workAge" jdbcType="VARCHAR" />
+				<result property="belongaddress" column="belongAddress" jdbcType="VARCHAR" />
+				<result property="workstatus" column="workStatus" jdbcType="VARCHAR" />
+				<result property="orderno" column="orderNo" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 yg_hr -->	
+<select id="searchYgHrByPaging" parameterType="java.util.Map" resultMap="YGhrDTO">
+    	 		select 
+						t1.nbase                          ,
+						t1.nbase0                         ,
+						t1.uniqueid                       ,
+						t1.a0100                          ,
+						t1.b01100                         ,
+						t1.e01220                         ,
+						t1.e01a10                         ,
+						t1.b0110code                      ,
+						t1.e0122code                      ,
+						t1.e01a1code                      ,
+						t1.a0101                          ,
+						t1.username                       ,
+						t1.userpassword                   ,
+						t1.sdate                          ,
+						t1.flag                           ,
+						t1.sysflag                        ,
+						t1.a0000                          ,
+						t1.c0104                          ,
+						t1.h01um                          ,
+						t1.h01ub                          ,
+						t1.a0111                          ,
+						t1.c0183                          ,
+						t1.b0110                          ,
+						t1.h01ua                          ,
+						t1.a0107                          ,
+						t1.e01a1                          ,
+						t1.e0127                          ,
+						t1.oa                             ,
+						t1.fullname                       ,
+						t1.fullpath                       ,
+						t1.sealdate                       ,
+						t1.isdelete                       ,
+						t1.idcardnumber                   ,
+						t1.maritalstatus                  ,
+						t1.national                       ,
+						t1.political                      ,
+						t1.degree                         ,
+						t1.nativeplace                    ,
+						t1.domicileplace                  ,
+						t1.workdate                       ,
+						t1.emergencycontact               ,
+						t1.emergencycontactphone          ,
+						t1.leader                         ,
+						t1.regular                        ,
+						t1.age                            ,
+						t1.level                          ,
+						t1.regulardate                    ,
+						t1.workage                        ,
+						t1.belongaddress                  ,
+						t1.workstatus                     ,
+						t1.orderno                        
+					
+				from yg_hr 	t1
+				where 1=1
+				and t1.valid='1'
+    			<if test="dto.nbase != null and dto.nbase != ''">
+						and t1.nbase =#{dto.nbase}
+    			</if>
+    			<if test="dto.nbase0 != null and dto.nbase0 != ''">
+						and t1.nbase0 =#{dto.nbase0}
+    			</if>
+    			<if test="dto.uniqueid != null and dto.uniqueid != ''">
+						and t1.uniqueId =#{dto.uniqueid}
+    			</if>
+    			<if test="dto.a0100 != null and dto.a0100 != ''">
+						and t1.a0100 =#{dto.a0100}
+    			</if>
+    			<if test="dto.b01100 != null and dto.b01100 != ''">
+						and t1.b01100 =#{dto.b01100}
+    			</if>
+    			<if test="dto.e01220 != null and dto.e01220 != ''">
+						and t1.e01220 =#{dto.e01220}
+    			</if>
+    			<if test="dto.e01a10 != null and dto.e01a10 != ''">
+						and t1.e01a10 =#{dto.e01a10}
+    			</if>
+    			<if test="dto.b0110code != null and dto.b0110code != ''">
+						and t1.b0110Code =#{dto.b0110code}
+    			</if>
+    			<if test="dto.e0122code != null and dto.e0122code != ''">
+						and t1.e0122Code =#{dto.e0122code}
+    			</if>
+    			<if test="dto.e01a1code != null and dto.e01a1code != ''">
+						and t1.e01a1Code =#{dto.e01a1code}
+    			</if>
+    			<if test="dto.a0101 != null and dto.a0101 != ''">
+						and t1.a0101 =#{dto.a0101}
+    			</if>
+    			<if test="dto.username != null and dto.username != ''">
+						and t1.username =#{dto.username}
+    			</if>
+    			<if test="dto.userpassword != null and dto.userpassword != ''">
+						and t1.userpassword =#{dto.userpassword}
+    			</if>
+    			<if test="dto.sdate != null and dto.sdate != ''">
+						and t1.sdate =#{dto.sdate}
+    			</if>
+    			<if test="dto.flag != null and dto.flag != ''">
+						and t1.flag =#{dto.flag}
+    			</if>
+    			<if test="dto.sysflag != null and dto.sysflag != ''">
+						and t1.sysFlag =#{dto.sysflag}
+    			</if>
+    			<if test="dto.a0000 != null and dto.a0000 != ''">
+						and t1.a0000 =#{dto.a0000}
+    			</if>
+    			<if test="dto.c0104 != null and dto.c0104 != ''">
+						and t1.c0104 =#{dto.c0104}
+    			</if>
+    			<if test="dto.h01um != null and dto.h01um != ''">
+						and t1.h01um =#{dto.h01um}
+    			</if>
+    			<if test="dto.h01ub != null and dto.h01ub != ''">
+						and t1.h01ub =#{dto.h01ub}
+    			</if>
+    			<if test="dto.a0111 != null and dto.a0111 != ''">
+						and t1.a0111 =#{dto.a0111}
+    			</if>
+    			<if test="dto.c0183 != null and dto.c0183 != ''">
+						and t1.c0183 =#{dto.c0183}
+    			</if>
+    			<if test="dto.b0110 != null and dto.b0110 != ''">
+						and t1.b0110 =#{dto.b0110}
+    			</if>
+    			<if test="dto.h01ua != null and dto.h01ua != ''">
+						and t1.h01ua =#{dto.h01ua}
+    			</if>
+    			<if test="dto.a0107 != null and dto.a0107 != ''">
+						and t1.a0107 =#{dto.a0107}
+    			</if>
+    			<if test="dto.e01a1 != null and dto.e01a1 != ''">
+						and t1.e01a1 =#{dto.e01a1}
+    			</if>
+    			<if test="dto.e0127 != null and dto.e0127 != ''">
+						and t1.e0127 =#{dto.e0127}
+    			</if>
+    			<if test="dto.oa != null and dto.oa != ''">
+						and t1.oa =#{dto.oa}
+    			</if>
+    			<if test="dto.fullname != null and dto.fullname != ''">
+						and t1.fullname =#{dto.fullname}
+    			</if>
+    			<if test="dto.fullpath != null and dto.fullpath != ''">
+						and t1.fullpath =#{dto.fullpath}
+    			</if>
+    			<if test="dto.sealdate != null and dto.sealdate != ''">
+						and t1.sealDate =#{dto.sealdate}
+    			</if>
+    			<if test="dto.isdelete != null and dto.isdelete != ''">
+						and t1.isDelete =#{dto.isdelete}
+    			</if>
+    			<if test="dto.idcardnumber != null and dto.idcardnumber != ''">
+						and t1.idCardNumber =#{dto.idcardnumber}
+    			</if>
+    			<if test="dto.maritalstatus != null and dto.maritalstatus != ''">
+						and t1.maritalStatus =#{dto.maritalstatus}
+    			</if>
+    			<if test="dto.national != null and dto.national != ''">
+						and t1.national =#{dto.national}
+    			</if>
+    			<if test="dto.political != null and dto.political != ''">
+						and t1.political =#{dto.political}
+    			</if>
+    			<if test="dto.degree != null and dto.degree != ''">
+						and t1.degree =#{dto.degree}
+    			</if>
+    			<if test="dto.nativeplace != null and dto.nativeplace != ''">
+						and t1.nativePlace =#{dto.nativeplace}
+    			</if>
+    			<if test="dto.domicileplace != null and dto.domicileplace != ''">
+						and t1.domicilePlace =#{dto.domicileplace}
+    			</if>
+    			<if test="dto.workdate != null and dto.workdate != ''">
+						and t1.workDate =#{dto.workdate}
+    			</if>
+    			<if test="dto.emergencycontact != null and dto.emergencycontact != ''">
+						and t1.emergencyContact =#{dto.emergencycontact}
+    			</if>
+    			<if test="dto.emergencycontactphone != null and dto.emergencycontactphone != ''">
+						and t1.emergencyContactPhone =#{dto.emergencycontactphone}
+    			</if>
+    			<if test="dto.leader != null and dto.leader != ''">
+						and t1.leader =#{dto.leader}
+    			</if>
+    			<if test="dto.regular != null and dto.regular != ''">
+						and t1.regular =#{dto.regular}
+    			</if>
+    			<if test="dto.age != null and dto.age != ''">
+						and t1.age =#{dto.age}
+    			</if>
+    			<if test="dto.level != null and dto.level != ''">
+						and t1.level =#{dto.level}
+    			</if>
+    			<if test="dto.regulardate != null and dto.regulardate != ''">
+						and t1.regularDate =#{dto.regulardate}
+    			</if>
+    			<if test="dto.workage != null and dto.workage != ''">
+						and t1.workAge =#{dto.workage}
+    			</if>
+    			<if test="dto.belongaddress != null and dto.belongaddress != ''">
+						and t1.belongAddress =#{dto.belongaddress}
+    			</if>
+    			<if test="dto.workstatus != null and dto.workstatus != ''">
+						and t1.workStatus =#{dto.workstatus}
+    			</if>
+    			<if test="dto.orderno != null and dto.orderno != ''">
+						and t1.orderNo =#{dto.orderno}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 yg_hr  -->
+<select id="searchYgHr" parameterType="java.util.Map" resultMap="YGhrDTO">
+    	     select 
+						t1.nbase                          ,
+						t1.nbase0                         ,
+						t1.uniqueid                       ,
+						t1.a0100                          ,
+						t1.b01100                         ,
+						t1.e01220                         ,
+						t1.e01a10                         ,
+						t1.b0110code                      ,
+						t1.e0122code                      ,
+						t1.e01a1code                      ,
+						t1.a0101                          ,
+						t1.username                       ,
+						t1.userpassword                   ,
+						t1.sdate                          ,
+						t1.flag                           ,
+						t1.sysflag                        ,
+						t1.a0000                          ,
+						t1.c0104                          ,
+						t1.h01um                          ,
+						t1.h01ub                          ,
+						t1.a0111                          ,
+						t1.c0183                          ,
+						t1.b0110                          ,
+						t1.h01ua                          ,
+						t1.a0107                          ,
+						t1.e01a1                          ,
+						t1.e0127                          ,
+						t1.oa                             ,
+						t1.fullname                       ,
+						t1.fullpath                       ,
+						t1.sealdate                       ,
+						t1.isdelete                       ,
+						t1.idcardnumber                   ,
+						t1.maritalstatus                  ,
+						t1.national                       ,
+						t1.political                      ,
+						t1.degree                         ,
+						t1.nativeplace                    ,
+						t1.domicileplace                  ,
+						t1.workdate                       ,
+						t1.emergencycontact               ,
+						t1.emergencycontactphone          ,
+						t1.leader                         ,
+						t1.regular                        ,
+						t1.age                            ,
+						t1.level                          ,
+						t1.regulardate                    ,
+						t1.workage                        ,
+						t1.belongaddress                  ,
+						t1.workstatus                     ,
+						t1.orderno                        
+				from yg_hr 		t1
+				where 1=1
+    			<if test="dto.nbase != null and dto.nbase != ''">
+						and t1.nbase = #{dto.nbase}
+    			</if>
+    			<if test="dto.nbase0 != null and dto.nbase0 != ''">
+						and t1.nbase0 = #{dto.nbase0}
+    			</if>
+    			<if test="dto.uniqueid != null and dto.uniqueid != ''">
+						and t1.uniqueId = #{dto.uniqueid}
+    			</if>
+    			<if test="dto.a0100 != null and dto.a0100 != ''">
+						and t1.a0100 = #{dto.a0100}
+    			</if>
+    			<if test="dto.b01100 != null and dto.b01100 != ''">
+						and t1.b01100 = #{dto.b01100}
+    			</if>
+    			<if test="dto.e01220 != null and dto.e01220 != ''">
+						and t1.e01220 = #{dto.e01220}
+    			</if>
+    			<if test="dto.e01a10 != null and dto.e01a10 != ''">
+						and t1.e01a10 = #{dto.e01a10}
+    			</if>
+    			<if test="dto.b0110code != null and dto.b0110code != ''">
+						and t1.b0110Code = #{dto.b0110code}
+    			</if>
+    			<if test="dto.e0122code != null and dto.e0122code != ''">
+						and t1.e0122Code = #{dto.e0122code}
+    			</if>
+    			<if test="dto.e01a1code != null and dto.e01a1code != ''">
+						and t1.e01a1Code = #{dto.e01a1code}
+    			</if>
+    			<if test="dto.a0101 != null and dto.a0101 != ''">
+						and t1.a0101 = #{dto.a0101}
+    			</if>
+    			<if test="dto.username != null and dto.username != ''">
+						and t1.username = #{dto.username}
+    			</if>
+    			<if test="dto.userpassword != null and dto.userpassword != ''">
+						and t1.userpassword = #{dto.userpassword}
+    			</if>
+    			<if test="dto.sdate != null and dto.sdate != ''">
+						and t1.sdate = #{dto.sdate}
+    			</if>
+    			<if test="dto.flag != null and dto.flag != ''">
+						and t1.flag = #{dto.flag}
+    			</if>
+    			<if test="dto.sysflag != null and dto.sysflag != ''">
+						and t1.sysFlag = #{dto.sysflag}
+    			</if>
+    			<if test="dto.a0000 != null and dto.a0000 != ''">
+						and t1.a0000 = #{dto.a0000}
+    			</if>
+    			<if test="dto.c0104 != null and dto.c0104 != ''">
+						and t1.c0104 = #{dto.c0104}
+    			</if>
+    			<if test="dto.h01um != null and dto.h01um != ''">
+						and t1.h01um = #{dto.h01um}
+    			</if>
+    			<if test="dto.h01ub != null and dto.h01ub != ''">
+						and t1.h01ub = #{dto.h01ub}
+    			</if>
+    			<if test="dto.a0111 != null and dto.a0111 != ''">
+						and t1.a0111 = #{dto.a0111}
+    			</if>
+    			<if test="dto.c0183 != null and dto.c0183 != ''">
+						and t1.c0183 = #{dto.c0183}
+    			</if>
+    			<if test="dto.b0110 != null and dto.b0110 != ''">
+						and t1.b0110 = #{dto.b0110}
+    			</if>
+    			<if test="dto.h01ua != null and dto.h01ua != ''">
+						and t1.h01ua = #{dto.h01ua}
+    			</if>
+    			<if test="dto.a0107 != null and dto.a0107 != ''">
+						and t1.a0107 = #{dto.a0107}
+    			</if>
+    			<if test="dto.e01a1 != null and dto.e01a1 != ''">
+						and t1.e01a1 = #{dto.e01a1}
+    			</if>
+    			<if test="dto.e0127 != null and dto.e0127 != ''">
+						and t1.e0127 = #{dto.e0127}
+    			</if>
+    			<if test="dto.oa != null and dto.oa != ''">
+						and t1.oa = #{dto.oa}
+    			</if>
+    			<if test="dto.fullname != null and dto.fullname != ''">
+						and t1.fullname = #{dto.fullname}
+    			</if>
+    			<if test="dto.fullpath != null and dto.fullpath != ''">
+						and t1.fullpath = #{dto.fullpath}
+    			</if>
+    			<if test="dto.sealdate != null and dto.sealdate != ''">
+						and t1.sealDate = #{dto.sealdate}
+    			</if>
+    			<if test="dto.isdelete != null and dto.isdelete != ''">
+						and t1.isDelete = #{dto.isdelete}
+    			</if>
+    			<if test="dto.idcardnumber != null and dto.idcardnumber != ''">
+						and t1.idCardNumber = #{dto.idcardnumber}
+    			</if>
+    			<if test="dto.maritalstatus != null and dto.maritalstatus != ''">
+						and t1.maritalStatus = #{dto.maritalstatus}
+    			</if>
+    			<if test="dto.national != null and dto.national != ''">
+						and t1.national = #{dto.national}
+    			</if>
+    			<if test="dto.political != null and dto.political != ''">
+						and t1.political = #{dto.political}
+    			</if>
+    			<if test="dto.degree != null and dto.degree != ''">
+						and t1.degree = #{dto.degree}
+    			</if>
+    			<if test="dto.nativeplace != null and dto.nativeplace != ''">
+						and t1.nativePlace = #{dto.nativeplace}
+    			</if>
+    			<if test="dto.domicileplace != null and dto.domicileplace != ''">
+						and t1.domicilePlace = #{dto.domicileplace}
+    			</if>
+    			<if test="dto.workdate != null and dto.workdate != ''">
+						and t1.workDate = #{dto.workdate}
+    			</if>
+    			<if test="dto.emergencycontact != null and dto.emergencycontact != ''">
+						and t1.emergencyContact = #{dto.emergencycontact}
+    			</if>
+    			<if test="dto.emergencycontactphone != null and dto.emergencycontactphone != ''">
+						and t1.emergencyContactPhone = #{dto.emergencycontactphone}
+    			</if>
+    			<if test="dto.leader != null and dto.leader != ''">
+						and t1.leader = #{dto.leader}
+    			</if>
+    			<if test="dto.regular != null and dto.regular != ''">
+						and t1.regular = #{dto.regular}
+    			</if>
+    			<if test="dto.age != null and dto.age != ''">
+						and t1.age = #{dto.age}
+    			</if>
+    			<if test="dto.level != null and dto.level != ''">
+						and t1.level = #{dto.level}
+    			</if>
+    			<if test="dto.regulardate != null and dto.regulardate != ''">
+						and t1.regularDate = #{dto.regulardate}
+    			</if>
+    			<if test="dto.workage != null and dto.workage != ''">
+						and t1.workAge = #{dto.workage}
+    			</if>
+    			<if test="dto.belongaddress != null and dto.belongaddress != ''">
+						and t1.belongAddress = #{dto.belongaddress}
+    			</if>
+    			<if test="dto.workstatus != null and dto.workstatus != ''">
+						and t1.workStatus = #{dto.workstatus}
+    			</if>
+    			<if test="dto.orderno != null and dto.orderno != ''">
+						and t1.orderNo = #{dto.orderno}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  yg_hr -->
+<select id="findYgHrByPrimaryKey" parameterType="java.util.Map" resultMap="YGhrDTO">
+   	 		select 
+					t1.nbase                          ,
+					t1.nbase0                         ,
+					t1.uniqueid                       ,
+					t1.a0100                          ,
+					t1.b01100                         ,
+					t1.e01220                         ,
+					t1.e01a10                         ,
+					t1.b0110code                      ,
+					t1.e0122code                      ,
+					t1.e01a1code                      ,
+					t1.a0101                          ,
+					t1.username                       ,
+					t1.userpassword                   ,
+					t1.sdate                          ,
+					t1.flag                           ,
+					t1.sysflag                        ,
+					t1.a0000                          ,
+					t1.c0104                          ,
+					t1.h01um                          ,
+					t1.h01ub                          ,
+					t1.a0111                          ,
+					t1.c0183                          ,
+					t1.b0110                          ,
+					t1.h01ua                          ,
+					t1.a0107                          ,
+					t1.e01a1                          ,
+					t1.e0127                          ,
+					t1.oa                             ,
+					t1.fullname                       ,
+					t1.fullpath                       ,
+					t1.sealdate                       ,
+					t1.isdelete                       ,
+					t1.idcardnumber                   ,
+					t1.maritalstatus                  ,
+					t1.national                       ,
+					t1.political                      ,
+					t1.degree                         ,
+					t1.nativeplace                    ,
+					t1.domicileplace                  ,
+					t1.workdate                       ,
+					t1.emergencycontact               ,
+					t1.emergencycontactphone          ,
+					t1.leader                         ,
+					t1.regular                        ,
+					t1.age                            ,
+					t1.level                          ,
+					t1.regulardate                    ,
+					t1.workage                        ,
+					t1.belongaddress                  ,
+					t1.workstatus                     ,
+					t1.orderno                        
+			from yg_hr 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 yg_hr -->
+<insert id="insertYgHr" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="dto.id">
+			insert into yg_hr
+			(   		
+						nbase                          ,
+						nbase0                         ,
+						uniqueid                       ,
+						a0100                          ,
+						b01100                         ,
+						e01220                         ,
+						e01a10                         ,
+						b0110code                      ,
+						e0122code                      ,
+						e01a1code                      ,
+						a0101                          ,
+						username                       ,
+						userpassword                   ,
+						sdate                          ,
+						flag                           ,
+						sysflag                        ,
+						a0000                          ,
+						c0104                          ,
+						h01um                          ,
+						h01ub                          ,
+						a0111                          ,
+						c0183                          ,
+						b0110                          ,
+						h01ua                          ,
+						a0107                          ,
+						e01a1                          ,
+						e0127                          ,
+						oa                             ,
+						fullname                       ,
+						fullpath                       ,
+						sealdate                       ,
+						isdelete                       ,
+						idcardnumber                   ,
+						maritalstatus                  ,
+						national                       ,
+						political                      ,
+						degree                         ,
+						nativeplace                    ,
+						domicileplace                  ,
+						workdate                       ,
+						emergencycontact               ,
+						emergencycontactphone          ,
+						leader                         ,
+						regular                        ,
+						age                            ,
+						level                          ,
+						regulardate                    ,
+						workage                        ,
+						belongaddress                  ,
+						workstatus                     ,
+						orderno                        
+			)
+			values(
+						#{dto.nbase,jdbcType=VARCHAR}
+						,
+						#{dto.nbase0,jdbcType=VARCHAR}
+						,
+						#{dto.uniqueId,jdbcType=VARCHAR}
+						,
+						#{dto.a0100,jdbcType=VARCHAR}
+						,
+						#{dto.b01100,jdbcType=VARCHAR}
+						,
+						#{dto.e01220,jdbcType=VARCHAR}
+						,
+						#{dto.e01a10,jdbcType=VARCHAR}
+						,
+						#{dto.b0110Code,jdbcType=VARCHAR}
+						,
+						#{dto.e0122Code,jdbcType=VARCHAR}
+						,
+						#{dto.e01a1Code,jdbcType=VARCHAR}
+						,
+						#{dto.a0101,jdbcType=VARCHAR}
+						,
+						#{dto.username,jdbcType=VARCHAR}
+						,
+						#{dto.userpassword,jdbcType=VARCHAR}
+						,
+						#{dto.sdate,jdbcType=VARCHAR}
+						,
+						#{dto.flag,jdbcType=VARCHAR}
+						,
+						#{dto.sysFlag,jdbcType=VARCHAR}
+						,
+						#{dto.a0000,jdbcType=VARCHAR}
+						,
+						#{dto.c0104,jdbcType=VARCHAR}
+						,
+						#{dto.h01um,jdbcType=VARCHAR}
+						,
+						#{dto.h01ub,jdbcType=VARCHAR}
+						,
+						#{dto.a0111,jdbcType=VARCHAR}
+						,
+						#{dto.c0183,jdbcType=VARCHAR}
+						,
+						#{dto.b0110,jdbcType=VARCHAR}
+						,
+						#{dto.h01ua,jdbcType=VARCHAR}
+						,
+						#{dto.a0107,jdbcType=VARCHAR}
+						,
+						#{dto.e01a1,jdbcType=VARCHAR}
+						,
+						#{dto.e0127,jdbcType=VARCHAR}
+						,
+						#{dto.oa,jdbcType=VARCHAR}
+						,
+						#{dto.fullname,jdbcType=VARCHAR}
+						,
+						#{dto.fullpath,jdbcType=VARCHAR}
+						,
+						#{dto.sealDate,jdbcType=VARCHAR}
+						,
+						#{dto.isDelete,jdbcType=VARCHAR}
+						,
+						#{dto.idCardNumber,jdbcType=VARCHAR}
+						,
+						#{dto.maritalStatus,jdbcType=VARCHAR}
+						,
+						#{dto.national,jdbcType=VARCHAR}
+						,
+						#{dto.political,jdbcType=VARCHAR}
+						,
+						#{dto.degree,jdbcType=VARCHAR}
+						,
+						#{dto.nativePlace,jdbcType=VARCHAR}
+						,
+						#{dto.domicilePlace,jdbcType=VARCHAR}
+						,
+						#{dto.workDate,jdbcType=VARCHAR}
+						,
+						#{dto.emergencyContact,jdbcType=VARCHAR}
+						,
+						#{dto.emergencyContactPhone,jdbcType=VARCHAR}
+						,
+						#{dto.leader,jdbcType=VARCHAR}
+						,
+						#{dto.regular,jdbcType=VARCHAR}
+						,
+						#{dto.age,jdbcType=VARCHAR}
+						,
+						#{dto.level,jdbcType=VARCHAR}
+						,
+						#{dto.regularDate,jdbcType=VARCHAR}
+						,
+						#{dto.workAge,jdbcType=VARCHAR}
+						,
+						#{dto.belongAddress,jdbcType=VARCHAR}
+						,
+						#{dto.workStatus,jdbcType=VARCHAR}
+						,
+						#{dto.order,jdbcType=VARCHAR}
+						
+			)
+</insert>
+    
+<!-- 更新对象 yg_hr -->
+<update id="updateYgHr" parameterType="java.util.Map">
+	     update yg_hr t1
+	           set 
+			           t1.nbase                          =#{dto.nbase,jdbcType=VARCHAR},
+			           t1.nbase0                         =#{dto.nbase0,jdbcType=VARCHAR},
+			           t1.uniqueid                       =#{dto.uniqueid,jdbcType=VARCHAR},
+			           t1.a0100                          =#{dto.a0100,jdbcType=VARCHAR},
+			           t1.b01100                         =#{dto.b01100,jdbcType=VARCHAR},
+			           t1.e01220                         =#{dto.e01220,jdbcType=VARCHAR},
+			           t1.e01a10                         =#{dto.e01a10,jdbcType=VARCHAR},
+			           t1.b0110code                      =#{dto.b0110code,jdbcType=VARCHAR},
+			           t1.e0122code                      =#{dto.e0122code,jdbcType=VARCHAR},
+			           t1.e01a1code                      =#{dto.e01a1code,jdbcType=VARCHAR},
+			           t1.a0101                          =#{dto.a0101,jdbcType=VARCHAR},
+			           t1.username                       =#{dto.username,jdbcType=VARCHAR},
+			           t1.userpassword                   =#{dto.userpassword,jdbcType=VARCHAR},
+			           t1.sdate                          =#{dto.sdate,jdbcType=VARCHAR},
+			           t1.flag                           =#{dto.flag,jdbcType=VARCHAR},
+			           t1.sysflag                        =#{dto.sysflag,jdbcType=VARCHAR},
+			           t1.a0000                          =#{dto.a0000,jdbcType=VARCHAR},
+			           t1.c0104                          =#{dto.c0104,jdbcType=VARCHAR},
+			           t1.h01um                          =#{dto.h01um,jdbcType=VARCHAR},
+			           t1.h01ub                          =#{dto.h01ub,jdbcType=VARCHAR},
+			           t1.a0111                          =#{dto.a0111,jdbcType=VARCHAR},
+			           t1.c0183                          =#{dto.c0183,jdbcType=VARCHAR},
+			           t1.b0110                          =#{dto.b0110,jdbcType=VARCHAR},
+			           t1.h01ua                          =#{dto.h01ua,jdbcType=VARCHAR},
+			           t1.a0107                          =#{dto.a0107,jdbcType=VARCHAR},
+			           t1.e01a1                          =#{dto.e01a1,jdbcType=VARCHAR},
+			           t1.e0127                          =#{dto.e0127,jdbcType=VARCHAR},
+			           t1.oa                             =#{dto.oa,jdbcType=VARCHAR},
+			           t1.fullname                       =#{dto.fullname,jdbcType=VARCHAR},
+			           t1.fullpath                       =#{dto.fullpath,jdbcType=VARCHAR},
+			           t1.sealdate                       =#{dto.sealdate,jdbcType=VARCHAR},
+			           t1.isdelete                       =#{dto.isdelete,jdbcType=VARCHAR},
+			           t1.idcardnumber                   =#{dto.idcardnumber,jdbcType=VARCHAR},
+			           t1.maritalstatus                  =#{dto.maritalstatus,jdbcType=VARCHAR},
+			           t1.national                       =#{dto.national,jdbcType=VARCHAR},
+			           t1.political                      =#{dto.political,jdbcType=VARCHAR},
+			           t1.degree                         =#{dto.degree,jdbcType=VARCHAR},
+			           t1.nativeplace                    =#{dto.nativeplace,jdbcType=VARCHAR},
+			           t1.domicileplace                  =#{dto.domicileplace,jdbcType=VARCHAR},
+			           t1.workdate                       =#{dto.workdate,jdbcType=VARCHAR},
+			           t1.emergencycontact               =#{dto.emergencycontact,jdbcType=VARCHAR},
+			           t1.emergencycontactphone          =#{dto.emergencycontactphone,jdbcType=VARCHAR},
+			           t1.leader                         =#{dto.leader,jdbcType=VARCHAR},
+			           t1.regular                        =#{dto.regular,jdbcType=VARCHAR},
+			           t1.age                            =#{dto.age,jdbcType=VARCHAR},
+			           t1.level                          =#{dto.level,jdbcType=VARCHAR},
+			           t1.regulardate                    =#{dto.regulardate,jdbcType=VARCHAR},
+			           t1.workage                        =#{dto.workage,jdbcType=VARCHAR},
+			           t1.belongaddress                  =#{dto.belongaddress,jdbcType=VARCHAR},
+			           t1.workstatus                     =#{dto.workstatus,jdbcType=VARCHAR},
+			           t1.orderno                        =#{dto.orderno,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 yg_hr -->
+<delete id="deleteYgHrByID" parameterType="java.util.Map">
+    	delete from yg_hr where id in (${ids} )
+</delete>
+<!-- 主键假删除 yg_hr -->
+<update id="deleteYgHrByPrimaryKey" parameterType="java.util.Map">
+	     update yg_hr t1
+	           set   t1.valid='0'	
+	     where t1.id in( ${ids})
+</update>
+<update id="insertImportYGtoSys" parameterType="java.util.Map" >
+	call importYGtoSys(#{tableName})
+</update>
+<update id="updateSysOrgRelation" parameterType="java.util.Map" >
+	call updateSysOrgRelation('6','1')
+</update>
+
+
+<update id="truncateYgHRTable" parameterType="java.util.Map" >
+	truncate table yg_hr
+</update>
+
+
+<update id="truncateYgORGTable" parameterType="java.util.Map" >
+	truncate table yg_org
+</update>
+</mapper>

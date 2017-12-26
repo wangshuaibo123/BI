@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysmessage.dao.SysUserMsgRelationDao">
+<resultMap id="SysUserMsgRelationDTO" type="com.fintech.modules.platform.sysmessage.dto.SysUserMsgRelationDTO">
+				<result property="relId" column="REL_ID" jdbcType="DECIMAL" />
+				<result property="relStatus" column="REL_STATUS" jdbcType="CHAR" />
+				<result property="userId" column="USER_ID" jdbcType="VARCHAR" />
+				<result property="readFlag" column="READ_FLAG" jdbcType="CHAR" />
+				<result property="msgId" column="MSG_ID" jdbcType="DECIMAL" />
+</resultMap>
+<resultMap id="SysUserDTO" type="com.fintech.modules.platform.sysorg.dto.SysUserDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 SYS_USER_MSG_RELATION -->	
+<select id="searchSysUserMsgRelationByPaging" parameterType="java.util.Map" resultMap="SysUserMsgRelationDTO">
+    	 		select 
+						t1.rel_id                         ,
+						t1.rel_status                     ,
+						t1.user_id                        ,
+						t1.read_flag                      ,
+						t1.msg_id                         
+					
+				from sys_user_msg_relation 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.relId != null and dto.relId != ''">
+						and t1.REL_ID =#{dto.relId}
+    			</if>
+    			<if test="dto.relStatus != null and dto.relStatus != ''">
+						and t1.REL_STATUS =#{dto.relStatus}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="dto.readFlag != null and dto.readFlag != ''">
+						and t1.READ_FLAG =#{dto.readFlag}
+    			</if>
+    			<if test="dto.msgId != null and dto.msgId != ''">
+						and t1.MSG_ID =#{dto.msgId}
+    			</if>
+				
+				order by t1.rel_id desc
+</select>
+  
+<!-- 查询列表 SYS_USER_MSG_RELATION  -->
+<select id="searchSysUserMsgRelation" parameterType="java.util.Map" resultMap="SysUserMsgRelationDTO">
+    	     select 
+						t1.rel_id                         ,
+						t1.rel_status                     ,
+						t1.user_id                        ,
+						t1.read_flag                      ,
+						t1.msg_id                         
+				from sys_user_msg_relation 		t1
+				where 1=1
+    			<if test="dto.relId != null and dto.relId != ''">
+						and t1.REL_ID = #{dto.relId}
+    			</if>
+    			<if test="dto.relStatus != null and dto.relStatus != ''">
+						and t1.REL_STATUS = #{dto.relStatus}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.readFlag != null and dto.readFlag != ''">
+						and t1.READ_FLAG = #{dto.readFlag}
+    			</if>
+    			<if test="dto.msgId != null and dto.msgId != ''">
+						and t1.MSG_ID = #{dto.msgId}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_USER_MSG_RELATION -->
+<select id="findSysUserMsgRelationByPrimaryKey" parameterType="java.util.Map" resultMap="SysUserMsgRelationDTO">
+   	 		select 
+					t1.rel_id                         ,
+					t1.rel_status                     ,
+					t1.user_id                        ,
+					t1.read_flag                      ,
+					t1.msg_id                         
+			from sys_user_msg_relation 		t1
+			where 
+				t1.rel_id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_USER_MSG_RELATION -->
+<insert id="insertSysUserMsgRelation" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.relId" order="BEFORE">
+	<!-- 			select seq_SYS_USER_MSG_RELATION.nextval as relId from dual -->
+				SELECT auto_increment FROM information_schema.TABLES WHERE  TABLE_NAME='sys_user_msg_relation'
+	</selectKey>
+			insert into sys_user_msg_relation
+			(   		
+					rel_id                         ,
+					rel_status                     ,
+					user_id                        ,
+					read_flag                      ,
+					msg_id                         
+			)
+			values(#{dto.relId}
+					,#{dto.relStatus,jdbcType=CHAR}
+					,#{dto.userId,jdbcType=VARCHAR}
+					,#{dto.readFlag,jdbcType=CHAR}
+					,#{dto.msgId,jdbcType=DECIMAL}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_USER_MSG_RELATION   只有传入主键或者 userId和msgId同时传入才可确保修改唯一对象 -->
+<update id="updateSysUserMsgRelation" parameterType="java.util.Map">
+	     update sys_user_msg_relation t1
+	           set 
+	           		<if test="dto.relId != null and dto.relId != ''">	
+			           	t1.rel_id                         =#{dto.relId,jdbcType=DECIMAL},
+			         </if>
+			         <if test="dto.relStatus != null and dto.relStatus != ''">
+			          	 t1.rel_status                     =#{dto.relStatus,jdbcType=CHAR},
+			          </if>
+			          <if test="dto.userId != null and dto.userId != ''">
+			         	  t1.user_id                        =#{dto.userId,jdbcType=VARCHAR},
+			           </if>
+			           <if test="dto.readFlag != null and dto.readFlag != ''">
+			           			t1.read_flag                      =#{dto.readFlag,jdbcType=CHAR},
+			           </if>
+			           <if test="dto.msgId != null and dto.msgId != ''">
+			           t1.msg_id                         =#{dto.msgId,jdbcType=DECIMAL}
+			           </if>
+	     where 1=1  
+	     		<if test="dto.relId != null and dto.relId != ''">	
+	   		 				 and  t1.rel_id = #{dto.relId}
+	     	    </if>
+	       		<if test="dto.userId != null and dto.userId != ''">
+			      			 and  t1.user_id = #{dto.userId}
+			    </if>
+			    <if test="dto.msgId != null and dto.msgId != ''">
+			          		and  t1.msg_id   =#{dto.msgId}
+			    </if>
+</update>
+   
+<!-- 主键删除 SYS_USER_MSG_RELATION -->
+<delete id="deleteSysUserMsgRelationByID" parameterType="java.util.Map">
+    	delete t1 from sys_user_msg_relation t1 where t1.rel_id in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_USER_MSG_RELATION -->
+<update id="deleteSysUserMsgRelationByPrimaryKey" parameterType="java.util.Map">
+	     update sys_user_msg_relation t1
+	           set   t1.validate_state='0'	
+	     where t1.rel_id in( ${ids})
+</update>
+
+<!-- 获取所有可用的（且已分配角色）用户编号列表 -->
+<select id="searchAllUsefulSysUser" resultMap="SysUserDTO">
+	     select t1.id 
+	     from sys_user t1 
+	     where t1.validate_state='1'
+		 and exists (select * from sys_role_user t2 where t2.validate_state='1' and t2.target_id=t1.id )
+</select>
+</mapper>

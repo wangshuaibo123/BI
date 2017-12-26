@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysversion.dao.SysVersionDao">
+<resultMap id="SysVersionDTO" type="com.fintech.modules.platform.sysversion.dto.SysVersionDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="versionNum" column="VERSION_NUM" jdbcType="VARCHAR" />
+				<result property="versionName" column="VERSION_NAME" jdbcType="VARCHAR" />
+				<result property="versionContent" column="VERSION_CONTENT" jdbcType="VARCHAR" />
+				<result property="versionTime" column="VERSION_TIME" jdbcType="VARCHAR" />
+				<result property="systemState" column="SYSTEM_STATE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_VERSION -->	
+<select id="searchSysVersionByPaging" parameterType="java.util.Map" resultMap="SysVersionDTO">
+    	 		select 
+						t1.id                             ,
+						t1.version_num                    ,
+						t1.version_name                   ,
+						t1.version_content                ,
+						t1.version_time                   ,
+						t1.system_state                   
+					
+				from sys_version 	t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.versionNum != null and dto.versionNum != ''">
+						and t1.VERSION_NUM like concat('%',#{dto.versionNum},'%')
+    			</if>
+    			<if test="dto.versionName != null and dto.versionName != ''">
+						and t1.VERSION_NAME like concat('%',#{dto.versionName},'%')
+    			</if>
+    			<if test="dto.versionContent != null and dto.versionContent != ''">
+						and t1.VERSION_CONTENT =#{dto.versionContent}
+    			</if>
+    			<if test="dto.versionTime != null and dto.versionTime != ''">
+						and t1.VERSION_TIME =#{dto.versionTime}
+    			</if>
+    			<if test="dto.systemState != null and dto.systemState != ''">
+						and t1.SYSTEM_STATE = #{dto.systemState}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_VERSION  -->
+<select id="searchSysVersion" parameterType="java.util.Map" resultMap="SysVersionDTO">
+    	     select 
+						t1.id                             ,
+						t1.version_num                    ,
+						t1.version_name                   ,
+						t1.version_content                ,
+						t1.version_time                   ,
+						t1.system_state                   
+				from sys_version 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.versionNum != null and dto.versionNum != ''">
+						and t1.VERSION_NUM = #{dto.versionNum}
+    			</if>
+    			<if test="dto.versionName != null and dto.versionName != ''">
+						and t1.VERSION_NAME = #{dto.versionName}
+    			</if>
+    			<if test="dto.versionContent != null and dto.versionContent != ''">
+						and t1.VERSION_CONTENT = #{dto.versionContent}
+    			</if>
+    			<if test="dto.versionTime != null and dto.versionTime != ''">
+						and t1.VERSION_TIME = #{dto.versionTime}
+    			</if>
+    			<if test="dto.systemState != null and dto.systemState != ''">
+						and t1.SYSTEM_STATE = #{dto.systemState}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_VERSION -->
+<select id="findSysVersionByPrimaryKey" parameterType="java.util.Map" resultMap="SysVersionDTO">
+   	 		select 
+					t1.id                             ,
+					t1.version_num                    ,
+					t1.version_name                   ,
+					t1.version_content                ,
+					t1.version_time                   ,
+					t1.system_state                   
+			from sys_version 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_VERSION -->
+<insert id="insertSysVersion" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				<!-- select seq_SYS_VERSION.nextval as id from dual -->
+				SELECT auto_increment FROM information_schema.TABLES WHERE  TABLE_NAME='sys_version'
+	</selectKey>
+			insert into sys_version
+			(   		
+					id                             ,
+					version_num                    ,
+					version_name                   ,
+					version_content                ,
+					version_time                   ,
+					system_state                   
+			)
+			values(#{dto.id}
+					,#{dto.versionNum,jdbcType=VARCHAR}
+					,#{dto.versionName,jdbcType=VARCHAR}
+					,#{dto.versionContent,jdbcType=VARCHAR}
+					,#{dto.versionTime,jdbcType=VARCHAR}
+					,#{dto.systemState,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_VERSION -->
+<update id="updateSysVersion" parameterType="java.util.Map">
+	     update sys_version t1
+	           set 
+			           t1.version_num                    =#{dto.versionNum,jdbcType=VARCHAR},
+			           t1.version_name                   =#{dto.versionName,jdbcType=VARCHAR},
+			           t1.version_content                =#{dto.versionContent,jdbcType=VARCHAR},
+			           t1.version_time                   =#{dto.versionTime,jdbcType=VARCHAR},
+			           t1.system_state                   =#{dto.systemState,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_VERSION -->
+<delete id="deleteSysVersionByPrimaryKey" parameterType="java.util.Map">
+    	delete t1 from sys_version t1 where t1.ID in (${ids} )
+</delete>
+
+<!-- 主键假删除 SYS_VERSION -->
+<update id="deleteSysVersionByID" parameterType="java.util.Map">
+	     update sys_version t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysorg.dao.SysOrgUserDao">
+<resultMap id="SysOrgUserDTO" type="com.fintech.modules.platform.sysorg.dto.SysOrgUserDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+				<result property="userId" column="USER_ID" jdbcType="DECIMAL" />
+				<result property="userName" column="USER_NAME" jdbcType="VARCHAR" />
+				<result property="positionId" column="POSITION_ID" jdbcType="DECIMAL" />
+				<result property="isMainOrg" column="IS_MAIN_ORG" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+				<result property="positionName" column="POSITION_NAME" jdbcType="VARCHAR" />
+				<result property="orgName" column="ORG_NAME" jdbcType="VARCHAR" />
+				<result property="parentId" column="PARENT_ID" jdbcType="VARCHAR" />
+				<result property="positionCode" column="POSITION_CODE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_ORG_USER -->	
+<select id="searchSysOrgUserByPaging" parameterType="java.util.Map" resultMap="SysOrgUserDTO">
+    	 		select 
+						t1.id                             ,
+						t1.org_id                         ,
+						t1.user_id                        ,
+						t1.position_id                    ,
+						t1.position_code                 ,
+						t1.is_main_org                    ,
+						t1.validate_state                 ,
+						t1.version                        
+					
+				from sys_org_user 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="dto.positionId != null and dto.positionId != ''">
+						and t1.POSITION_ID =#{dto.positionId}
+    			</if>
+    			<if test="dto.positionCode != null and dto.positionCode != ''">
+						and t1.POSITION_CODE =#{dto.positionCode}
+    			</if>
+    			<if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+						and t1.IS_MAIN_ORG =#{dto.isMainOrg}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+				
+				order by t1.id desc
+</select>
+
+
+<!-- 分页查询 SYS_ORG_USER searchFuzzySysOrgUserByPaging 模糊查询-->
+<select id="searchFuzzySysOrgUserByPaging" parameterType="java.util.Map" resultMap="SysOrgUserDTO">
+    select 
+			t1.id as id                            ,
+			t1.org_id                         ,
+			t1.user_id                        ,
+			t1.position_id                    ,
+			t1.is_main_org                    ,
+			t1.validate_state                 ,
+			t1.version                        ,
+			t1.position_code                 ,
+			t3.parent_id,
+			t3.org_name 			org_name     , 
+			t4.user_name 			user_name   , 
+			t2.position_name 		position_name                       
+			from sys_org_user t1 left join sys_org t3 on t1.org_id = t3.id 
+			left join sys_position t2 on t1.position_id = t2.id 
+			left join sys_user t4 on t1.user_id = t4.id 
+			where 1=1 
+			and t1.validate_state='1'  and t4.validate_state='1'
+	    	<!-- 数据权限 开始 -->
+		    	<if test="optConditionUser != null and optConditionUser != ''">
+					${optConditionUser} 
+				</if>
+	 	   	<!-- 数据权限 开结束-->
+			    <if test="dto.orgId != null and dto.orgId != ''">
+			and t1.ORG_ID =#{dto.orgId} 
+			    </if>
+			    <if test="dto.userId != null and dto.userId != ''">
+			and t1.USER_ID =#{dto.userId} 
+			    </if>
+			    <if test="dto.positionId != null and dto.positionId != ''">
+			and t1.POSITION_ID =#{dto.positionId} 
+			    </if>
+			    <if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+			and t1.IS_MAIN_ORG =#{dto.isMainOrg} 
+			    </if>
+			    <!--  
+			    <if test="dto.validateState != null and dto.validateState != ''">
+			and t1.VALIDATE_STATE =#{dto.validateState} 
+			    </if>
+			    -->
+			    <if test="dto.version != null and dto.version != ''">
+			and t1.VERSION =#{dto.version} 
+			    </if>
+			    <if test="positionCode != null and positionCode != ''">
+		    and t2.POSITION_CODE in (${positionCode})  
+			    </if>
+			    <if test="dto.orgName != null and dto.orgName != ''">
+			and t3.ORG_NAME like concat('%',#{dto.orgName},'%') 
+			    </if>
+			    <if test="dto.userName != null and dto.userName != ''">
+			and t4.USER_NAME like concat('%',#{dto.userName},'%') 
+			    </if>
+			    <if test="dto.positionName != null and dto.positionName != ''">
+			and t2.POSITION_NAME like concat('%',#{dto.positionName},'%') 
+			    </if>
+			    
+			union 
+			
+			 select 
+			t1.id as id                            ,
+			t1.org_id                         ,
+			t1.user_id                        ,
+			t1.position_id                    ,
+			t1.is_main_org                    ,
+			t1.validate_state                 ,
+			t1.version                        ,
+			t1.position_code                 ,
+			t3.parent_id,
+			t3.org_name 		org_name     , 
+			t4.user_name 		user_name   , 
+			t2.position_name 	position_name                       
+			from sys_org_user t1 left join sys_org t3 on t1.org_id = t3.id 
+			left join sys_position t2 on t1.position_id = t2.id 
+			left join sys_user t4 on t1.user_id = t4.id 
+			where 1=1 
+			and t1.validate_state='1'  and t4.validate_state='1'
+	    	<!-- 数据权限 开始 -->
+		    	<if test="optConditionOrg != null and optConditionOrg != ''">
+					${optConditionOrg} 
+				</if>
+	 	   	<!-- 数据权限 开结束-->
+			    <if test="dto.orgId != null and dto.orgId != ''">
+			and t1.ORG_ID =#{dto.orgId} 
+			    </if>
+			    <if test="dto.userId != null and dto.userId != ''">
+			and t1.USER_ID =#{dto.userId} 
+			    </if>
+			    <if test="dto.positionId != null and dto.positionId != ''">
+			and t1.POSITION_ID =#{dto.positionId} 
+			    </if>
+			    <if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+			and t1.IS_MAIN_ORG =#{dto.isMainOrg} 
+			    </if>
+			    <!--  
+			    <if test="dto.validateState != null and dto.validateState != ''">
+			and t1.VALIDATE_STATE =#{dto.validateState} 
+			    </if>
+			    -->
+			    <if test="dto.version != null and dto.version != ''">
+			and t1.VERSION =#{dto.version} 
+			    </if>
+			    <if test="positionCode != null and positionCode != ''">
+		    and t2.POSITION_CODE in (${positionCode})  
+			    </if>
+			    <if test="dto.orgName != null and dto.orgName != ''">
+			and t3.ORG_NAME like concat('%',#{dto.orgName},'%') 
+			    </if>
+			    <if test="dto.userName != null and dto.userName != ''">
+			and t4.USER_NAME like concat('%',#{dto.userName},'%') 
+			    </if>
+			    <if test="dto.positionName != null and dto.positionName != ''">
+			and t2.POSITION_NAME like concat('%',#{dto.positionName},'%') 
+			    </if>
+			order by id desc
+</select>
+
+<!-- 查询 SYS_ORG_USER searchFuzzySysOrgUserByPaging 模糊查询 	不分页-->
+<select id="searchFuzzySysOrgUser" parameterType="java.util.Map" resultMap="SysOrgUserDTO">
+     select 
+			t1.id as id                            ,
+			t1.org_id                         ,
+			t1.user_id                        ,
+			t1.position_id                    ,
+			t1.position_code                 ,
+			t1.is_main_org                    ,
+			t1.validate_state                 ,
+			t1.version                        ,
+			t3.parent_id,
+			t3.org_name 		org_name     , 
+			t4.user_name 		user_name   , 
+			t2.position_name		 position_name                       
+			from sys_org_user t1 left join sys_org t3 on t1.org_id = t3.id 
+			left join sys_position t2 on t1.position_id = t2.id 
+			left join sys_user t4 on t1.user_id = t4.id 
+			where 1=1 
+			and t1.validate_state='1' and t4.validate_state='1'
+	    	<!-- 数据权限 开始 -->
+		    	<if test="optConditionUser != null and optConditionUser != ''">
+					${optConditionUser} 
+				</if>
+	 	   	<!-- 数据权限 开结束-->
+	 	   	 <if test="dto != null">
+				    <if test="dto.orgId != null and dto.orgId != ''">
+				and t1.ORG_ID =#{dto.orgId} 
+				    </if>
+				    <if test="dto.userId != null and dto.userId != ''">
+				and t1.USER_ID =#{dto.userId} 
+				    </if>
+				    <if test="dto.positionId != null and dto.positionId != ''">
+				and t1.POSITION_ID =#{dto.positionId} 
+				    </if>
+				    <if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+				and t1.IS_MAIN_ORG =#{dto.isMainOrg} 
+				    </if>
+				    <!--
+				    <if test="dto.validateState != null and dto.validateState != ''">
+				and t1.VALIDATE_STATE =#{dto.validateState} 
+				    </if>
+				    -->
+				    <if test="dto.version != null and dto.version != ''">
+				and t1.VERSION =#{dto.version} 
+				    </if>
+				    <if test="positionCode != null and positionCode != ''">
+			    and t2.POSITION_CODE in (${positionCode})  
+				    </if>
+				    <if test="dto.orgName != null and dto.orgName != ''">
+				and t3.ORG_NAME like concat('%',#{dto.orgName},'%') 
+				    </if>
+				    <if test="dto.userName != null and dto.userName != ''">
+				and t4.USER_NAME like concat('%',#{dto.userName},'%') 
+				    </if>
+				    <if test="dto.positionName != null and dto.positionName != ''">
+				and t2.POSITION_NAME like concat('%',#{dto.positionName},'%') 
+				    </if>
+			    </if>
+			union 
+			
+			 select 
+			t1.id as id                            ,
+			t1.org_id                         ,
+			t1.user_id                        ,
+			t1.position_id                    ,
+			t1.position_code                 ,
+			t1.is_main_org                    ,
+			t1.validate_state                 ,
+			t1.version                        ,
+			t3.parent_id,
+			t3.org_name 		org_name     , 
+			t4.user_name 		user_name   , 
+			t2.position_name 	position_name                       
+			from sys_org_user t1 left join sys_org t3 on t1.org_id = t3.id 
+			left join sys_position t2 on t1.position_id = t2.id 
+			left join sys_user t4 on t1.user_id = t4.id 
+			where 1=1 
+			and t1.validate_state='1'  and t4.validate_state='1'
+	    	<!-- 数据权限 开始 -->
+		    	<if test="optConditionOrg != null and optConditionOrg != ''">
+					${optConditionOrg} 
+				</if>
+	 	   	<!-- 数据权限 开结束-->
+			   	 <if test="dto != null">
+				    <if test="dto.orgId != null and dto.orgId != ''">
+				and t1.ORG_ID =#{dto.orgId} 
+				    </if>
+				    <if test="dto.userId != null and dto.userId != ''">
+				and t1.USER_ID =#{dto.userId} 
+				    </if>
+				    <if test="dto.positionId != null and dto.positionId != ''">
+				and t1.POSITION_ID =#{dto.positionId} 
+				    </if>
+				    <if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+				and t1.IS_MAIN_ORG =#{dto.isMainOrg} 
+				    </if>
+				    <!--
+				    <if test="dto.validateState != null and dto.validateState != ''">
+				and t1.VALIDATE_STATE =#{dto.validateState} 
+				    </if>
+				    -->
+				    <if test="dto.version != null and dto.version != ''">
+				and t1.VERSION =#{dto.version} 
+				    </if>
+				    <if test="positionCode != null and positionCode != ''">
+			    and t2.POSITION_CODE in (${positionCode})  
+				    </if>
+				    <if test="dto.orgName != null and dto.orgName != ''">
+				and t3.ORG_NAME like concat('%',#{dto.orgName},'%') 
+				    </if>
+				    <if test="dto.userName != null and dto.userName != ''">
+				and t4.USER_NAME like concat('%',#{dto.userName},'%') 
+				    </if>
+				    <if test="dto.positionName != null and dto.positionName != ''">
+				and t2.POSITION_NAME like concat('%',#{dto.positionName},'%') 
+				    </if>
+			    </if>
+			order by id desc
+</select>
+
+  
+<!-- 查询列表 SYS_ORG_USER  -->
+<select id="searchSysOrgUser" parameterType="java.util.Map" resultMap="SysOrgUserDTO">
+    	     select 
+						t1.id                             ,
+						t1.org_id                         ,
+						t1.user_id                        ,
+						t1.position_id                    ,
+						t1.position_code                 ,
+						t1.is_main_org                    ,
+						t1.validate_state                 ,
+						t1.version                        
+				from sys_org_user 		t1
+				where 1=1 and t1.VALIDATE_STATE='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.positionId != null and dto.positionId != ''">
+						and t1.POSITION_ID = #{dto.positionId}
+    			</if>
+    			<if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+						and t1.IS_MAIN_ORG = #{dto.isMainOrg}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+</select>
+
+
+<!-- 查询列表 SYS_ORG_USER  -->
+<select id="searchSysOrgUserInfo" parameterType="java.util.Map" resultMap="SysOrgUserDTO">
+    	     select 
+						t1.id                             ,
+						t1.org_id                         ,
+						t1.user_id                        ,
+						t1.position_id                    ,
+						t1.position_code                 ,
+						t1.is_main_org                    ,
+						t1.validate_state                 ,
+						t1.version							,
+						t3.org_name 				org_name, 
+						t3.parent_id						,
+						t2.position_name	 position_name
+				from sys_org_user t1 left join sys_org t3 on t1.org_id = t3.id left join sys_position t2 on t1.position_id = t2.id
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.positionId != null and dto.positionId != ''">
+						and t1.POSITION_ID = #{dto.positionId}
+    			</if>
+    			<if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+						and t1.IS_MAIN_ORG = #{dto.isMainOrg}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+</select>
+
+  
+<!-- 主键查询对象  SYS_ORG_USER -->
+<select id="findSysOrgUserByPrimaryKey" parameterType="java.util.Map" resultMap="SysOrgUserDTO">
+   	 		select 
+					t1.id                             ,
+					t1.org_id                         ,
+					t1.user_id                        ,
+					t1.position_id                    ,
+					t1.position_code                 ,
+					t1.is_main_org                    ,
+					t1.validate_state                 ,
+					t1.version                        
+			from sys_org_user 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_ORG_USER -->
+<insert id="insertSysOrgUser" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				<!-- select seq_SYS_ORG_USER.nextval as id from dual -->
+				select auto_increment as id from information_schema.tables where  table_name='SYS_ORG_USER'
+	</selectKey>
+			insert into sys_org_user
+			(   		
+					id                             ,
+					org_id                         ,
+					user_id                        ,
+					position_id                    ,
+					position_code                 ,
+					is_main_org                    ,
+					validate_state                 ,
+					version                        
+			)
+			values(#{dto.id}
+					,#{dto.orgId,jdbcType=DECIMAL}
+					,#{dto.userId,jdbcType=DECIMAL}
+					,#{dto.positionId,jdbcType=DECIMAL}
+					,#{dto.positionCode,jdbcType=VARCHAR}
+					,#{dto.isMainOrg,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.version,jdbcType=DECIMAL}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_ORG_USER -->
+<update id="updateSysOrgUser" parameterType="java.util.Map">
+	     update sys_org_user t1
+	           set 
+			           t1.org_id                         =#{dto.orgId,jdbcType=DECIMAL},
+			           t1.user_id                        =#{dto.userId,jdbcType=DECIMAL},
+			           t1.position_id                    =#{dto.positionId,jdbcType=DECIMAL},
+			           t1.position_code                 =#{dto.positionCode,jdbcType=VARCHAR},
+			           t1.is_main_org                    =#{dto.isMainOrg,jdbcType=VARCHAR},
+			           t1.validate_state                 =#{dto.validateState,jdbcType=VARCHAR},
+			           t1.version                        =#{dto.version,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_ORG_USER -->
+<delete id="deleteSysOrgUserByID" parameterType="java.util.Map">
+    	delete t1 from sys_org_user t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_ORG_USER -->
+<update id="deleteSysOrgUserByPrimaryKey" parameterType="java.util.Map">
+	     update sys_org_user t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+<!-- 真删除，删除兼职机构 SYS_ORG_USER -->
+<update id="deleteSysOrgUserByUserId" parameterType="java.util.Map">
+	     delete t1 from sys_org_user t1
+	     where t1.user_id=#{userId} and t1.id not in(${ids})
+</update>
+
+<!-- 关联删除 真删除 -->
+<delete id="deleteSysOrgByOrgIds" parameterType="java.util.Map">
+    	delete  from sys_org_user  where org_id in (${ids} )
+</delete>
+<!-- 关联删除 真删除 -->
+<delete id="deleteSysOrgByUserIds" parameterType="java.util.Map">
+    	delete  from sys_org_user  where user_id in (${ids} )
+</delete>
+
+<!-- 数据同步关联删除 真删除 -->
+<delete id="deleteSysOrgUserByUserIdAndOrgId" parameterType="java.util.Map">
+    	delete  from sys_org_user  where user_id =${userId} and org_id =${orgId}
+</delete>
+
+<!-- 关联删除 假删除 -->
+<delete id="updateValidateSysOrgByUserIds" parameterType="java.util.Map">
+    	update sys_org_user t1
+	           set   t1.validate_state='0'	 
+	    where t1.user_id in (${ids} )
+</delete>
+
+<!-- 关联删除 真删除 -->
+<delete id="deleteSysOrgByPositionIds" parameterType="java.util.Map">
+    	delete  from sys_org_user  where position_id in (${ids} )
+</delete>
+
+<!-- 查询 系统间用户与机构关系同步功能使用 模糊查询 	不分页-->
+<select id="searchFuzzySysOrgUserSyn" parameterType="java.util.Map" resultMap="SysOrgUserDTO">
+     select 
+			t1.id as id                            ,
+			t1.org_id                         ,
+			t1.user_id                        ,
+			t1.position_id                    ,
+			t1.position_code                    ,
+			t1.is_main_org                    ,
+			t1.validate_state                 ,
+			t1.version                        ,
+			t3.parent_id,
+			t3.org_name 			org_name     , 
+			t4.user_name 			user_name   , 
+			t2.position_name		 position_name                       
+			from sys_org_user t1 left join sys_org t3 on t1.org_id = t3.id 
+			left join sys_position t2 on t1.position_id = t2.id 
+			left join sys_user t4 on t1.user_id = t4.id 
+			where 1=1 
+	    	<!-- 数据权限 开始 -->
+		    	<if test="optConditionUser != null and optConditionUser != ''">
+					${optConditionUser} 
+				</if>
+	 	   	<!-- 数据权限 开结束-->
+	 	   	 <if test="dto != null">
+				    <if test="dto.orgId != null and dto.orgId != ''">
+				and t1.ORG_ID =#{dto.orgId} 
+				    </if>
+				    <if test="dto.userId != null and dto.userId != ''">
+				and t1.USER_ID =#{dto.userId} 
+				    </if>
+				    <if test="dto.positionId != null and dto.positionId != ''">
+				and t1.POSITION_ID =#{dto.positionId} 
+				    </if>
+				    <if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+				and t1.IS_MAIN_ORG =#{dto.isMainOrg} 
+				    </if>
+				    <!--
+				    <if test="dto.validateState != null and dto.validateState != ''">
+				and t1.VALIDATE_STATE =#{dto.validateState} 
+				    </if>
+				    -->
+				    <if test="dto.version != null and dto.version != ''">
+				and t1.VERSION =#{dto.version} 
+				    </if>
+				    <if test="positionCode != null and positionCode != ''">
+			    and t2.POSITION_CODE in (${positionCode})  
+				    </if>
+				    <if test="dto.orgName != null and dto.orgName != ''">
+				and t3.ORG_NAME like concat('%',#{dto.orgName},'%') 
+				    </if>
+				    <if test="dto.userName != null and dto.userName != ''">
+				and t4.USER_NAME like concat('%',#{dto.userName},'%') 
+				    </if>
+				    <if test="dto.positionName != null and dto.positionName != ''">
+				and t2.POSITION_NAME like concat('%',#{dto.positionName},'%') 
+				    </if>
+			    </if>
+			union 
+			
+			 select 
+			t1.id as id                            ,
+			t1.org_id                         ,
+			t1.user_id                        ,
+			t1.position_id                    ,
+			t1.position_code                    ,
+			t1.is_main_org                    ,
+			t1.validate_state                 ,
+			t1.version                        ,
+			t3.parent_id,
+			t3.org_name 				org_name     , 
+			t4.user_name 				user_name   , 
+			t2.position_name		 position_name                       
+			from sys_org_user t1 left join sys_org t3 on t1.org_id = t3.id 
+			left join sys_position t2 on t1.position_id = t2.id 
+			left join sys_user t4 on t1.user_id = t4.id 
+			where 1=1 
+	    	<!-- 数据权限 开始 -->
+		    	<if test="optConditionOrg != null and optConditionOrg != ''">
+					${optConditionOrg} 
+				</if>
+	 	   	<!-- 数据权限 开结束-->
+			   	 <if test="dto != null">
+				    <if test="dto.orgId != null and dto.orgId != ''">
+				and t1.ORG_ID =#{dto.orgId} 
+				    </if>
+				    <if test="dto.userId != null and dto.userId != ''">
+				and t1.USER_ID =#{dto.userId} 
+				    </if>
+				    <if test="dto.positionId != null and dto.positionId != ''">
+				and t1.POSITION_ID =#{dto.positionId} 
+				    </if>
+				    <if test="dto.isMainOrg != null and dto.isMainOrg != ''">
+				and t1.IS_MAIN_ORG =#{dto.isMainOrg} 
+				    </if>
+				    <!--
+				    <if test="dto.validateState != null and dto.validateState != ''">
+				and t1.VALIDATE_STATE =#{dto.validateState} 
+				    </if>
+				    -->
+				    <if test="dto.version != null and dto.version != ''">
+				and t1.VERSION =#{dto.version} 
+				    </if>
+				    <if test="positionCode != null and positionCode != ''">
+			    and t2.POSITION_CODE in (${positionCode})  
+				    </if>
+				    <if test="dto.orgName != null and dto.orgName != ''">
+				and t3.ORG_NAME like concat('%',#{dto.orgName},'%') 
+				    </if>
+				    <if test="dto.userName != null and dto.userName != ''">
+				and t4.USER_NAME like concat('%',#{dto.userName},'%') 
+				    </if>
+				    <if test="dto.positionName != null and dto.positionName != ''">
+				and t2.POSITION_NAME like concat('%',#{dto.positionName},'%') 
+				    </if>
+			    </if>
+			order by id desc
+</select>
+
+</mapper>

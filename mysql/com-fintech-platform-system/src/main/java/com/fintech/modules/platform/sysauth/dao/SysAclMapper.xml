@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysauth.dao.SysAclDao">
+<resultMap id="SysAclDTO" type="com.fintech.modules.platform.sysauth.dto.SysAclDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="roleId" column="ROLE_ID" jdbcType="DECIMAL" />
+				<result property="resoureId" column="RESOURE_ID" jdbcType="DECIMAL" />
+				<result property="accessibility" column="ACCESSIBILITY" jdbcType="DECIMAL" />
+				<result property="appId" column="APP_ID" jdbcType="DECIMAL" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 SYS_ACL -->	
+<select id="searchSysAclByPaging" parameterType="java.util.Map" resultMap="SysAclDTO">
+    	 		select 
+						t1.id                             ,
+						t1.role_id                        ,
+						t1.resoure_id                     ,
+						t1.accessibility                  ,
+						t1.app_id                         ,
+						t1.validate_state                 ,
+						t1.version                        
+					
+				from sys_acl 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.roleId != null and dto.roleId != ''">
+						and t1.ROLE_ID =#{dto.roleId}
+    			</if>
+    			<if test="dto.resoureId != null and dto.resoureId != ''">
+						and t1.RESOURE_ID =#{dto.resoureId}
+    			</if>
+    			<if test="dto.accessibility != null and dto.accessibility != ''">
+						and t1.ACCESSIBILITY =#{dto.accessibility}
+    			</if>
+    			<if test="dto.appId != null and dto.appId != ''">
+						and t1.APP_ID =#{dto.appId}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_ACL  -->
+<select id="searchSysAcl" parameterType="java.util.Map" resultMap="SysAclDTO">
+    	     select 
+						t1.id                             ,
+						t1.role_id                        ,
+						t1.resoure_id                     ,
+						t1.accessibility                  ,
+						t1.app_id                         ,
+						t1.validate_state                 ,
+						t1.version                        
+				from sys_acl 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.roleId != null and dto.roleId != ''">
+						and t1.ROLE_ID = #{dto.roleId}
+    			</if>
+    			<if test="dto.resoureId != null and dto.resoureId != ''">
+						and t1.RESOURE_ID = #{dto.resoureId}
+    			</if>
+    			<if test="dto.accessibility != null and dto.accessibility != ''">
+						and t1.ACCESSIBILITY = #{dto.accessibility}
+    			</if>
+    			<if test="dto.appId != null and dto.appId != ''">
+						and t1.APP_ID = #{dto.appId}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_ACL -->
+<select id="findSysAclByPrimaryKey" parameterType="java.util.Map" resultMap="SysAclDTO">
+   	 		select 
+					t1.id                             ,
+					t1.role_id                        ,
+					t1.resoure_id                     ,
+					t1.accessibility                  ,
+					t1.app_id                         ,
+					t1.validate_state                 ,
+					t1.version                        
+			from sys_acl 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_ACL -->
+<insert id="insertSysAcl" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.`TABLES` WHERE  TABLE_NAME='SYS_ACL'
+	</selectKey>
+			insert into sys_acl
+			(   		
+					id                             ,
+					role_id                        ,
+					resoure_id                     ,
+					accessibility                  ,
+					app_id                         ,
+					validate_state                 ,
+					version                        
+			)
+			values(#{dto.id}
+					,#{dto.roleId,jdbcType=DECIMAL}
+					,#{dto.resoureId,jdbcType=DECIMAL}
+					,#{dto.accessibility,jdbcType=DECIMAL}
+					,#{dto.appId,jdbcType=DECIMAL}
+					,'1'
+					,#{dto.version,jdbcType=DECIMAL}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_ACL -->
+<update id="updateSysAcl" parameterType="java.util.Map">
+	     update sys_acl t1
+	           set 
+			           t1.role_id                        =#{dto.roleId,jdbcType=DECIMAL},
+			           t1.resoure_id                     =#{dto.resoureId,jdbcType=DECIMAL},
+			           t1.accessibility                  =#{dto.accessibility,jdbcType=DECIMAL},
+			           t1.app_id                         =#{dto.appId,jdbcType=DECIMAL},
+			           t1.validate_state                 ='1',
+			           t1.version                        =#{dto.version,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_ACL -->
+<delete id="deleteSysAclByID" parameterType="java.util.Map">
+    	delete t1 from sys_acl t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_ACL -->
+<update id="deleteSysAclByPrimaryKey" parameterType="java.util.Map">
+	     update sys_acl t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+
+<!-- 删除 SYS_ACL -->
+<delete id="deleteSysAclByPrimaryKeys" parameterType="java.util.Map">
+	     delete t1 from sys_acl t1  where t1.id in( ${ids})
+</delete>
+
+
+<!-- 获取一组资源id -->
+<select id="getResourceIdsByRoleId" parameterType="java.lang.Long" resultType="java.lang.Long">
+	select RESOURE_ID from  SYS_ACL
+		   		   	  where ROLE_ID=#{roleId} 
+					  and ACCESSIBILITY=1 
+					  and VALIDATE_STATE=1
+</select>
+</mapper>

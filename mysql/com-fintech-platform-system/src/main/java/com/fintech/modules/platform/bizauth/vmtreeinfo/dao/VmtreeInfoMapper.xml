@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.bizauth.vmtreeinfo.dao.VmtreeInfoDao">
+<resultMap id="VmtreeInfoDTO" type="com.fintech.modules.platform.bizauth.vmtreeinfo.dto.VmtreeInfoDTO">
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+				<result property="orgName" column="ORG_NAME" jdbcType="VARCHAR" />
+				<result property="orgType" column="ORG_TYPE" jdbcType="VARCHAR" />
+				<result property="parentId" column="PARENT_ID" jdbcType="DECIMAL" />
+				<result property="sourceType" column="SOURCE_TYPE" jdbcType="VARCHAR" />
+				<result property="endFlag" column="END_FLAG" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+				<result property="baseExt7" column="PARENT_NAME" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 查询一棵树列表 -->	
+<select id="searchVmtreeInfoForTree" parameterType="java.util.Map" resultMap="VmtreeInfoDTO">
+    	 		select a.org_id,
+				       a.org_name,
+				       a.org_type,
+				       a.parent_id,
+				       a.source_type,
+				       a.end_flag,
+				       a.create_time,
+				       a.create_by,
+				       '' parent_name
+				  from (select *from vmtree_info 
+				         where org_type=#{orgType}
+				         ) a
+				    start with a.org_id= #{orgId}
+				    connect by prior  a.org_id=a.parent_id     
+				
+</select>
+
+
+<!-- 查询多棵树列表 -->	
+<select id="searchVmtreeInfoForAllTree" parameterType="java.util.Map" resultMap="VmtreeInfoDTO">
+    	 		select a.org_id,
+				       a.org_name,
+				       a.org_type,
+				       a.parent_id,
+				       a.source_type,
+				       a.end_flag,
+				       a.create_time,
+				       a.create_by,
+				       '' parent_name
+				  from (select *from vmtree_info 
+				  		where 1=1
+				  		<if test="orgType != null and orgType != ''">
+							and org_type=#{orgType}
+    					</if>
+				         ) a 
+				  where 1 =1 <!-- and a.parent_id >0 -->
+				  order by a.parent_id			
+</select>
+
+
+
+<!-- 分页查询 vmtree_info -->	
+<select id="searchVmtreeInfoByPaging" parameterType="java.util.Map" resultMap="VmtreeInfoDTO">
+    	 		select 
+						t1.org_id                         ,
+						t1.org_name                       ,
+						t1.org_type                       ,
+						t1.parent_id                      ,
+						t1.source_type                    ,
+						t1.end_flag                       ,
+						t1.create_time                    ,
+						t1.create_by 					  ,
+				       ifnull(p1.org_name,' ') parent_name
+				from vmtree_info 	t1 
+				left join vmtree_info 	p1 on t1.PARENT_ID = p1.ORG_ID  and t1.ORG_TYPE = p1.ORG_TYPE
+				where 1=1
+				<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME =#{dto.orgName}
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE =#{dto.orgType}
+    			</if>
+    			<if test="dto.parentId != null">
+						and t1.PARENT_ID =#{dto.parentId}
+    			</if>
+    			<if test="dto.sourceType != null and dto.sourceType != ''">
+						and t1.SOURCE_TYPE =#{dto.sourceType}
+    			</if>
+    			<if test="dto.endFlag != null and dto.endFlag != ''">
+						and t1.END_FLAG =#{dto.endFlag}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY =#{dto.createBy}
+    			</if>
+				
+				order by t1.CREATE_TIME desc
+</select>  
+<!-- 查询列表 vmtree_info  -->
+<select id="searchVmtreeInfo" parameterType="java.util.Map" resultMap="VmtreeInfoDTO">
+    	     select 
+						t1.org_id                         ,
+						t1.org_name                       ,
+						t1.org_type                       ,
+						t1.parent_id                      ,
+						t1.source_type                    ,
+						t1.end_flag                       ,
+						t1.create_time                    ,
+						t1.create_by					,
+						ifnull(p1.org_name,' ') parent_name
+				from vmtree_info 	t1 
+				left join vmtree_info 	p1 on t1.PARENT_ID = p1.ORG_ID  and t1.ORG_TYPE = p1.ORG_TYPE
+				where 1=1
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME = #{dto.orgName}
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE = #{dto.orgType}
+    			</if>
+    			<if test="dto.parentId != null and dto.parentId != ''">
+						and t1.PARENT_ID = #{dto.parentId}
+    			</if>
+    			<if test="dto.sourceType != null and dto.sourceType != ''">
+						and t1.SOURCE_TYPE = #{dto.sourceType}
+    			</if>
+    			<if test="dto.endFlag != null and dto.endFlag != ''">
+						and t1.END_FLAG = #{dto.endFlag}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+    			<if test="createTime_interval != null and createTime_interval != ''">
+    					and t1.CREATE_TIME >= date_sub(now(),interval #{createTime_interval}/24/60 DAY) 
+    			</if>
+</select>
+  
+<!-- 主键查询对象  vmtree_info -->
+<select id="findVmtreeInfoByPrimaryKey" parameterType="java.util.Map" resultMap="VmtreeInfoDTO">
+   	 		select 
+					t1.org_id                         ,
+					t1.org_name                       ,
+					t1.org_type                       ,
+					t1.parent_id                      ,
+					t1.source_type                    ,
+					t1.end_flag                       ,
+					t1.create_time                    ,
+					t1.create_by 					  ,  
+					ifnull(p1.org_name,' ') parent_name
+				from vmtree_info 	t1 
+				left join vmtree_info 	p1  on t1.PARENT_ID = p1.ORG_ID  and t1.ORG_TYPE = p1.ORG_TYPE
+				where   t1.org_id in (#{orgId}) and t1.ORG_TYPE = #{orgType}
+</select>
+
+  
+<!-- 新增对象 vmtree_info对HR数据 -->
+<insert id="insertVmtreeInfoForHR" parameterType="java.util.Map" useGeneratedKeys="true">
+			insert into vmtree_info
+			(   		
+					org_id                         ,
+					org_name                       ,
+					org_type                       ,
+					parent_id                      ,
+					source_type                    ,
+					end_flag                       ,
+					create_time                    ,
+					create_by                      
+			)
+			values(#{dto.orgId,jdbcType=DECIMAL}
+					,#{dto.orgName,jdbcType=VARCHAR}
+					,#{dto.orgType,jdbcType=VARCHAR}
+					,#{dto.parentId,jdbcType=DECIMAL}
+					,#{dto.sourceType,jdbcType=VARCHAR}
+					,#{dto.endFlag,jdbcType=VARCHAR}
+					,now()
+					,#{dto.createBy,jdbcType=DECIMAL}
+			)
+</insert>
+
+ <insert id="insertVmtreeInfo" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.orgId" order="BEFORE">
+				<!-- select seq_vmtree_info.nextval as id from dual -->
+				SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE  TABLE_NAME='vmtree_info'
+	</selectKey>
+			insert into vmtree_info
+			(   		
+					org_id                         ,
+					org_name                       ,
+					org_type                       ,
+					parent_id                      ,
+					source_type                    ,
+					end_flag                       ,
+					create_time                    ,
+					create_by                      
+			)
+			values(#{dto.orgId,jdbcType=DECIMAL}
+					,#{dto.orgName,jdbcType=VARCHAR}
+					,#{dto.orgType,jdbcType=VARCHAR}
+					,#{dto.parentId,jdbcType=DECIMAL}
+					,#{dto.sourceType,jdbcType=VARCHAR}
+					,#{dto.endFlag,jdbcType=VARCHAR}
+					,now()
+					,#{dto.createBy,jdbcType=DECIMAL}
+			)
+</insert>   
+<!-- 更新对象 vmtree_info -->
+<update id="updateVmtreeInfo" parameterType="java.util.Map">
+	     update vmtree_info t1
+	           set 
+			           t1.org_name                       =#{dto.orgName,jdbcType=VARCHAR},
+			           t1.org_type                       =#{dto.orgType,jdbcType=VARCHAR},
+			           t1.parent_id                      =#{dto.parentId,jdbcType=DECIMAL},
+			           t1.source_type                    =#{dto.sourceType,jdbcType=VARCHAR},
+			           t1.end_flag                       =#{dto.endFlag,jdbcType=VARCHAR},			 
+			           t1.create_by                      =#{dto.createBy,jdbcType=DECIMAL}
+	     where t1.org_id  = #{dto.orgId} and t1.org_Type = #{dto.orgType,jdbcType=VARCHAR}
+</update>
+
+<!-- 查询HR和XN组织机构 -->
+<select id="searchVmtreeInfoForTreeByType" parameterType="java.util.Map" resultMap="VmtreeInfoDTO">
+  select 
+               b.org_id,
+               b.org_name,
+               b.org_type,
+               b.parent_id,
+               b.source_type,
+               b.end_flag,
+               b.create_time,
+               b.create_by,
+               '' parent_name from     (
+	               select a.org_id,
+	               a.org_name,
+	               a.org_type,
+	               a.parent_id,
+	               a.source_type,
+	               a.end_flag,
+	               a.create_time,
+	               a.create_by,
+	               '' parent_name
+          from (select * from vmtree_info 
+                 where org_type=#{orgType} 
+                 ) a
+            start with a.org_id=#{orgId} 
+            connect by prior  a.org_id=a.parent_id   ) b 
+            where b.source_type=#{sourceType} 
+            
+    			<if test="endFlag != null and endFlag != ''">
+						and b.end_flag=#{endFlag}
+    			</if>
+            
+</select>
+
+   
+<!-- 主键删除 vmtree_info -->
+<delete id="deleteVmtreeInfoBy" parameterType="java.util.Map">
+    	delete t1 from vmtree_info t1 where t1.Org_ID in (${ids} ) 
+</delete>
+<!-- 主键假删除 vmtree_info -->
+<update id="deleteVmtreeInfoByPrimaryKey" parameterType="java.util.Map">
+	    delete t1 from vmtree_info t1 where t1.Org_ID in (${ids} ) and t1.org_type = #{dto.orgType}
+</update>
+</mapper>

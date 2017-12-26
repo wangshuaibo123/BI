@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysasynjob.dao.SysAsynJobDao">
+<resultMap id="SysAsynJobDTO" type="com.fintech.modules.platform.sysasynjob.dto.SysAsynJobDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="beanId" column="BEAN_ID" jdbcType="VARCHAR" />
+				<result property="bizKeyId" column="BIZ_KEY_ID" jdbcType="VARCHAR" />
+				<result property="jobState" column="JOB_STATE" jdbcType="VARCHAR" />
+				<result property="startTime" column="START_TIME" jdbcType="TIMESTAMP" />
+				<result property="endTime" column="END_TIME" jdbcType="TIMESTAMP" />
+				<result property="errorRemark" column="ERROR_REMARK" jdbcType="VARCHAR" />
+				<result property="valid" column="VALID" jdbcType="VARCHAR" />
+				<result property="jobRun" column="JOB_RUN" jdbcType="VARCHAR" />
+				<result property="runCun" column="RUN_CUN" jdbcType="DECIMAL" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="remark" column="REMARK" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_ASYN_JOB -->	
+<select id="searchSysAsynJobByPaging" parameterType="java.util.Map" resultMap="SysAsynJobDTO">
+    	 		select 
+						t1.id                             ,
+						t1.bean_id                        ,
+						t1.biz_key_id                     ,
+						t1.job_state                      ,
+						t1.start_time                     ,
+						t1.end_time                       ,
+						t1.error_remark                   ,
+						t1.valid                          ,
+						t1.job_run                        ,
+						t1.run_cun                        ,
+						t1.create_time                    ,
+						t1.remark                         
+					
+				from sys_asyn_job 	t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.beanId != null and dto.beanId != ''">
+						and t1.BEAN_ID like concat('%',#{dto.beanId},'%')
+    			</if>
+    			<if test="dto.bizKeyId != null and dto.bizKeyId != ''">
+						and t1.BIZ_KEY_ID =#{dto.bizKeyId}
+    			</if>
+    			<if test="dto.jobState != null and dto.jobState != ''">
+						and t1.JOB_STATE =#{dto.jobState}
+    			</if>
+    			<if test="dto.startTime != null and dto.startTime != ''">
+						and t1.START_TIME =#{dto.startTime}
+    			</if>
+    			<if test="dto.endTime != null and dto.endTime != ''">
+						and t1.END_TIME =#{dto.endTime}
+    			</if>
+    			<if test="dto.errorRemark != null and dto.errorRemark != ''">
+						and t1.ERROR_REMARK like concat('%',#{dto.errorRemark},'%')
+    			</if>
+    			<if test="dto.valid != null and dto.valid != ''">
+						and t1.VALID =#{dto.valid}
+    			</if>
+    			<if test="dto.jobRun != null and dto.jobRun != ''">
+						and t1.JOB_RUN =#{dto.jobRun}
+    			</if>
+    			<if test="dto.runCun != null and dto.runCun != ''">
+						and t1.RUN_CUN =#{dto.runCun}
+    			</if>
+    			<if test="startTime != null and startTime != ''">
+						and t1.CREATE_TIME >=STR_TO_DATE(#{startTime},'%Y-%m-%d')
+    			</if>
+    			<if test="endTime != null and endTime != ''">
+						<![CDATA[ 
+						and t1.CREATE_TIME <= STR_TO_DATE(#{endTime},'%Y-%m-%d')+1
+						]]>
+    			</if>
+    			
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK like concat('%',#{dto.remark},'%')
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_ASYN_JOB  -->
+<select id="searchSysAsynJob" parameterType="java.util.Map" resultMap="SysAsynJobDTO">
+    	     select 
+						t1.id                             ,
+						t1.bean_id                        ,
+						t1.biz_key_id                     ,
+						t1.job_state                      ,
+						t1.start_time                     ,
+						t1.end_time                       ,
+						t1.error_remark                   ,
+						t1.valid                          ,
+						t1.job_run                        ,
+						t1.run_cun                        ,
+						t1.create_time                    ,
+						t1.remark                         
+				from sys_asyn_job 		t1
+				where 1=1
+				and t1.VALID = '1'
+    			and t1.job_run='0'
+    			<if test="runCun != null and runCun != ''">
+						and IFNULL(t1.RUN_CUN,0) <![CDATA[ <=]]> #{runCun}
+    			</if>
+    			<if test="jobState != null and jobState != ''">
+						and t1.job_state = #{jobState}
+    			</if>
+    			
+				order by t1.id desc
+</select>
+  
+<!-- 主键查询对象  SYS_ASYN_JOB -->
+<select id="findSysAsynJobByPrimaryKey" parameterType="java.util.Map" resultMap="SysAsynJobDTO">
+   	 		select 
+					t1.id                             ,
+					t1.bean_id                        ,
+					t1.biz_key_id                     ,
+					t1.job_state                      ,
+					t1.start_time                     ,
+					t1.end_time                       ,
+					t1.error_remark                   ,
+					t1.valid                          ,
+					t1.job_run                        ,
+					t1.run_cun                        ,
+					t1.create_time                    ,
+					t1.remark                         
+			from sys_asyn_job 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_ASYN_JOB -->
+<insert id="insertSysAsynJob" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.`TABLES` WHERE  TABLE_NAME='SYS_ASYN_JOB'
+	</selectKey>
+			insert into sys_asyn_job
+			(   		
+					id                             ,
+					bean_id                        ,
+					biz_key_id                     ,
+					job_state                      ,
+					valid                          ,
+					job_run                        ,
+					run_cun                        ,
+					create_time                    ,
+					remark                         
+			)
+			values(#{dto.id}
+					,#{dto.beanId,jdbcType=VARCHAR}
+					,#{dto.bizKeyId,jdbcType=VARCHAR}
+					,#{dto.jobState,jdbcType=VARCHAR}
+					,1
+					,0
+					,0
+					,now()
+					,#{dto.remark,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 异步接口调用成功后 更新数据 -->
+<update id="updateSysAsynJob" parameterType="java.util.Map">
+	    update sys_asyn_job t1
+	           set 
+			           t1.job_state                      =#{dto.jobState,jdbcType=VARCHAR},
+			           t1.end_time                       =now(),
+			           t1.job_run						 ='0',
+			           t1.run_cun                        =IFNULL(t1.run_cun,0)+1
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 暂停删除 某一个异步接口调用 -->
+<update id="deleteSysAsynJobByPrimaryKey" parameterType="java.util.Map">
+	     update sys_asyn_job t1
+	           set   t1.valid='0',
+	          		 t1.remark=#{remark,jdbcType=VARCHAR}	
+	     where t1.id in( ${ids})
+</update>
+
+<!-- 异步接口调用失败后 更新数据 -->
+<update id="updateJobErrorMsg" parameterType="java.util.Map">
+	     update sys_asyn_job t1
+	           set 
+			           t1.end_time                       =now(),
+			           t1.job_run						 ='0',
+			           t1.error_remark                   =#{dto.errorRemark,jdbcType=VARCHAR},
+			           t1.run_cun                        =IFNULL(t1.run_cun,0)+1
+	     where t1.id = #{dto.id}
+</update>
+<!-- 更新 异步接口 调用 开始时间 -->
+<update id="updateJobStartTime" parameterType="java.util.Map">
+	     update sys_asyn_job t1
+	           set t1.start_time=now(),
+	           t1.job_run='1'
+	     where t1.id = #{jobKeyId}
+</update>
+
+<!-- 恢复重新调用 异步接口 -->
+<update id="updateRecoverySysBizJob" parameterType="java.util.Map">
+	     update sys_asyn_job t1
+	           set   					 t1.valid='1',
+	           t1.start_time					 =null,
+	           t1.end_time                       =null,
+	           t1.job_state						 ='1',
+	           t1.job_run						 ='0',
+	           <!-- t1.error_remark                   ='', -->
+	           t1.run_cun                        =0,
+	           t1.remark						 =#{dto.remark,jdbcType=VARCHAR}
+	     where t1.id=#{dto.id}
+</update>
+
+
+</mapper>

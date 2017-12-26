@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper
+	namespace="com.fintech.modules.platform.dataprv.sysprvauthresult.dao.SysPrvAuthResultDao">
+	<resultMap id="SysPrvAuthResultDTO"
+		type="com.fintech.modules.platform.dataprv.sysprvauthresult.dto.SysPrvAuthResultDTO">
+		<result property="id" column="ID" jdbcType="DECIMAL" />
+		<result property="userIdFrom" column="USER_ID_FROM" jdbcType="DECIMAL" />
+		<result property="userIdTo" column="USER_ID_TO" jdbcType="DECIMAL" />
+		<result property="validateState" column="VALIDATE_STATE"
+			jdbcType="VARCHAR" />
+		<result property="insertFrom" column="insert_from"
+			jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 分页查询 SYS_PRV_AUTH_RESULT -->
+	<select id="searchSysPrvAuthResultByPaging" parameterType="java.util.Map"
+		resultMap="SysPrvAuthResultDTO">
+		select
+		t1.id ,
+		t1.user_id_from ,
+		t1.user_id_to ,
+		t1.validate_state,
+		REPLACE(REPLACE(REPLACE(REPLACE(INSERT_FROM, 'Y', '角色组织'), 'X', '角色人员'), 'O', '组织机构'), 'S', '用户共享')  INSERT_FROM
+		from
+		sys_prv_auth_result t1
+		where t1.validate_state='1'
+		<if test="dto.userIdFrom != null and dto.userIdFrom != ''">
+			and t1.USER_ID_FROM =#{dto.userIdFrom}
+		</if>
+		<if test="dto.userIdTo != null and dto.userIdTo != ''">
+			and t1.USER_ID_TO =#{dto.userIdTo}
+		</if>
+	</select>
+
+	<!-- 查询列表 SYS_PRV_AUTH_RESULT -->
+	<select id="searchSysPrvAuthResult" parameterType="java.util.Map"
+		resultMap="SysPrvAuthResultDTO">
+		select
+		t1.id ,
+		t1.user_id_from ,
+		t1.user_id_to ,
+		REPLACE(REPLACE(REPLACE(REPLACE(INSERT_FROM, 'Y', '角色组织'), 'X', '角色人员'), 'O', '组织机构'), 'S', '用户共享') INSERT_FROM
+		from
+		sys_prv_auth_result t1
+		where t1.validate_state='1'
+		<if test="dto.id != null and dto.id != ''">
+			and t1.ID = #{dto.id}
+		</if>
+		<if test="dto.userIdFrom != null and dto.userIdFrom != ''">
+			and t1.USER_ID_FROM = #{dto.userIdFrom}
+		</if>
+		<if test="dto.userIdTo != null and dto.userIdTo != ''">
+			and t1.USER_ID_TO = #{dto.userIdTo}
+		</if>
+	</select>
+
+	<!-- 主键查询对象 SYS_PRV_AUTH_RESULT -->
+	<select id="findSysPrvAuthResultByPrimaryKey" parameterType="java.util.Map"
+		resultMap="SysPrvAuthResultDTO">
+		select
+		t1.id ,
+		t1.user_id_from ,
+		t1.user_id_to ,
+		t1.validate_state,
+		REPLACE(REPLACE(REPLACE(REPLACE(INSERT_FROM, 'Y', '角色组织'), 'X', '角色人员'), 'O', '组织机构'), 'S', '用户共享') INSERT_FROM
+		from sys_prv_auth_result t1
+		where
+		t1.validate_state='1' and
+		t1.id = #{id}
+	</select>
+	<!-- 主键查询对象 SYS_PRV_AUTH_RESULT -->
+	<select id="findSysPrvAuthResultByUser" parameterType="com.fintech.modules.platform.dataprv.sysprvauthresult.dto.SysPrvAuthResultDTO"
+		resultMap="SysPrvAuthResultDTO">
+		select
+		t1.id ,
+		t1.user_id_from ,
+		t1.user_id_to ,
+		t1.insert_from
+		from sys_prv_auth_result t1
+		where
+		t1.validate_state='1' AND (
+		<foreach collection="list" item="item" index="index" separator=" or " >
+			(t1.user_id_from = #{item.userIdFrom} and t1.user_id_to = #{item.userIdTo})
+		</foreach>
+		)
+	</select>
+
+	<!-- 新增对象 SYS_PRV_AUTH_RESULT -->
+	<insert id="insertSysPrvAuthResult" parameterType="java.util.Map"
+		useGeneratedKeys="true">
+		<selectKey resultType="java.lang.Long" keyProperty="dto.id"
+			order="BEFORE">
+			SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.`TABLES` WHERE  TABLE_NAME='SYS_PRV_AUTH_RESULT'
+		</selectKey>
+		insert into sys_prv_auth_result
+		(
+		id ,
+		user_id_from ,
+		user_id_to ,
+		validate_state
+		)
+		values(#{dto.id}
+		,#{dto.userIdFrom,jdbcType=DECIMAL}
+		,#{dto.userIdTo,jdbcType=DECIMAL}
+		,'1'
+		)
+	</insert>
+	<!-- 更新对象 SYS_PRV_AUTH_RESULT -->
+	<update id="updateSysPrvAuthResultType" parameterType="com.fintech.modules.platform.dataprv.sysprvauthresult.dto.SysPrvAuthResultDTO">
+		update
+		sys_prv_auth_result t1
+		set
+		t1.insert_from = #{insertFrom,jdbcType=VARCHAR}
+		where t1.user_id_to = #{userIdTo}
+		and user_id_from = #{userIdFrom}
+	</update>
+	<!-- 更新对象 SYS_PRV_AUTH_RESULT -->
+	<update id="updateSysPrvAuthResult" parameterType="java.util.Map">
+		update
+		sys_prv_auth_result t1
+		set
+		t1.user_id_from
+		=#{dto.userIdFrom,jdbcType=DECIMAL},
+		t1.user_id_to
+		=#{dto.userIdTo,jdbcType=DECIMAL},
+		t1.validate_state ='1'
+		where t1.id =
+		#{dto.id}
+	</update>
+	<delete id="deleteAllSysPrvAuthResult">
+		delete sys_prv_auth_result
+	</delete>
+
+	<!-- 主键删除 SYS_PRV_AUTH_RESULT -->
+	<delete id="deleteSysPrvAuthResultByID" parameterType="java.util.Map">
+		delete
+		from sys_prv_auth_result where ID in (${ids} )
+	</delete>
+	<!-- 主键假删除 SYS_PRV_AUTH_RESULT -->
+	<update id="deleteSysPrvAuthResultByPrimaryKey" parameterType="java.util.Map">
+		update sys_prv_auth_result t1
+		set t1.validate_state='0'
+		where t1.id in(
+		${ids})
+	</update>
+	<!-- 根据fromUser，toUser删除记录 -->
+	<delete id="deleteSysPrvAuthResultByUser" parameterType="java.util.Map">
+		delete t1 from sys_prv_auth_result t1 where t1.user_id_from = #{userIdFrom} 
+		and t1.user_id_to = #{userIdTo}
+	</delete>
+	<!-- 根据fromUser，toUser删除记录 -->
+	<delete id="deleteSysPrvAuthResultByUserBatch" parameterType="java.util.List">
+		delete t1 from sys_prv_auth_result t1 
+		where (
+		<foreach collection="list" item="item" index="index" separator=" or " >  
+			(t1.user_id_from = #{item.userIdFrom}  and t1.user_id_to = #{item.userIdTo})
+		</foreach>
+		)
+	</delete>
+	
+		<!-- 新增对象 SYS_PRV_AUTH_RESULT -->
+	<insert id="insertSysPrvAuthResultMy" parameterType="com.fintech.modules.platform.dataprv.sysprvauthresult.dto.SysPrvAuthResultDTO"
+		useGeneratedKeys="true">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="BEFORE">
+			SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.`TABLES` WHERE  TABLE_NAME='SYS_PRV_AUTH_RESULT'
+		</selectKey>
+		insert into sys_prv_auth_result
+		(
+		id ,
+		user_id_from ,
+		user_id_to ,
+		validate_state,
+		INSERT_FROM
+		)
+		values(#{id}
+		,#{userIdFrom,jdbcType=DECIMAL}
+		,#{userIdTo,jdbcType=DECIMAL}
+		,'1',
+		#{insertFrom}
+		)
+	</insert>
+	
+	<!-- 定时批量插入 -->
+	<insert id="insertSysPrvAuthResultBatch" parameterType="java.util.List">
+	    INSERT INTO SYS_PRV_AUTH_RESULT (USER_ID_FROM,USER_ID_TO,VALIDATE_STATE,INSERT_FROM)  
+			VALUES
+	    <foreach collection="list" item="item" index="index" separator=", " >  
+	        ( 
+	        #{item.userIdFrom,jdbcType=DECIMAL},
+	        #{item.userIdTo,jdbcType=DECIMAL},
+	        '1',
+	        #{item.insertFrom,jdbcType=VARCHAR}
+	        )
+	    </foreach> 
+	</insert>
+	<!-- 定时查找增量更新的用户 -->
+	<select id="searchUserPrvMappingByAction" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+		SPRA.USER_ID TOUSER,
+		SPRR.RESOURCE_ID FROMUSER,
+		'X' ITYPE
+		FROM SYS_PRV_ROLE_AUTH SPRA
+		INNER JOIN SYS_PRV_ROLE SPR ON SPR.ID = SPRA.ROLE_ID
+		AND SPR.VALIDATE_STATE = '1'
+		INNER JOIN SYS_PRV_ROLE_RESOURCE SPRR 
+		ON SPRR.ROLE_ID = SPR.ID
+		AND SPRR.VALIDATE_STATE = '1'
+		AND SPRR.RESOURCE_TYPE = 'user'
+		<if test="sType != null and sType != ''">
+			AND (SPRR.ACTION_STATE='I' OR SPRR.ACTION_STATE='U')
+			AND SPRR.SYN_STATE = '0'
+		</if>
+		WHERE SPRA.VALIDATE_STATE = '1' and RESOURCE_ID!=SPRA.USER_ID
+		<if test="sType != null and sType != ''">
+			AND (SPRA.ACTION_STATE='I' OR SPRA.ACTION_STATE='U')
+			AND	SPRA.SYN_STATE = '0'
+		</if>
+		UNION ALL
+		SELECT
+		SPUS.TO_USER_ID TO_USER,
+		SPUS.FROM_USER_ID FROMUSER,
+		'S' ITYPE
+		FROM SYS_PRV_USER_SHARE SPUS
+		WHERE SPUS.VALIDATE_STATE = '1'
+		<if test="sType != null and sType != ''">
+			AND	(SPUS.ACTION_STATE='I' OR SPUS.ACTION_STATE='U')
+			AND SPUS.SYN_STATE = '0'
+		</if>
+	</select>
+	<!-- 定时查找增量更新的组织机构 -->
+	<select id="searchOrgPrvMappingByAction" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+		SPOA.USER_ID TOUSER,
+		SPOA.ORG_ID ORGID,
+		'O' ITYPE
+		FROM SYS_PRV_ORG_AUTH spoa
+		WHERE SPOA.VALIDATE_STATE = '1'
+		<if test="sType != null and sType != ''">
+			AND (SPOA.ACTION_STATE='I' OR SPOA.ACTION_STATE='U')
+			AND SPOA.SYN_STATE = '0'
+		</if>
+		UNION ALL
+		SELECT
+		SPRA.USER_ID TO_USER,
+		SPRR.RESOURCE_ID ORGID,
+		'Y' ITYPE
+		FROM SYS_PRV_ROLE_AUTH SPRA
+		INNER JOIN SYS_PRV_ROLE SPR ON SPR.ID = SPRA.ROLE_ID
+			AND SPR.VALIDATE_STATE = '1'
+		INNER JOIN SYS_PRV_ROLE_RESOURCE SPRR ON SPRR.ROLE_ID = SPR.ID
+			AND SPRR.VALIDATE_STATE = '1'
+			AND SPRR.RESOURCE_TYPE = 'org'
+		<if test="sType != null and sType != ''">
+			AND (SPRR.ACTION_STATE='I' OR SPRR.ACTION_STATE='U')
+			AND SPRR.SYN_STATE = '0'
+		</if>
+		WHERE SPRA.VALIDATE_STATE = '1'
+		<if test="sType != null and sType != ''">
+			AND (SPRA.ACTION_STATE='I' OR SPRA.ACTION_STATE='U')
+			AND SPRA.SYN_STATE = '0'
+		</if>
+	</select>
+</mapper>

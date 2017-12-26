@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysauth.dao.SysRoleUserDao">
+<resultMap id="SysRoleUserDTO" type="com.fintech.modules.platform.sysauth.dto.SysRoleUserDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="roleId" column="ROLE_ID" jdbcType="DECIMAL" />
+				<result property="targetId" column="TARGET_ID" jdbcType="DECIMAL" />
+				<result property="appId" column="APP_ID" jdbcType="DECIMAL" />
+				<result property="targetType" column="TARGET_TYPE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 SYS_ROLE_USER -->	
+<select id="searchSysRoleUserByPaging" parameterType="java.util.Map" resultMap="SysRoleUserDTO">
+    	 		select 
+						t1.id                             ,
+						t1.role_id                        ,
+						t1.target_id                      ,
+						t1.app_id                         ,
+						t1.target_type                    ,
+						t1.validate_state                 ,
+						t1.version                        
+				from sys_role_user 	t1
+				<if test=" (userName != null and userName != '') or  (userCode != null and userCode != '')">
+					left join sys_user t2 on t1.TARGET_ID = t2.id and t1.TARGET_TYPE = 'user'
+				</if>
+				where 1=1
+				and t1.validate_state='1'
+				<if test=" (userName != null and userName != '') or  (userCode != null and userCode != '')">
+	    			<if test="userName != null and userName != ''">
+							and t2.USER_NAME like concat('%',#{userName},'%')
+	    			</if>
+	    			<if test="userCode != null and userCode != ''">
+							and t2.USER_CODE = #{userCode}
+	    			</if>
+				</if>
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.roleId != null and dto.roleId != ''">
+						and t1.ROLE_ID =#{dto.roleId}
+    			</if>
+    			<if test="dto.targetId != null and dto.targetId != ''">
+						and t1.TARGET_ID like concat('%',#{dto.targetId},'%')
+    			</if>
+    			<if test="dto.appId != null and dto.appId != ''">
+						and t1.APP_ID =#{dto.appId}
+    			</if>
+    			<if test="dto.targetType != null and dto.targetType != ''">
+						and t1.TARGET_TYPE =#{dto.targetType}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+    			<if test="orgId != null and orgId != ''">
+    					and t1.TARGET_TYPE = 'user' and t1.TARGET_ID in 
+    					(select b.user_id from sys_org_user b where b.org_id in (select id from sys_org a where a.parent_ids like concat('%/',#{orgId},'/%') or a.id=#{orgId}) ) 
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_ROLE_USER  -->
+<select id="searchSysRoleUser" parameterType="java.util.Map" resultMap="SysRoleUserDTO">
+    	     select 
+						distinct
+						t1.target_id                      ,
+						t1.target_type                    
+				from sys_role_user 		t1 , sys_role t2 
+				where t1.role_id = t2.id
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="roleCode != null and roleCode != ''">
+						 and t2.role_code =#{roleCode}
+    			</if>
+    			<if test="roleCodes != null and roleCodes != ''">
+						 and t2.role_code in (${roleCodes})
+    			</if>
+    			<if test="dto.roleId != null and dto.roleId != ''">
+						and t1.ROLE_ID = #{dto.roleId}
+    			</if>
+    			<if test="dto.targetId != null and dto.targetId != ''">
+						and t1.TARGET_ID = #{dto.targetId}
+    			</if>
+    			<if test="dto.appId != null and dto.appId != ''">
+						and t1.APP_ID = #{dto.appId}
+    			</if>
+    			<if test="dto.targetType != null and dto.targetType != ''">
+						and t1.TARGET_TYPE = #{dto.targetType}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_ROLE_USER -->
+<select id="findSysRoleUserByPrimaryKey" parameterType="java.util.Map" resultMap="SysRoleUserDTO">
+   	 		select 
+					t1.id                             ,
+					t1.role_id                        ,
+					t1.target_id                      ,
+					t1.app_id                         ,
+					t1.target_type                    ,
+					t1.validate_state                 ,
+					t1.version                        
+			from sys_role_user 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_ROLE_USER -->
+<insert id="insertSysRoleUser" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				<!-- select seq_SYS_ROLE_USER.nextval as id from dual -->
+				select auto_increment as id from information_schema.tables where  table_name='SYS_ROLE_USER'
+	</selectKey>
+			insert into sys_role_user
+			(   		
+					id                             ,
+					role_id                        ,
+					target_id                      ,
+					app_id                         ,
+					target_type                    ,
+					validate_state                 ,
+					version                        
+			)
+			values(#{dto.id}
+					,#{dto.roleId,jdbcType=DECIMAL}
+					,#{dto.targetId,jdbcType=DECIMAL}
+					,#{dto.appId,jdbcType=DECIMAL}
+					,#{dto.targetType,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.version,jdbcType=DECIMAL}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_ROLE_USER -->
+<update id="updateSysRoleUser" parameterType="java.util.Map">
+	     update sys_role_user t1
+	           set 
+			           t1.role_id                        =#{dto.roleId,jdbcType=DECIMAL},
+			           t1.target_id                      =#{dto.targetId,jdbcType=DECIMAL},
+			           t1.app_id                         =#{dto.appId,jdbcType=DECIMAL},
+			           t1.target_type                    =#{dto.targetType,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1',
+			           t1.version                        =#{dto.version,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- roleId 真删除 SYS_ROLE_USER -->
+<delete id="deleteSysRoleUserByRoleId" parameterType="java.util.Map">
+	   delete from sys_role_user where role_id=#{dto.roleId}
+</delete>
+
+<!-- 主键假删除 SYS_ROLE_USER -->
+<delete id="deleteSysRoleUserByPrimaryKey" parameterType="java.util.Map">
+	   delete from sys_role_user where id in (${ids})
+</delete>
+<!-- 主键查询对象  SYS_ROLE_USER -->
+<select id="findSysRoleOrgByRoleId" parameterType="java.util.Map" resultMap="SysRoleUserDTO">
+   	 		select 
+					t1.id                             ,
+					t1.role_id                        ,
+					t1.target_id                      ,
+					t1.app_id                         ,
+					t1.target_type                    ,
+					t1.validate_state                 ,
+					t1.version                        
+			from sys_role_user 		t1
+			where 
+				t1.role_id = #{roleId} and t1.target_type='org' and t1.validate_state='1'
+</select>
+
+
+<!-- 获取当前用户是管理员的情况下，能管理的机构和权限信息 -->
+<select id="findSysRoleOrgByCurrentUser" parameterType="java.util.Map" resultMap="SysRoleUserDTO">
+		select 
+			t1.id                             ,
+			t1.role_id                        ,
+			t1.target_id                      ,
+			t1.app_id                         ,
+			t1.target_type                    ,
+			t1.validate_state                 ,
+			t1.version                        
+			from sys_role_user t1
+			where 1=1
+			and t1.TARGET_ID in (
+				select a.id from sys_org a where 1=1 and a.parent_ids like CONCAT('%/', '6','/%')
+				union select a.id from sys_org a where 1=1 and a.id='6'
+			)
+			and t1.role_id in (select role_id from sys_role_user b
+					 where b.target_id =1
+						 and b.target_type = 'user'
+						 and b.role_id in (select id from sys_role a where a.role_type = '0')
+			)
+			and t1.target_type = 'org'
+			limit 0,1
+</select>
+
+<!-- 清理离职人员操作权限 -->
+<delete id="modifySysRoleUserByOrgId" parameterType="java.util.Map">
+	     delete b from sys_org_user b where b.org_id in (select id from sys_org c where c.id=#{orgId} or c.parent_ids like concat('%/',#{orgId},'/%')) and b.user_id in (select id from sys_user a where a.validate_state='0')
+</delete>
+</mapper>

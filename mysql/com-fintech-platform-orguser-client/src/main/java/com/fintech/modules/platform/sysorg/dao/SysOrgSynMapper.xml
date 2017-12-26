@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysorg.dao.SysOrgSynDao">
+<resultMap id="SysOrgSynDTO" type="com.fintech.modules.platform.sysorg.dto.SysOrgSynDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="orgCode" column="ORG_CODE" jdbcType="VARCHAR" />
+				<result property="orgName" column="ORG_NAME" jdbcType="VARCHAR" />
+				<result property="orgType" column="ORG_TYPE" jdbcType="VARCHAR" />
+				<result property="parentId" column="PARENT_ID" jdbcType="VARCHAR" />
+				<result property="parentIds" column="PARENT_IDS" jdbcType="VARCHAR" />
+				<result property="orderBy" column="ORDER_BY" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="isVirtual" column="IS_VIRTUAL" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+				<result property="appFlag" column="APP_FLAG" jdbcType="VARCHAR" />
+				<result property="createDate" column="CREATE_DATE" jdbcType="TIMESTAMP" />
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+				<result property="areaCodes" column="AREA_CODES" jdbcType="VARCHAR" />
+				<result property="areaAdress" column="AREA_ADRESS" jdbcType="VARCHAR" />
+				<result property="isLeef" column="IS_LEEF" jdbcType="VARCHAR" />
+				<result property="orgLevel" column="ORG_LEVEL" jdbcType="VARCHAR" />
+				<result property="effectiveDate" column="EFFECTIVE_DATE" jdbcType="TIMESTAMP" />
+</resultMap>
+				
+<!-- 分页查询 SYS_ORG_SYN -->	
+<select id="searchSysOrgSynByPaging" parameterType="java.util.Map" resultMap="SysOrgSynDTO">
+    	 		select 
+						t1.id                             ,
+						t1.org_code                       ,
+						t1.org_name                       ,
+						t1.org_type                       ,
+						t1.parent_id                      ,
+						t1.parent_ids                     ,
+						t1.order_by                       ,
+						t1.validate_state                 ,
+						t1.is_virtual                     ,
+						t1.version                        ,
+						t1.app_flag                       ,
+						t1.create_date                    ,
+						t1.org_id                         ,
+						t1.area_codes					  ,
+						t1.area_adress					  ,
+						t1.is_leef    					   ,
+						t1.org_level                      ,
+						t1.effective_date          
+					
+				from sys_org_syn 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.orgCode != null and dto.orgCode != ''">
+						and t1.ORG_CODE =#{dto.orgCode}
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME =#{dto.orgName}
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE =#{dto.orgType}
+    			</if>
+    			<if test="dto.parentId != null and dto.parentId != ''">
+						and t1.PARENT_ID =#{dto.parentId}
+    			</if>
+    			<if test="dto.parentIds != null and dto.parentIds != ''">
+						and t1.PARENT_IDS =#{dto.parentIds}
+    			</if>
+    			<if test="dto.orderBy != null and dto.orderBy != ''">
+						and t1.ORDER_BY =#{dto.orderBy}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.isVirtual != null and dto.isVirtual != ''">
+						and t1.IS_VIRTUAL =#{dto.isVirtual}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and t1.APP_FLAG =#{dto.appFlag}
+    			</if>
+    			<if test="dto.createDate != null and dto.createDate != ''">
+						and t1.CREATE_DATE =#{dto.createDate}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_ORG_SYN  -->
+<select id="searchSysOrgSyn" parameterType="java.util.Map" resultMap="SysOrgSynDTO">
+    	     select 
+						t1.id                             ,
+						t1.org_code                       ,
+						t1.org_name                       ,
+						t1.org_type                       ,
+						t1.parent_id                      ,
+						t1.parent_ids                     ,
+						t1.order_by                       ,
+						t1.validate_state                 ,
+						t1.is_virtual                     ,
+						t1.version                        ,
+						t1.app_flag                       ,
+						t1.create_date                    ,
+						t1.org_id                         ,
+						t1.area_codes					  ,
+						t1.area_adress					  ,
+						t1.is_leef    					   ,
+						t1.org_level                      ,
+						t1.effective_date          
+				from sys_org_syn 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.orgCode != null and dto.orgCode != ''">
+						and t1.ORG_CODE = #{dto.orgCode}
+    			</if>
+    			<if test="dto.orgName != null and dto.orgName != ''">
+						and t1.ORG_NAME = #{dto.orgName}
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE = #{dto.orgType}
+    			</if>
+    			<if test="dto.parentId != null and dto.parentId != ''">
+						and t1.PARENT_ID = #{dto.parentId}
+    			</if>
+    			<if test="dto.parentIds != null and dto.parentIds != ''">
+						and t1.PARENT_IDS = #{dto.parentIds}
+    			</if>
+    			<if test="dto.orderBy != null and dto.orderBy != ''">
+						and t1.ORDER_BY = #{dto.orderBy}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.isVirtual != null and dto.isVirtual != ''">
+						and t1.IS_VIRTUAL = #{dto.isVirtual}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and t1.APP_FLAG = #{dto.appFlag}
+    			</if>
+    			<if test="dto.createDate != null and dto.createDate != ''">
+						and t1.CREATE_DATE = #{dto.createDate}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="lastModifyTime != null and lastModifyTime != ''">
+						and t1.CREATE_DATE &lt; str_to_date('${lastModifyTime}','%Y-%m-%d %H:%i:%s.%f')		
+						order by t1.CREATE_DATE desc
+    			</if>
+    			
+</select>
+  <!-- 查找最大时间记录 -->
+  <select id="searchSysOrgSynByMaxCreateDate" parameterType="java.util.Map" resultMap="SysOrgSynDTO">
+    	     select 
+						t1.id                             ,
+						t1.org_code                       ,
+						t1.org_name                       ,
+						t1.org_type                       ,
+						t1.parent_id                      ,
+						t1.parent_ids                     ,
+						t1.order_by                       ,
+						t1.validate_state                 ,
+						t1.is_virtual                     ,
+						t1.version                        ,
+						t1.app_flag                       ,
+						t1.create_date                    ,
+						t1.org_id                         ,
+						t1.org_level                      ,
+						t1.effective_date                               
+				from sys_org_syn 		t1
+				where 1=1 
+				and t1.create_date  =  ( SELECT  MAX( t2.create_date  )  FROM  sys_org_syn  t2 )
+				limit 1
+    			
+</select>
+<!-- 主键查询对象  SYS_ORG_SYN -->
+<select id="findSysOrgSynByPrimaryKey" parameterType="java.util.Map" resultMap="SysOrgSynDTO">
+   	 		select 
+					t1.id                             ,
+					t1.org_code                       ,
+					t1.org_name                       ,
+					t1.org_type                       ,
+					t1.parent_id                      ,
+					t1.parent_ids                     ,
+					t1.order_by                       ,
+					t1.validate_state                 ,
+					t1.is_virtual                     ,
+					t1.version                        ,
+					t1.app_flag                       ,
+					t1.create_date                    ,
+					t1.org_id                         ,
+					t1.org_level                      ,
+					t1.effective_date                              
+			from sys_org_syn 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_ORG_SYN -->
+<insert id="insertSysOrgSyn" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select nextval('seq_SYS_ORG_SYN') as id from dual
+	</selectKey>
+			insert into sys_org_syn
+			(   		
+					id                             ,
+					org_code                       ,
+					org_name                       ,
+					org_type                       ,
+					parent_id                      ,
+					parent_ids                     ,
+					order_by                       ,
+					validate_state                 ,
+					is_virtual                     ,
+					version                        ,
+					app_flag                       ,
+					create_date                    ,
+					org_id                    	   ,
+					syn_status					   ,
+					area_codes					  ,
+					area_adress					  ,
+					is_leef                         ,
+					org_level                      ,
+					effective_date 
+			)
+			values(#{dto.id}
+					,#{dto.orgCode,jdbcType=VARCHAR}
+					,#{dto.orgName,jdbcType=VARCHAR}
+					,#{dto.orgType,jdbcType=VARCHAR}
+					,#{dto.parentId,jdbcType=VARCHAR}
+					,#{dto.parentIds,jdbcType=VARCHAR}
+					,#{dto.orderBy,jdbcType=VARCHAR}
+					,#{dto.validateState,jdbcType=VARCHAR}
+					,#{dto.isVirtual,jdbcType=VARCHAR}
+					,#{dto.version,jdbcType=DECIMAL}
+					,#{dto.appFlag,jdbcType=VARCHAR}
+					,#{dto.createDate,jdbcType=TIMESTAMP}
+					,#{dto.orgId,jdbcType=DECIMAL}
+					,'1'
+					,#{dto.areaCodes,jdbcType=VARCHAR}
+					,#{dto.areaAdress,jdbcType=VARCHAR}
+					,#{dto.isLeef,jdbcType=VARCHAR}
+					,#{dto.orgLevel,jdbcType=VARCHAR}
+					,#{dto.effectiveDate,jdbcType=TIMESTAMP}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_ORG_SYN -->
+<update id="updateSysOrgSyn" parameterType="java.util.Map">
+	     update sys_org_syn t1
+	           set 
+			           t1.org_code                       =#{dto.orgCode,jdbcType=VARCHAR},
+			           t1.org_name                       =#{dto.orgName,jdbcType=VARCHAR},
+			           t1.org_type                       =#{dto.orgType,jdbcType=VARCHAR},
+			           t1.parent_id                      =#{dto.parentId,jdbcType=VARCHAR},
+			           t1.parent_ids                     =#{dto.parentIds,jdbcType=VARCHAR},
+			           t1.order_by                       =#{dto.orderBy,jdbcType=VARCHAR},
+			           t1.validate_state                ='1',
+			           t1.is_virtual                     =#{dto.isVirtual,jdbcType=VARCHAR},
+			           t1.version                        =#{dto.version,jdbcType=DECIMAL},
+			           t1.app_flag                       =#{dto.appFlag,jdbcType=VARCHAR},
+			           t1.create_date                    =#{dto.createDate,jdbcType=TIMESTAMP},
+			           t1.org_id                         =#{dto.orgId,jdbcType=DECIMAL}
+			           t1.org_level                          =#{dto.orgLevel,jdbcType=VARCHAR},
+					   t1.effective_date                  =#{dto.effectiveDate,jdbcType=TIMESTAMP}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_ORG_SYN -->
+<delete id="deleteSysOrgSynByID" parameterType="java.util.Map">
+    	delete from sys_org_syn t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_ORG_SYN -->
+<update id="deleteSysOrgSynByPrimaryKey" parameterType="java.util.Map">
+	     update sys_org_syn t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

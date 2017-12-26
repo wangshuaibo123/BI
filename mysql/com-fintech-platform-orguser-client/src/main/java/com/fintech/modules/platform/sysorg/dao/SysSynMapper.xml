@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.sysorg.dao.SysSynDao">
+<resultMap id="SysSynDTO" type="com.fintech.modules.platform.sysorg.dto.SysSynDTO">
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+				<result property="createDate" column="CREATE_DATE" jdbcType="TIMESTAMP" />
+</resultMap>
+				
+<!-- 分页查询 SYS_ORG_SYN -->	
+<select id="searchSysSynByPaging" parameterType="java.util.Map" resultMap="SysSynDTO">
+select distinct version, create_date
+
+  from (select version, create_date
+          from sys_user_syn t1  where  t1.syn_status = '1'
+        union all
+        
+        select version, create_date
+          from sys_org_user_syn t2 where  t2.syn_status = '1'
+        union all
+        
+        select version, create_date 
+          from sys_org_syn t3 where t3.syn_status = '1'
+        
+        union all
+        
+        select version, create_date from sys_position_syn t4 where t4.syn_status = '1') tmp1
+ order by tmp1.version asc
+</select>
+
+
+<!-- 不分页查询 SYS_ORG_SYN -->	
+<select id="searchAutoSysSyn" resultMap="SysSynDTO">
+select distinct version, create_date
+
+  from (select version, create_date
+          from sys_user_syn t1  where  t1.syn_status = '1'
+        union all
+        
+        select version, create_date
+          from sys_org_user_syn t2 where  t2.syn_status = '1'
+        union all
+        
+        select version, create_date 
+          from sys_org_syn t3 where t3.syn_status = '1'
+        
+        union all
+        
+        select version, create_date from sys_position_syn t4 where t4.syn_status = '1') tmp1
+ order by tmp1.version asc
+</select>
+
+
+<select id="searchSysSyn" parameterType="java.util.Map" resultMap="SysSynDTO">
+	select tmp2.version, tmp2.create_date  from (
+		select distinct tmp1.version, tmp1.create_date
+		  from (select t1.version, t1.create_date
+		          from sys_user_syn t1 where  t1.syn_status = '1'
+		        union all
+		        
+		        select t2.version, t2.create_date
+		          from sys_org_user_syn t2 where  t2.syn_status = '1'
+		        union all
+		        
+		        select t3.version, t3.create_date 
+		          from sys_org_syn t3 where  t3.syn_status = '1'
+		        union all
+		        select t4.version, t4.create_date from sys_position_syn t4 where  t4.syn_status = '1') tmp1
+		 order by tmp1.version asc
+		 ) tmp2 limit ${rowSize}
+</select>
+
+
+<update id="updateSynType" parameterType="java.util.Map">
+	begin
+		update sys_user_syn t1 set t1.syn_status = '2' where t1.version in ( ${versions} ) ;
+		update sys_org_user_syn t2 set t2.syn_status = '2' where t2.version in ( ${versions} );
+		update sys_position_syn t3 set t3.syn_status = '2' where t3.version in ( ${versions} );
+		update sys_org_syn t4 set t4.syn_status = '2' where t4.version in ( ${versions} );
+	end;
+</update>
+
+<update id="updateUserSyn" parameterType="java.util.Map">
+		update sys_user_syn t1 set t1.syn_status = '2' where t1.version in ( ${versions} ) ;
+</update>
+
+<update id="updateOrgUserSyn" parameterType="java.util.Map">
+		update sys_org_user_syn t2 set t2.syn_status = '2' where t2.version in ( ${versions} );
+</update>
+
+<update id="updatePositionSyn" parameterType="java.util.Map">
+		update sys_position_syn t3 set t3.syn_status = '2' where t3.version in ( ${versions} );
+</update>
+
+<update id="updateOrgSyn" parameterType="java.util.Map">
+		update sys_org_syn t4 set t4.syn_status = '2' where t4.version in ( ${versions} );
+</update>
+
+</mapper>

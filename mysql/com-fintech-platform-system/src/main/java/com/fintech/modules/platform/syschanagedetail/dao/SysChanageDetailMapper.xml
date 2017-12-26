@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.platform.syschanagedetail.dao.SysChanageDetailDao">
+<resultMap id="SysChanageDetailDTO" type="com.fintech.modules.platform.syschanagedetail.dto.SysChanageDetailDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="bizTableName" column="BIZ_TABLE_NAME" jdbcType="VARCHAR" />
+				<result property="bizTableColum" column="BIZ_TABLE_COLUM" jdbcType="VARCHAR" />
+				<result property="changeItemName" column="CHANGE_ITEM_NAME" jdbcType="VARCHAR" />
+				<result property="oldValue" column="OLD_VALUE" jdbcType="VARCHAR" />
+				<result property="newValue" column="NEW_VALUE" jdbcType="VARCHAR" />
+				<result property="oldShowvalue" column="OLD_SHOWVALUE" jdbcType="VARCHAR" />
+				<result property="newShowvalue" column="NEW_SHOWVALUE" jdbcType="VARCHAR" />
+				<result property="fkBizId" column="FK_BIZ_ID" jdbcType="DECIMAL" />
+				<result property="batNo" column="BAT_NO" jdbcType="VARCHAR" />
+				<result property="state" column="STATE" jdbcType="VARCHAR" />
+				<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+				<result property="ownerId" column="OWNER_ID" jdbcType="DECIMAL" />
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="valid" column="VALID" jdbcType="VARCHAR" />
+				<result property="remark" column="REMARK" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_CHANAGE_DETAIL -->	
+<select id="searchSysChanageDetailByPaging" parameterType="java.util.Map" resultMap="SysChanageDetailDTO">
+    	 		select 
+						t1.id                             ,
+						t1.biz_table_name                 ,
+						t1.biz_table_colum                ,
+						t1.change_item_name               ,
+						t1.old_value                      ,
+						t1.new_value                      ,
+						t1.old_showvalue                  ,
+						t1.new_showvalue                  ,
+						t1.fk_biz_id                      ,
+						t1.bat_no                         ,
+						t1.state                          ,
+						t1.create_by                      ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.create_time                    ,
+						t1.valid                          ,
+						t1.remark                         
+					
+				from sys_chanage_detail 	t1
+				where 1=1
+				and t1.valid='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.bizTableName != null and dto.bizTableName != ''">
+						and t1.BIZ_TABLE_NAME =#{dto.bizTableName}
+    			</if>
+    			<if test="dto.bizTableColum != null and dto.bizTableColum != ''">
+						and t1.BIZ_TABLE_COLUM =#{dto.bizTableColum}
+    			</if>
+    			<if test="dto.changeItemName != null and dto.changeItemName != ''">
+						and t1.CHANGE_ITEM_NAME =#{dto.changeItemName}
+    			</if>
+    			<if test="dto.oldValue != null and dto.oldValue != ''">
+						and t1.OLD_VALUE =#{dto.oldValue}
+    			</if>
+    			<if test="dto.newValue != null and dto.newValue != ''">
+						and t1.NEW_VALUE =#{dto.newValue}
+    			</if>
+    			<if test="dto.oldShowvalue != null and dto.oldShowvalue != ''">
+						and t1.OLD_SHOWVALUE =#{dto.oldShowvalue}
+    			</if>
+    			<if test="dto.newShowvalue != null and dto.newShowvalue != ''">
+						and t1.NEW_SHOWVALUE =#{dto.newShowvalue}
+    			</if>
+    			<if test="dto.fkBizId != null and dto.fkBizId != ''">
+						and t1.FK_BIZ_ID =#{dto.fkBizId}
+    			</if>
+    			<if test="dto.batNo != null and dto.batNo != ''">
+						and t1.BAT_NO =#{dto.batNo}
+    			</if>
+    			<if test="dto.state != null and dto.state != ''">
+						and t1.STATE =#{dto.state}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY =#{dto.createBy}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID =#{dto.ownerId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.valid != null and dto.valid != ''">
+						and t1.VALID =#{dto.valid}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK =#{dto.remark}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_CHANAGE_DETAIL  -->
+<select id="searchSysChanageDetail" parameterType="java.util.Map" resultMap="SysChanageDetailDTO">
+    	     select 
+						t1.id                             ,
+						t1.biz_table_name                 ,
+						t1.biz_table_colum                ,
+						t1.change_item_name               ,
+						t1.old_value                      ,
+						t1.new_value                      ,
+						t1.old_showvalue                  ,
+						t1.new_showvalue                  ,
+						t1.fk_biz_id                      ,
+						t1.bat_no                         ,
+						t1.state                          ,
+						t1.create_by                      ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.create_time                    ,
+						t1.valid                          ,
+						t1.remark                         
+				from sys_chanage_detail 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.bizTableName != null and dto.bizTableName != ''">
+						and t1.BIZ_TABLE_NAME = #{dto.bizTableName}
+    			</if>
+    			<if test="dto.bizTableColum != null and dto.bizTableColum != ''">
+						and t1.BIZ_TABLE_COLUM = #{dto.bizTableColum}
+    			</if>
+    			<if test="dto.changeItemName != null and dto.changeItemName != ''">
+						and t1.CHANGE_ITEM_NAME = #{dto.changeItemName}
+    			</if>
+    			<if test="dto.oldValue != null and dto.oldValue != ''">
+						and t1.OLD_VALUE = #{dto.oldValue}
+    			</if>
+    			<if test="dto.newValue != null and dto.newValue != ''">
+						and t1.NEW_VALUE = #{dto.newValue}
+    			</if>
+    			<if test="dto.oldShowvalue != null and dto.oldShowvalue != ''">
+						and t1.OLD_SHOWVALUE = #{dto.oldShowvalue}
+    			</if>
+    			<if test="dto.newShowvalue != null and dto.newShowvalue != ''">
+						and t1.NEW_SHOWVALUE = #{dto.newShowvalue}
+    			</if>
+    			<if test="dto.fkBizId != null and dto.fkBizId != ''">
+						and t1.FK_BIZ_ID = #{dto.fkBizId}
+    			</if>
+    			<if test="dto.batNo != null and dto.batNo != ''">
+						and t1.BAT_NO = #{dto.batNo}
+    			</if>
+    			<if test="dto.state != null and dto.state != ''">
+						and t1.STATE = #{dto.state}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID = #{dto.ownerId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.valid != null and dto.valid != ''">
+						and t1.VALID = #{dto.valid}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK = #{dto.remark}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_CHANAGE_DETAIL -->
+<select id="findSysChanageDetailByPrimaryKey" parameterType="java.util.Map" resultMap="SysChanageDetailDTO">
+   	 		select 
+					t1.id                             ,
+					t1.biz_table_name                 ,
+					t1.biz_table_colum                ,
+					t1.change_item_name               ,
+					t1.old_value                      ,
+					t1.new_value                      ,
+					t1.old_showvalue                  ,
+					t1.new_showvalue                  ,
+					t1.fk_biz_id                      ,
+					t1.bat_no                         ,
+					t1.state                          ,
+					t1.create_by                      ,
+					t1.owner_id                       ,
+					t1.org_id                         ,
+					t1.create_time                    ,
+					t1.valid                          ,
+					t1.remark                         
+			from sys_chanage_detail 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_CHANAGE_DETAIL -->
+<insert id="insertSysChanageDetail" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.`TABLES` WHERE  TABLE_NAME='SYS_CHANAGE_DETAIL'
+	</selectKey>
+			insert into sys_chanage_detail
+			(   		
+					id                             ,
+					biz_table_name                 ,
+					biz_table_colum                ,
+					change_item_name               ,
+					old_value                      ,
+					new_value                      ,
+					old_showvalue                  ,
+					new_showvalue                  ,
+					fk_biz_id                      ,
+					bat_no                         ,
+					state                          ,
+					create_by                      ,
+					owner_id                       ,
+					org_id                         ,
+					create_time                    ,
+					valid                          ,
+					remark                         
+			)
+			values(#{dto.id}
+					,#{dto.bizTableName,jdbcType=VARCHAR}
+					,#{dto.bizTableColum,jdbcType=VARCHAR}
+					,#{dto.changeItemName,jdbcType=VARCHAR}
+					,#{dto.oldValue,jdbcType=VARCHAR}
+					,#{dto.newValue,jdbcType=VARCHAR}
+					,#{dto.oldShowvalue,jdbcType=VARCHAR}
+					,#{dto.newShowvalue,jdbcType=VARCHAR}
+					,#{dto.fkBizId,jdbcType=DECIMAL}
+					,#{dto.batNo,jdbcType=VARCHAR}
+					,0
+					,#{dto.opUserId,jdbcType=DECIMAL}
+					,#{dto.opUserId,jdbcType=DECIMAL}
+					,#{dto.userOrgId,jdbcType=DECIMAL}
+					,now()
+					,1
+					,#{dto.remark,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_CHANAGE_DETAIL -->
+<update id="updateSysChanageDetail" parameterType="java.util.Map">
+	     update sys_chanage_detail t1
+	           set 
+			           t1.biz_table_name                 =#{dto.bizTableName,jdbcType=VARCHAR},
+			           t1.biz_table_colum                =#{dto.bizTableColum,jdbcType=VARCHAR},
+			           t1.change_item_name               =#{dto.changeItemName,jdbcType=VARCHAR},
+			           t1.old_value                      =#{dto.oldValue,jdbcType=VARCHAR},
+			           t1.new_value                      =#{dto.newValue,jdbcType=VARCHAR},
+			           t1.old_showvalue                  =#{dto.oldShowvalue,jdbcType=VARCHAR},
+			           t1.new_showvalue                  =#{dto.newShowvalue,jdbcType=VARCHAR},
+			           t1.fk_biz_id                      =#{dto.fkBizId,jdbcType=DECIMAL},
+			           t1.bat_no                         =#{dto.batNo,jdbcType=VARCHAR},
+			           t1.state                          =#{dto.state,jdbcType=VARCHAR},
+			           t1.remark                         =#{dto.remark,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_CHANAGE_DETAIL -->
+<delete id="deleteSysChanageDetailByID" parameterType="java.util.Map">
+    	delete t1 from sys_chanage_detail t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_CHANAGE_DETAIL -->
+<update id="deleteSysChanageDetailByPrimaryKey" parameterType="java.util.Map">
+	     update sys_chanage_detail t1
+	           set   t1.valid='0'	
+	     where t1.id in( ${ids})
+</update>
+
+
+<!-- 将栏位变更信息更新至业务表中 -->
+<update id="updateNewVaToBizTab" parameterType="java.util.Map">
+declare
+
+v_type      varchar2(20);
+v_len       varchar2(20);
+my_update   varchar2(500); 
+v_temp      sys_chanage_detail%rowtype;
+
+--获取最新更改数据值
+cursor my_cur is 
+select  t1.*
+       from sys_chanage_detail t1 
+       where t1.id in( select  max(t.id) from sys_chanage_detail t
+         where t.valid='1' 
+         and t.bat_no='${batNo}'
+         group by t.biz_table_name,t.biz_table_colum
+       );
+ 
+begin
+        
+for v_temp in my_cur loop
+
+    select  t.DATA_TYPE,  t.DATA_LENGTH  into v_type,v_len from user_tab_columns t
+    where t.table_name=upper(''||v_temp.biz_table_name||'')
+    and t.COLUMN_NAME=upper(''||v_temp.biz_table_colum||'');
+    
+    if (v_type ='DATE') then
+         my_update:='update '||v_temp.biz_table_name||' set '||v_temp.biz_table_colum||' = to_date('''||v_temp.new_value||''',''yyyy-MM-dd'') where id='||v_temp.fk_biz_id;
+    else
+         my_update:='update '||v_temp.biz_table_name||' set '||v_temp.biz_table_colum||' = '''||v_temp.new_value||''' where id='||v_temp.fk_biz_id;
+    
+    end if;
+    
+    dbms_output.put_line('my_update:'||my_update);
+    execute immediate my_update;
+   	--更改状态为生效状态
+   	update sys_chanage_detail t  set t.state='1' where t.id=v_temp.id;
+end loop;
+
+exception when others then
+dbms_output.put_line('-----updateNewVaToBizTab error------');
+
+end;
+</update>
+
+<!-- 流程拒绝后撤销还原变更业务表中状态 -->
+<update id="updateOldVaToBizTab" parameterType="java.util.Map">
+declare
+
+v_type      varchar2(20);
+v_len       varchar2(20);
+my_update   varchar2(500); 
+v_temp      sys_chanage_detail%rowtype;
+
+--获取最早的历史状态
+cursor my_cur is 
+select  t1.*
+       from sys_chanage_detail t1 
+       where t1.id in( select  min(t.id) from sys_chanage_detail t
+         where t.valid='1' 
+         and t.bat_no='${batNo}'
+         group by t.biz_table_name,t.biz_table_colum
+       );
+ 
+begin
+        
+for v_temp in my_cur loop
+
+    select  t.DATA_TYPE,  t.DATA_LENGTH  into v_type,v_len from user_tab_columns t
+    where t.table_name=upper(''||v_temp.biz_table_name||'')
+    and t.COLUMN_NAME=upper(''||v_temp.biz_table_colum||'');
+    
+    if (v_type ='DATE') then
+         my_update:='update '||v_temp.biz_table_name||' set '||v_temp.biz_table_colum||' = to_date('''||v_temp.old_value||''',''yyyy-MM-dd'') where id='||v_temp.fk_biz_id;
+    else
+         my_update:='update '||v_temp.biz_table_name||' set '||v_temp.biz_table_colum||' = '''||v_temp.old_value||''' where id='||v_temp.fk_biz_id;
+    
+    end if;
+    
+    dbms_output.put_line('my_update:'||my_update);
+    execute immediate my_update;
+   	--更改状态为生效状态
+   	update sys_chanage_detail t  set t.state='1' where t.id=v_temp.id;
+end loop;
+
+exception when others then
+dbms_output.put_line('-----updateOldVaToBizTab error------');
+
+end;
+</update>
+
+</mapper>
