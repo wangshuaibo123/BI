@@ -11,7 +11,6 @@ import redis.clients.util.Pool;
 import redis.clients.util.SafeEncoder;
 
 import com.fintech.platform.core.common.SerializeUtil;
-import com.fintech.platform.core.redis.JedisSentinelPool;
 
 
 public class MethodRedisCacheInterceptor implements MethodInterceptor,InitializingBean {
