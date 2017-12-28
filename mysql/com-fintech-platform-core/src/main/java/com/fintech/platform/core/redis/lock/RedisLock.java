@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.ShardedJedis;
+import redis.clients.util.Pool;
 import redis.clients.util.SafeEncoder;
 
 import com.fintech.platform.core.ehcache.ObtainPropertiesInfo;
-import com.fintech.platform.core.redis.JedisSentinelPool;
 
 /**
  * Redis分布式锁
@@ -17,13 +17,13 @@ public class RedisLock implements DistributedLock{
 	private static final int DEFAULT_EXPIRE_TIME = 60;//默认的过期时间：60s
 	private static final String LOCK_KEY_PREFIX = "REDIS_LOCK";//默认的过期时间：60s
 //	private ThreadLocal<Long> threadLocal = new ThreadLocal<Long>();
-	private JedisSentinelPool pool;
+	private Pool<ShardedJedis> pool;
 	
-	public JedisSentinelPool getPool(){
+	public Pool<ShardedJedis> getPool(){
 		return pool;
 	}
 
-	public void setPool(JedisSentinelPool pool){
+	public void setPool(Pool<ShardedJedis> pool){
 		this.pool = pool;
 	}
 	

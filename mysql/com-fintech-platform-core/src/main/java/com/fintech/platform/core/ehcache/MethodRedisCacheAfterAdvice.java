@@ -11,6 +11,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
+import redis.clients.util.Pool;
 import redis.clients.util.SafeEncoder;
 
 import com.fintech.platform.core.redis.JedisSentinelPool;
@@ -18,7 +19,7 @@ import com.fintech.platform.core.redis.JedisSentinelPool;
 public class MethodRedisCacheAfterAdvice implements AfterReturningAdvice,InitializingBean {
 	private static final Logger logger = LoggerFactory.getLogger(MethodCacheAfterAdvice.class);  
 	
-	private JedisSentinelPool pool;
+	private Pool<ShardedJedis> pool;
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
@@ -43,11 +44,11 @@ public class MethodRedisCacheAfterAdvice implements AfterReturningAdvice,Initial
         
 	}
 
-	public JedisSentinelPool getPool() {
+	public Pool<ShardedJedis> getPool() {
 		return pool;
 	}
 
-	public void setPool(JedisSentinelPool pool) {
+	public void setPool(Pool<ShardedJedis> pool) {
 		this.pool = pool;
 	}
 

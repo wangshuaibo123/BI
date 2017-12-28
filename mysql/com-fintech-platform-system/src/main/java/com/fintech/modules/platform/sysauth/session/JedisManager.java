@@ -6,8 +6,7 @@ import java.util.Set;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
-
-import com.fintech.platform.core.redis.JedisSentinelPool;
+import redis.clients.util.Pool;
 /**
  * @ClassName: JedisManager 
  * @Description: redis管理
@@ -17,7 +16,7 @@ import com.fintech.platform.core.redis.JedisSentinelPool;
  */
 public class JedisManager {
 	/***redis 监听器连接池**/
-	private JedisSentinelPool jedisSentinelPool;
+	private Pool<ShardedJedis> jedisSentinelPool;
 	/**
 	 * @Title: getJedis 
 	 * @Description: 得到redis管理类
@@ -152,11 +151,11 @@ public class JedisManager {
         }
     }
 
-	public JedisSentinelPool getJedisSentinelPool() {
+	public Pool<ShardedJedis> getJedisSentinelPool() {
 		return jedisSentinelPool;
 	}
 
-	public void setJedisSentinelPool(JedisSentinelPool jedisSentinelPool) {
+	public void setJedisSentinelPool(Pool<ShardedJedis> jedisSentinelPool) {
 		this.jedisSentinelPool = jedisSentinelPool;
 	}
 

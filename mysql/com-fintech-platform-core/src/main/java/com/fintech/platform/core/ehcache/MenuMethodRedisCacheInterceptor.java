@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import redis.clients.jedis.ShardedJedis;
+import redis.clients.util.Pool;
 import redis.clients.util.SafeEncoder;
 
 import com.fintech.platform.core.common.SerializeUtil;
@@ -20,7 +21,7 @@ import com.fintech.platform.core.redis.JedisSentinelPool;
  */
 public class MenuMethodRedisCacheInterceptor implements MethodInterceptor,InitializingBean {
 	private static final Logger logger = LoggerFactory.getLogger(MenuMethodRedisCacheInterceptor.class);  
-	private JedisSentinelPool pool;
+	private Pool<ShardedJedis> pool;
 	private String menusKeyPrefix = "sys-menuCache-"+ObtainPropertiesInfo.getValByKey("app.code")+":biz:-menus-";
 
 	public MenuMethodRedisCacheInterceptor() {  
@@ -62,11 +63,11 @@ public class MenuMethodRedisCacheInterceptor implements MethodInterceptor,Initia
 	        return result;  
 	}
 
-	public JedisSentinelPool getPool() {
+	public Pool<ShardedJedis> getPool() {
 		return pool;
 	}
 
-	public void setPool(JedisSentinelPool pool) {
+	public void setPool(Pool<ShardedJedis> pool) {
 		this.pool = pool;
 	}
 }
