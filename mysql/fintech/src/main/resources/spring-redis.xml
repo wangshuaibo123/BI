@@ -8,7 +8,7 @@
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-	<bean id="jedisSentinelPool" class="com.fintech.platform.core.redis.JedisSentinelPool">
+	<!-- <bean id="jedisSentinelPool" class="com.fintech.platform.core.redis.JedisSentinelPool">
 		<constructor-arg index="0" ref="jedisPoolConfig" />
 		<constructor-arg index="1">
 			<list>
@@ -24,7 +24,7 @@
 		<constructor-arg index="3">
 				<value>000000aA</value>
 		</constructor-arg>
-	</bean>
+	</bean> -->
 
 	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
 		<property name="maxTotal" value="200" />
@@ -33,6 +33,23 @@
 		<property name="testOnBorrow" value="true" />
 	</bean>
 	
+    <bean id="jedisShardInfoDefault" class="redis.clients.jedis.JedisShardInfo">  
+        <constructor-arg index="0" value="139.129.200.212" />
+        <constructor-arg index="1" type="int" value="6379" />
+        <constructor-arg index="2" type="java.lang.String" value="139.129.200.212" />
+        <property name="password" value="000000aA"/>
+    </bean>  
+    
+    <bean id="jedisSentinelPool" class="redis.clients.jedis.ShardedJedisPool">  
+        <constructor-arg index="0" ref="jedisPoolConfig" />  
+        <constructor-arg index="1">  
+            <list>  
+                <ref bean="jedisShardInfoDefault" />  
+            </list>  
+        </constructor-arg>
+    </bean> 
+    
+    
 	 <!-- 采用redis的进行缓存配置  start -->
     <bean id="methodCacheInterceptor" class="com.fintech.platform.core.ehcache.MethodRedisCacheInterceptor">  
       <property name="pool" ref="jedisSentinelPool" />  
