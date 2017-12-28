@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.logmonitor.sysappftpinfo.dao.SysAppFtpInfoDao">
+<resultMap id="SysAppFtpInfoDTO" type="com.jy.modules.logmonitor.sysappftpinfo.dto.SysAppFtpInfoDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="ip" column="IP" jdbcType="VARCHAR" />
+				<result property="port" column="PORT" jdbcType="VARCHAR" />
+				<result property="username" column="USERNAME" jdbcType="VARCHAR" />
+				<result property="password" column="PASSWORD" jdbcType="VARCHAR" />
+				<result property="appFlag" column="APP_FLAG" jdbcType="VARCHAR" />
+				<result property="remoteDic" column="REMOTE_DIC" jdbcType="VARCHAR" />
+				<result property="applogDic" column="APPLOG_DIC" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_APP_FTP_INFO -->	
+<select id="searchSysAppFtpInfoByPaging" parameterType="java.util.Map" resultMap="SysAppFtpInfoDTO">
+    	 		select 
+						t1.id                             ,
+						t1.ip                             ,
+						t1.port                           ,
+						t1.username                       ,
+						t1.password                       ,
+						t1.app_flag                       ,
+						t1.remote_dic                     ,
+						t1.applog_dic                     
+					
+				from sys_app_ftp_info 	t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.ip != null and dto.ip != ''">
+						and t1.IP =#{dto.ip}
+    			</if>
+    			<if test="dto.port != null and dto.port != ''">
+						and t1.PORT =#{dto.port}
+    			</if>
+    			<if test="dto.username != null and dto.username != ''">
+						and t1.USERNAME =#{dto.username}
+    			</if>
+    			<if test="dto.password != null and dto.password != ''">
+						and t1.PASSWORD =#{dto.password}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and t1.APP_FLAG =#{dto.appFlag}
+    			</if>
+    			<if test="dto.remoteDic != null and dto.remoteDic != ''">
+						and t1.REMOTE_DIC =#{dto.remoteDic}
+    			</if>
+    			<if test="dto.applogDic != null and dto.applogDic != ''">
+						and t1.APPLOG_DIC =#{dto.applogDic}
+    			</if>
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_APP_FTP_INFO  -->
+<select id="searchSysAppFtpInfo" parameterType="java.util.Map" resultMap="SysAppFtpInfoDTO">
+    	     select 
+						t1.id                             ,
+						t1.ip                             ,
+						t1.port                           ,
+						t1.username                       ,
+						t1.password                       ,
+						t1.app_flag                       ,
+						t1.remote_dic                     ,
+						t1.applog_dic                     
+				from sys_app_ftp_info 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.ip != null and dto.ip != ''">
+						and t1.IP = #{dto.ip}
+    			</if>
+    			<if test="dto.port != null and dto.port != ''">
+						and t1.PORT = #{dto.port}
+    			</if>
+    			<if test="dto.username != null and dto.username != ''">
+						and t1.USERNAME = #{dto.username}
+    			</if>
+    			<if test="dto.password != null and dto.password != ''">
+						and t1.PASSWORD = #{dto.password}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and t1.APP_FLAG = #{dto.appFlag}
+    			</if>
+    			<if test="dto.remoteDic != null and dto.remoteDic != ''">
+						and t1.REMOTE_DIC = #{dto.remoteDic}
+    			</if>
+    			<if test="dto.applogDic != null and dto.applogDic != ''">
+						and t1.APPLOG_DIC =#{dto.applogDic}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_APP_FTP_INFO -->
+<select id="findSysAppFtpInfoByPrimaryKey" parameterType="java.util.Map" resultMap="SysAppFtpInfoDTO">
+   	 		select 
+					t1.id                             ,
+					t1.ip                             ,
+					t1.port                           ,
+					t1.username                       ,
+					t1.password                       ,
+					t1.app_flag                       ,
+					t1.remote_dic                     ,
+					t1.applog_dic                     
+			from sys_app_ftp_info 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_APP_FTP_INFO -->
+<insert id="insertSysAppFtpInfo" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_APP_FTP_INFO.nextval as id from dual
+	</selectKey>
+			insert into sys_app_ftp_info
+			(   		
+					id                             ,
+					ip                             ,
+					port                           ,
+					username                       ,
+					password                       ,
+					app_flag                       ,
+					remote_dic                     ,
+					applog_dic                     
+			)
+			values(#{dto.id}
+					,#{dto.ip,jdbcType=VARCHAR}
+					,#{dto.port,jdbcType=VARCHAR}
+					,#{dto.username,jdbcType=VARCHAR}
+					,#{dto.password,jdbcType=VARCHAR}
+					,#{dto.appFlag,jdbcType=VARCHAR}
+					,#{dto.remoteDic,jdbcType=VARCHAR}
+					,#{dto.applogDic,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_APP_FTP_INFO -->
+<update id="updateSysAppFtpInfo" parameterType="java.util.Map">
+	     update sys_app_ftp_info t1
+	           set 
+			           t1.ip                             =#{dto.ip,jdbcType=VARCHAR},
+			           t1.port                           =#{dto.port,jdbcType=VARCHAR},
+			           t1.username                       =#{dto.username,jdbcType=VARCHAR},
+			           t1.password                       =#{dto.password,jdbcType=VARCHAR},
+			           t1.app_flag                       =#{dto.appFlag,jdbcType=VARCHAR},
+			           t1.remote_dic                     =#{dto.remoteDic,jdbcType=VARCHAR},
+			           t1.applog_dic                     =#{dto.applogDic,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_APP_FTP_INFO -->
+<delete id="deleteSysAppFtpInfoByID" parameterType="java.util.Map">
+    	delete from sys_app_ftp_info t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_APP_FTP_INFO -->
+<delete id="deleteSysAppFtpInfoByPrimaryKey" parameterType="java.util.Map">
+	     delete from sys_app_ftp_info t1 where t1.ID in (${ids} )
+</delete>
+</mapper>

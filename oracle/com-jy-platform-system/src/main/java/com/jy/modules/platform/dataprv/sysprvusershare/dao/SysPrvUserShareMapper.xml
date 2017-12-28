@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.dataprv.sysprvusershare.dao.SysPrvUserShareDao">
+<resultMap id="SysPrvUserShareDTO" type="com.jy.modules.platform.dataprv.sysprvusershare.dto.SysPrvUserShareDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="fromUserId" column="FROM_USER_ID" jdbcType="DECIMAL" />
+				<result property="toUserId" column="TO_USER_ID" jdbcType="DECIMAL" />
+				<result property="actionState" column="ACTION_STATE" jdbcType="VARCHAR" />
+				<result property="synState" column="SYN_STATE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_PRV_USER_SHARE -->	
+<select id="searchSysPrvUserShareByPaging" parameterType="java.util.Map" resultMap="SysPrvUserShareDTO">
+    	 		select 
+						t1.id                             ,
+						t1.from_user_id                   ,
+						t1.to_user_id                     ,
+						t1.action_state                   ,
+						t1.syn_state                      ,
+						t1.validate_state                 
+					
+				from sys_prv_user_share 	t1
+				where  t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.fromUserId != null and dto.fromUserId != ''">
+						and t1.FROM_USER_ID =#{dto.fromUserId}
+    			</if>
+    			<if test="dto.toUserId != null and dto.toUserId != ''">
+						and t1.TO_USER_ID =#{dto.toUserId}
+    			</if>
+				order by t1.id desc
+</select>
+			
+
+<select id="searchSysPrvUserShareCount" parameterType="java.util.Map" resultType="int">
+				select 
+						count(1)
+					
+				from sys_prv_user_share 	t1
+				where  t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.fromUserId != null and dto.fromUserId != ''">
+						and t1.FROM_USER_ID =#{dto.fromUserId}
+    			</if>
+    			<if test="dto.toUserId != null and dto.toUserId != ''">
+						and t1.TO_USER_ID =#{dto.toUserId}
+    			</if>
+				order by t1.id desc
+
+</select>
+  
+<!-- 查询列表 SYS_PRV_USER_SHARE  -->
+<select id="searchSysPrvUserShare" parameterType="java.util.Map" resultMap="SysPrvUserShareDTO">
+    	     select 
+						t1.id                             ,
+						t1.from_user_id                   ,
+						t1.to_user_id                     ,
+						t1.action_state                   ,
+						t1.syn_state                      ,
+						t1.validate_state                 
+				from sys_prv_user_share t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.fromUserId != null and dto.fromUserId != ''">
+						and t1.FROM_USER_ID = #{dto.fromUserId}
+    			</if>
+    			<if test="dto.toUserId != null and dto.toUserId != ''">
+						and t1.TO_USER_ID = #{dto.toUserId}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_PRV_USER_SHARE -->
+<select id="findSysPrvUserShareByPrimaryKey" parameterType="java.util.Map" resultMap="SysPrvUserShareDTO">
+   	 		select 
+					t1.id                             ,
+					t1.from_user_id                   ,
+					t1.to_user_id                     ,
+					t1.action_state                   ,
+					t1.syn_state                      ,
+					t1.validate_state                 
+			from sys_prv_user_share 		t1
+			where t1.validate_state='1' and
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_PRV_USER_SHARE -->
+<insert id="insertSysPrvUserShare" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_PRV_USER_SHARE.nextval as id from dual
+	</selectKey>
+			insert into sys_prv_user_share
+			(   		
+					id                             ,
+					from_user_id                   ,
+					to_user_id                     ,
+					action_state                   ,
+					syn_state                      ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.fromUserId,jdbcType=DECIMAL}
+					,#{dto.toUserId,jdbcType=DECIMAL}
+					,'I'
+					,'0'
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 SYS_PRV_USER_SHARE -->
+<update id="updateSysPrvUserShare" parameterType="java.util.Map">
+	     update sys_prv_user_share t1
+	           set 
+			           t1.from_user_id                   =#{dto.fromUserId,jdbcType=DECIMAL},
+			           t1.to_user_id                     =#{dto.toUserId,jdbcType=DECIMAL},
+			           t1.action_state                   ='U',
+			           t1.syn_state                      ='0',
+			           t1.validate_state                 ='1'
+	     where t1.id = #{dto.id}
+</update>
+
+<select id="queryInfoNumByUser" parameterType="java.util.Map" resultType="java.lang.String">
+	select count(id) num from sys_prv_user_share t1
+	where t1.from_user_id in (${fromUserIds}) and to_user_id = ${toUserId}
+</select>
+<!-- 更新对象 SYS_PRV_ORG_AUTH -->
+<update id="updateSysPrvUserShareSyn">
+	     update sys_prv_user_share t1
+	           set t1.syn_state ='1'
+	     where t1.syn_state = '0'
+</update>
+
+<!-- 主键删除 SYS_PRV_USER_SHARE -->
+<delete id="deleteSysPrvUserShareByID" parameterType="java.util.Map">
+    	delete from sys_prv_user_share t1 where t1.ID in (${ids} )
+</delete>
+
+
+
+<select id="searchysPrvUserShareByID" parameterType="java.util.Map" resultMap="SysPrvUserShareDTO">
+		select 
+						t1.id                             ,
+						t1.from_user_id                   ,
+						t1.to_user_id                     ,
+						t1.action_state                   ,
+						t1.syn_state                      ,
+						t1.validate_state                 
+				from sys_prv_user_share t1
+				where t1.ID in (${ids} ) 
+</select> 
+
+
+
+
+
+
+
+
+
+<!-- 主键假删除 SYS_PRV_USER_SHARE -->
+<update id="deleteSysPrvUserShareByPrimaryKey" parameterType="java.util.Map">
+	     update sys_prv_user_share t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+
+<select id="searchSysPrvUserShareByIds" parameterType="java.util.Map" resultMap="SysPrvUserShareDTO">
+	select 
+					t1.id                             ,
+					t1.from_user_id                   ,
+					t1.to_user_id                     ,
+					t1.action_state                   ,
+					t1.syn_state                      ,
+					t1.validate_state                 
+			from sys_prv_user_share 		t1
+			where t1.validate_state='1' and
+				t1.id in (${ids}) and t1.syn_state = '1'
+</select>
+</mapper>

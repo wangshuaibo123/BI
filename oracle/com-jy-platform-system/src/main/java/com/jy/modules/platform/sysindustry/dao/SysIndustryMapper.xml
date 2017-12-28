@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.sysindustry.dao.SysIndustryDao">
+<resultMap id="SysIndustryDTO" type="com.jy.modules.platform.sysindustry.dto.SysIndustryDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="industryName" column="INDUSTRY_NAME" jdbcType="VARCHAR" />
+				<result property="industryType" column="INDUSTRY_TYPE" jdbcType="VARCHAR" />
+				<result property="parentCode" column="PARENT_CODE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="industryCode" column="INDUSTRY_CODE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 sys_industry -->	
+<select id="searchSysIndustryByPaging" parameterType="java.util.Map" resultMap="SysIndustryDTO">
+    	 		select 
+						t1.id                             ,
+						t1.industry_name                  ,
+						t1.industry_type                  ,
+						t1.PARENT_CODE                      ,
+						t1.validate_state                 
+					
+				from sys_industry 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.industryName != null and dto.industryName != ''">
+						and t1.INDUSTRY_NAME =#{dto.industryName}
+    			</if>
+    			<if test="dto.industryType != null and dto.industryType != ''">
+						and t1.INDUSTRY_TYPE =#{dto.industryType}
+    			</if>
+    			<if test="dto.parentCode != null and dto.parentCode != ''">
+						and t1.PARENT_CODE =#{dto.parentCode}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 sys_industry  -->
+<select id="searchSysIndustry" parameterType="java.util.Map" resultMap="SysIndustryDTO">
+    	     select 
+						t1.id                             ,
+						t1.industry_name                  ,
+						t1.industry_type                  ,
+						t1.PARENT_CODE                      ,
+						t1.validate_state,
+						t1.industry_code                 
+				from sys_industry 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.industryName != null and dto.industryName != ''">
+						and t1.INDUSTRY_NAME = #{dto.industryName}
+    			</if>
+    			<if test="dto.industryType != null and dto.industryType != ''">
+						and t1.INDUSTRY_TYPE = #{dto.industryType}
+    			</if>
+    			<if test="dto.parentCode != null and dto.parentCode != ''">
+						and t1.PARENT_CODE = #{dto.parentCode}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+</select>
+
+<!-- 根据行业ID查询子职位 -->
+<select id="queryPositionByIndustry" parameterType="java.lang.String" resultType="java.util.Map">
+	  select 
+						t1.id      ID                       ,
+						t1.industry_name INDUSTRYNAME                 ,
+						t1.industry_type  INDUSTRYTYPE                ,
+						t1.PARENT_CODE      PARENTCODE              ,
+						t1.industry_code   INDUSTRYCODE
+				from sys_industry 		t1
+				where 1=1  and t1.PARENT_CODE = #{defaultCode}
+
+</select>
+
+<!-- 根据行业Code查询子职位 -->
+<select id="getPositionsByIndustry" parameterType="java.util.Map" resultType="java.util.Map">
+	  select 
+						t1.id      ID                       ,
+						t1.industry_name INDUSTRYNAME                 ,
+						t1.industry_type  INDUSTRYTYPE                ,
+						t1.PARENT_CODE      PARENTCODE              ,
+						t1.industry_code   INDUSTRYCODE
+				from sys_industry 		t1
+				where 1=1  and t1.PARENT_CODE = #{dto.parentCode} and t1.industry_type='position'
+
+</select>
+
+
+<!-- 查询列表 sys_industry  -->
+<select id="searchIndustries" parameterType="java.util.Map" resultType="java.util.Map">
+    	     select 
+						t1.id      ID                       ,
+						t1.industry_name INDUSTRYNAME                 ,
+						t1.industry_type  INDUSTRYTYPE                ,
+						t1.PARENT_CODE      PARENTCODE              ,
+						t1.industry_code   INDUSTRYCODE               
+				from sys_industry 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.industryName != null and dto.industryName != ''">
+						and t1.INDUSTRY_NAME = #{dto.industryName}
+    			</if>
+    			<if test="dto.industryType != null and dto.industryType != ''">
+						and t1.INDUSTRY_TYPE = #{dto.industryType}
+    			</if>
+    			<if test="dto.parentCode != null and dto.parentCode != ''">
+						and t1.PARENT_CODE = #{dto.parentCode}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+</select>
+
+<select id="searchPositionsOfSameIndustryByID" parameterType="java.util.Map" resultType="java.util.Map">
+
+				select  t1.id      ID                       ,
+						t1.industry_name INDUSTRYNAME                 ,
+						t1.industry_type  INDUSTRYTYPE                ,
+						t1.PARENT_CODE      PARENTCODE,
+						t1.industry_code   INDUSTRYCODE         
+				from sys_industry  t1 where t1.parent_code = 
+				(select s.PARENT_CODE from sys_industry s where s.industry_code=#{dto.industryCode})
+				
+</select>
+  
+<!-- 主键查询对象  sys_industry -->
+<select id="findSysIndustryByPrimaryKey" parameterType="java.util.Map" resultMap="SysIndustryDTO">
+   	 		select 
+					t1.id                             ,
+					t1.industry_name                  ,
+					t1.industry_type                  ,
+					t1.PARENT_CODE                      ,
+					t1.validate_state                 
+			from sys_industry 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 sys_industry -->
+<insert id="insertSysIndustry" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_sys_industry.nextval as id from dual
+	</selectKey>
+			insert into sys_industry
+			(   		
+					id                             ,
+					industry_name                  ,
+					industry_type                  ,
+					PARENT_CODE                      ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.industryName,jdbcType=VARCHAR}
+					,#{dto.industryType,jdbcType=VARCHAR}
+					,#{dto.parentCode,jdbcType=DECIMAL}
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 sys_industry -->
+<update id="updateSysIndustry" parameterType="java.util.Map">
+	     update sys_industry t1
+	           set 
+			           t1.industry_name                  =#{dto.industryName,jdbcType=VARCHAR},
+			           t1.industry_type                  =#{dto.industryType,jdbcType=VARCHAR},
+			           t1.PARENT_CODE                      =#{dto.parentCode,jdbcType=DECIMAL},
+			           t1.validate_state                 ='1'
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 sys_industry -->
+<delete id="deleteSysIndustryByID" parameterType="java.util.Map">
+    	delete from sys_industry t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 sys_industry -->
+<update id="deleteSysIndustryByPrimaryKey" parameterType="java.util.Map">
+	     update sys_industry t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

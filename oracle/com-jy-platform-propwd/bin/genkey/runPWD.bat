@@ -1,0 +1,1 @@
+java -Xms256M -Xmx256M -jar  com-jy-platform-propwd_fat.jar

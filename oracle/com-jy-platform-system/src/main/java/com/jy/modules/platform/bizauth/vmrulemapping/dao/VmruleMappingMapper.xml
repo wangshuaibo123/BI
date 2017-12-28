@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.bizauth.vmrulemapping.dao.VmruleMappingDao">
+<resultMap id="VmruleMappingDTO" type="com.jy.modules.platform.bizauth.vmrulemapping.dto.VmruleMappingDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="mapType" column="MAP_TYPE" jdbcType="VARCHAR" />
+				<result property="mapKey" column="MAP_KEY" jdbcType="VARCHAR" />
+				<result property="mapValue" column="MAP_VALUE" jdbcType="VARCHAR" />
+				<result property="orgType" column="ORG_TYPE" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+				<result property="keyName" column="keyName" jdbcType="VARCHAR" />
+				<result property="valueName" column="valueName" jdbcType="VARCHAR" />
+</resultMap>
+<resultMap id="SysUserDTO" type="com.jy.modules.platform.sysorg.dto.SysUserDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="userName" column="USER_NAME" jdbcType="VARCHAR" />
+				<result property="userNo" column="USER_NO" jdbcType="VARCHAR" />
+				<result property="loginName" column="LOGIN_NAME" jdbcType="VARCHAR" />
+				<result property="password" column="PASSWORD" jdbcType="VARCHAR" />
+				<result property="salt" column="SALT" jdbcType="VARCHAR" />
+				<result property="mobile" column="MOBILE" jdbcType="VARCHAR" />
+				<result property="email" column="EMAIL" jdbcType="VARCHAR" />
+				<result property="userImage" column="USER_IMAGE" jdbcType="VARCHAR" />
+				<result property="sex" column="SEX" jdbcType="VARCHAR" />
+				<result property="birthday" column="BIRTHDAY" jdbcType="VARCHAR" />
+				<result property="nationality" column="NATIONALITY" jdbcType="VARCHAR" />
+				<result property="education" column="EDUCATION" jdbcType="VARCHAR" />
+				<result property="job" column="JOB" jdbcType="VARCHAR" />
+				<result property="homeAddress" column="HOME_ADDRESS" jdbcType="VARCHAR" />
+				<result property="homeZipcode" column="HOME_ZIPCODE" jdbcType="VARCHAR" />
+				<result property="homeTel" column="HOME_TEL" jdbcType="VARCHAR" />
+				<result property="officeTel" column="OFFICE_TEL" jdbcType="VARCHAR" />
+				<result property="officeAddress" column="OFFICE_ADDRESS" jdbcType="VARCHAR" />
+				<result property="orderBy" column="ORDER_BY" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="isLocked" column="IS_LOCKED" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 vmRULE_MAPPING -->	
+<select id="searchVmruleMappingByPaging" parameterType="java.util.Map" resultMap="VmruleMappingDTO">	
+				select * from (
+						select 
+											t1.id                             ,
+											t1.map_type                       ,
+											t1.map_key                        ,
+											t1.map_value                      ,
+											t1.org_type                       ,
+											t1.create_time                    ,
+											t1.create_by                      ,
+											(select DISTINCT(user_name) from  SYS_USER t3 where t3.id = t1.map_key)   as  keyName ,
+											(select DISTINCT(user_name) from  SYS_USER t4 where t4.id = t1.map_value)  as  valueName
+									from ${vmTableName} 	t1 
+									where t1.map_type=1 
+					<if test="startOrg != null and startOrg != ''">
+						and (t1.map_key in (select b.user_id from sys_org_user b where b.org_id in(select id from sys_org a where a.id=#{startOrg} or a.parent_ids like '%/'||#{startOrg}||'/%'))) 
+						<!-- or t1.map_value in (select b.user_id from sys_org_user b where b.org_id in(select id from sys_org a where a.id=#{startOrg} or a.parent_ids like '%/'||#{startOrg}||'/%'))) -->
+    				</if>
+
+						UNION ALL
+
+								select 
+													t1.id                             ,
+													t1.map_type                       ,
+													t1.map_key                        ,
+													t1.map_value                      ,
+													t1.org_type                       ,
+													t1.create_time                    ,
+													t1.create_by                      ,
+													(select DISTINCT(user_name) from  SYS_USER t3 where t3.id = t1.map_key)   as  keyName,
+													(select DISTINCT(org_name) from VMTREE_INFO t4 where t4.org_id = T1.MAP_VALUE and t4.org_type = #{code})	as  valueName	 
+											from ${vmTableName} 	t1  
+											where t1.map_type=2 
+						<if test="startOrg != null and startOrg != ''">
+							and (t1.map_key in (select b.user_id from sys_org_user b where b.org_id in(select id from sys_org a where a.id=#{startOrg} or a.parent_ids like '%/'||#{startOrg}||'/%')) )
+							<!-- or t1.map_value in (select a.org_id from vmtree_info a start with org_id =#{startOrg}  connect by prior  org_id=parent_id)) -->
+    					</if>
+
+						union ALL
+
+								select 
+											t1.id                             ,
+											t1.map_type                       ,
+											t1.map_key                        ,
+											t1.map_value                      ,
+											t1.org_type                       ,
+											t1.create_time                    ,
+											t1.create_by                      ,
+												(select DISTINCT(org_name) from VMTREE_INFO t3 where t3.org_id = t1.map_key and t3.org_type = #{code})	as  keyName	,
+												(select DISTINCT(org_name) from VMTREE_INFO t4 where t4.org_id = T1.MAP_VALUE and t4.org_type = #{code})	as  valueName	
+									from ${vmTableName} 	t1  
+									where t1.map_type=3 
+					<if test="startOrg != null and startOrg != ''">
+							and (t1.map_key in (select a.org_id from vmtree_info a start with org_id =#{startOrg}  connect by prior  org_id=parent_id) )
+							<!-- or t1.map_value in (select a.org_id from vmtree_info a start with org_id =#{startOrg}  connect by prior  org_id=parent_id)) -->
+    				</if>
+				) t2
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t2.ID =#{dto.id}
+    			</if>
+    			<if test="dto.mapType != null and dto.mapType != ''">
+						and t2.MAP_TYPE =#{dto.mapType}
+    			</if>
+    			<if test="dto.mapKey != null and dto.mapKey != ''">
+						and t2.MAP_KEY like '%'||#{dto.mapKey}||'%'
+    			</if>
+    			<if test="dto.mapValue != null and dto.mapValue != ''">
+						and t2.MAP_VALUE like '%'||#{dto.mapValue}||'%'
+    			</if>
+    			<if test="dto.keyName!= null and dto.keyName != ''">
+						and t2.keyName like '%'||#{dto.keyName}||'%'
+    			</if>
+    			<if test="dto.valueName != null and dto.valueName != ''">
+						and t2.valueName like '%'||#{dto.valueName}||'%'
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t2.ORG_TYPE =#{dto.orgType}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t2.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t2.CREATE_BY =#{dto.createBy}
+    			</if>
+				
+				order by t2.id desc
+</select>
+  
+<!-- 查询列表 vmRULE_MAPPING  -->
+<select id="searchVmruleMapping" parameterType="java.util.Map" resultMap="VmruleMappingDTO">
+    	     select 
+						t1.id                             ,
+						t1.map_type                       ,
+						t1.map_key                        ,
+						t1.map_value                      ,
+						t1.org_type                       ,
+						t1.create_time                    ,
+						t1.create_by                      
+				from ${vmTableName} 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.mapType != null and dto.mapType != ''">
+						and t1.MAP_TYPE = #{dto.mapType}
+    			</if>
+    			<if test="dto.mapKey != null and dto.mapKey != ''">
+						and t1.MAP_KEY in (${dto.mapKey})
+    			</if>
+    			<if test="dto.mapValue != null and dto.mapValue != ''">
+						and t1.MAP_VALUE in (${dto.mapValue})
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE = #{dto.orgType}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  vmRULE_MAPPING -->
+<select id="findVmruleMappingByPrimaryKey" parameterType="java.util.Map" resultMap="VmruleMappingDTO">
+   	 		select 
+					t1.id                             ,
+					t1.map_type                       ,
+					t1.map_key                        ,
+					t1.map_value                      ,
+					t1.org_type                       ,
+					t1.create_time                    ,
+					t1.create_by                      
+			from vmrule_mapping 		t1
+			where 
+				t1.id = #{id}
+</select>
+
+
+<!-- 主键查询对象  vmRULE_MAPPING -->
+<select id="findVmruleMappingByPrimaryKeyAndTableName" parameterType="java.util.Map" resultMap="VmruleMappingDTO">
+   	 		select 
+					t1.id                             ,
+					t1.map_type                       ,
+					t1.map_key                        ,
+					t1.map_value                      ,
+					t1.org_type                       ,
+					t1.create_time                    ,
+					t1.create_by                      
+			from ${vmtableName} 		t1
+			where 
+				t1.id = #{id}
+</select>
+
+
+  
+<!-- 新增对象 vmRULE_MAPPING -->
+<insert id="insertVmruleMapping" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select ${seqName}.nextval as id from dual
+	</selectKey>
+			insert into ${vmtableName}
+			(   		
+					id                             ,
+					map_type                       ,
+					map_key                        ,
+					map_value                      ,
+					org_type                       ,
+					create_time                    ,
+					create_by                      
+			)
+			values(#{dto.id}
+					,#{dto.mapType,jdbcType=VARCHAR}
+					,#{dto.mapKey,jdbcType=VARCHAR}
+					,#{dto.mapValue,jdbcType=VARCHAR}
+					,#{dto.orgType,jdbcType=VARCHAR}
+					,sysdate
+					,#{dto.createBy,jdbcType=DECIMAL}
+			)
+</insert>
+    
+<!-- 更新对象 vmRULE_MAPPING -->
+<update id="updateVmruleMapping" parameterType="java.util.Map">
+	     update vmrule_mapping t1
+	           set 
+			           t1.map_type                       =#{dto.mapType,jdbcType=VARCHAR},
+			           t1.map_key                        =#{dto.mapKey,jdbcType=VARCHAR},
+			           t1.map_value                      =#{dto.mapValue,jdbcType=VARCHAR},
+			           t1.org_type                       =#{dto.orgType,jdbcType=VARCHAR},
+			           t1.create_time                    =#{dto.createTime,jdbcType=TIMESTAMP},
+			           t1.create_by                      =#{dto.createBy,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 vmRULE_MAPPING -->
+<delete id="deleteVmruleMappingByPrimaryKey" parameterType="java.util.Map">
+    	delete from ${vmtableName} t1 where t1.ID in (${ids} )
+</delete>
+
+<!-- 删除该用户所有的映射管理 -->
+<delete id="deleteVmrleMappingByUserId"  parameterType="java.util.Map">
+		delete from ${vmMappingtableName}  t  where  (t.map_key =#{sourceId}   and (t.map_type = 1 or t.map_type = 2)) or (t.map_value = #{sourceId}  and t.map_type = 1)
+</delete>
+<!-- 删除该用户所有的数据权限 -->
+<delete id="deleteVmDataPrivByUserId"  parameterType="java.util.Map">
+		delete from ${vmPrivtableName} t1 
+	    where t1.vmrule_mapping_id in (select id from ${vmMappingtableName}  t where (t.map_key =#{sourceId}   and (t.map_type = 1 or t.map_type = 2)) or (t.map_value = #{sourceId}  and map_type = 1)) 
+		or (t1.user_id = #{sourceId}    or  t1.owner_id =#{sourceId} )
+</delete>
+
+<!-- 删除该组织所有的映射管理 -->
+<delete id="deleteVmrleMappingByOrgId">
+		delete from ${vmMappingtableName}  t  where  ((t.map_key =#{sourceId} or t.map_value =#{sourceId})  and map_type = 3 ) or  (t.map_value =#{sourceId} and  map_type = 2)
+</delete>
+
+<!-- 删除该组织的数据权限 -->
+<delete id="deleteVmDataPrivByOrgId">
+		delete from ${vmPrivtableName} t1 
+	    where t1.vmrule_mapping_id in (select id from ${vmMappingtableName}  t where  ((t.map_key =#{sourceId} or t.map_value =#{sourceId})  and map_type = 3 ) or  (t.map_value =#{sourceId} and  map_type = 2) ) 
+		or (t1.org_id = #{sourceId})
+</delete>
+
+
+<!-- 查询虚线下该某一个用户拥有的所有数据权限 机构只查询同级-->
+<select id="findVmruleMappingByUserId" parameterType="java.util.Map" resultMap="SysUserDTO">
+		SELECT
+						a1.id                             ,
+						a1.user_name                      ,
+						a1.user_no                        ,
+						a1.login_name                     ,
+						a1.password                       ,
+						a1.salt                           ,
+						a1.mobile                         ,
+						a1.email                          ,
+						a1.user_image                     ,
+						a1.sex                            ,
+						a1.birthday                       ,
+						a1.nationality                    ,
+						a1.education                      ,
+						a1.job                            ,
+						a1.home_address                   ,
+						a1.home_zipcode                   ,
+						a1.home_tel                       ,
+						a1.office_tel                     ,
+						a1.office_address                 ,
+						a1.order_by                       ,
+						a1.validate_state                 ,
+						a1.is_locked                      ,
+						a1.version                        
+			FROM
+				SYS_USER a1
+			RIGHT JOIN (
+				SELECT DISTINCT
+					(user_id) AS user_id
+				FROM
+					(
+						SELECT
+							MAP_VALUE AS user_id
+						FROM
+							${vmMappingtableName}
+						WHERE
+							MAP_TYPE = 1
+						AND MAP_KEY = #{userId}
+			
+						UNION ALL
+			
+							SELECT
+								TO_CHAR (USER_ID) AS user_id
+							FROM
+								VMUSER_VMORG_MAP t1
+							LEFT JOIN ${vmMappingtableName} t2 ON t1.ORG_ID = T2.MAP_VALUE
+							WHERE
+								T2.MAP_TYPE = 2
+							AND t1.ORG_TYPE = #{orgType}
+							AND T2.MAP_KEY = #{userId}
+					)
+			) A ON a1. ID = A .user_id where 1=1 
+			<if test="validateState!= null and validateState!='' ">
+				and a1.validate_state = #{validateState}
+			</if>
+			<if test="isOrder!= null and isOrder==true ">
+				order by a1.user_name desc
+			</if>
+</select>
+
+<!-- 清理离职人员映射关系 -->
+<delete id="modifyCleanVmruleMapping">
+		delete from ${vmtableName} t1 
+	    where t1.map_type=1 and 
+	    t1.map_key in (
+	    select b.user_id 
+	    	from sys_org_user b 
+	    		where b.org_id in 
+	    		(select id 
+	    			from sys_org a where a.id=#{startOrg} or a.parent_ids like '%/'||#{startOrg}||'/%') 
+	    			and b.user_id in (select id from sys_user a where a.validate_state=0))
+</delete>
+
+
+</mapper>

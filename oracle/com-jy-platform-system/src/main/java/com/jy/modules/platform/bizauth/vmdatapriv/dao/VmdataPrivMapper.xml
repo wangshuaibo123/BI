@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.bizauth.vmdatapriv.dao.VmdataPrivDao">
+<resultMap id="VmdataPrivDTO" type="com.jy.modules.platform.bizauth.vmdatapriv.dto.VmdataPrivDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="userId" column="USER_ID" jdbcType="DECIMAL" />
+				<result property="ownerId" column="OWNER_ID" jdbcType="DECIMAL" />
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+				<result property="bizId" column="BIZ_ID" jdbcType="DECIMAL" />
+				<result property="orgType" column="ORG_TYPE" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 vmDATA_PRIV -->	
+<select id="searchVmdataPrivByPaging" parameterType="java.util.Map" resultMap="VmdataPrivDTO">
+    	 		select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.biz_id                         ,
+						t1.org_type                       ,
+						t1.create_time                    ,
+						t1.create_by                      
+					
+				from ${vmtableName}	 t1 
+				where 1=1 
+				
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID =#{dto.ownerId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.bizId != null and dto.bizId != ''">
+						and t1.BIZ_ID =#{dto.bizId}
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE =#{dto.orgType}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+				
+				order by t1.id desc
+</select>
+
+<!-- 查询列表 vmDATA_PRIV  -->
+<select id="searchVmdataPrivrpeate" parameterType="java.util.Map" resultMap="VmdataPrivDTO">
+    	     select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.biz_id                         ,
+						t1.org_type                       ,
+						t1.create_time                    ,
+						t1.create_by                      
+				from  ${vmtableName}		t1 
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID = #{dto.ownerId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.bizId != null and dto.bizId != ''">
+						and t1.BIZ_ID = #{dto.bizId}
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE = #{dto.orgType}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+</select>
+  
+<!-- 查询列表 vmDATA_PRIV  -->
+<select id="searchVmdataPriv" parameterType="java.util.Map" resultMap="VmdataPrivDTO">
+    	     select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.biz_id                         ,
+						t1.org_type                       ,
+						t1.create_time                    ,
+						t1.create_by                      
+				from vmdata_priv 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID = #{dto.ownerId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.bizId != null and dto.bizId != ''">
+						and t1.BIZ_ID = #{dto.bizId}
+    			</if>
+    			<if test="dto.orgType != null and dto.orgType != ''">
+						and t1.ORG_TYPE = #{dto.orgType}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  vmDATA_PRIV -->
+<select id="findVmdataPrivByPrimaryKey" parameterType="java.util.Map" resultMap="VmdataPrivDTO">
+   	 		select 
+					t1.id                             ,
+					t1.user_id                        ,
+					t1.owner_id                       ,
+					t1.org_id                         ,
+					t1.biz_id                         ,
+					t1.org_type                       ,
+					t1.create_time                    ,
+					t1.create_by                      
+			from vmdata_priv 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 vmDATA_PRIV -->
+<insert id="insertVmdataPriv" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select ${seqName}.nextval as id from dual
+	</selectKey>
+			insert into ${vmtableName}
+			(   		
+					id                             ,
+					user_id                        ,
+					owner_id                       ,
+					org_id                         ,
+					biz_id                         ,
+					org_type                       ,
+					create_time                    ,
+					create_by                      ,
+					vmrule_mapping_id              
+			)
+			values(#{dto.id}
+					,#{dto.userId,jdbcType=DECIMAL}
+					,#{dto.ownerId,jdbcType=DECIMAL}
+					,#{dto.orgId,jdbcType=DECIMAL}
+					,#{dto.bizId,jdbcType=DECIMAL}
+					,#{dto.orgType,jdbcType=VARCHAR}
+					,sysdate
+					,#{dto.createBy,jdbcType=DECIMAL}
+					,#{dto.vmRuleMappingId,jdbcType=DECIMAL}
+			)
+</insert>
+
+
+<!-- 添加员工时新增对象 vmDATA_PRIV -->
+<insert id="insertVmdataPrivforUser" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_vmdata_priv.nextval as id from dual
+	</selectKey>
+			insert into vmdata_priv
+			(   		
+					id                             ,
+					user_id                        ,
+					owner_id                       ,
+					org_id                         ,
+					biz_id                         ,
+					org_type                       ,
+					create_time                    ,
+					create_by                      
+					
+			)
+			values(#{dto.id}
+					,#{dto.userId,jdbcType=DECIMAL}
+					,#{dto.ownerId,jdbcType=DECIMAL}
+					,#{dto.orgId,jdbcType=DECIMAL}
+					,#{dto.bizId,jdbcType=DECIMAL}
+					,#{dto.orgType,jdbcType=VARCHAR}
+					,sysdate
+					,#{dto.createBy,jdbcType=DECIMAL}
+					
+			)
+</insert>
+    
+<!-- 更新对象 vmDATA_PRIV -->
+<update id="updateVmdataPriv" parameterType="java.util.Map">
+	     update vmdata_priv t1
+	           set 
+			           t1.user_id                        =#{dto.userId,jdbcType=DECIMAL},
+			           t1.owner_id                       =#{dto.ownerId,jdbcType=DECIMAL},
+			           t1.org_id                         =#{dto.orgId,jdbcType=DECIMAL},
+			           t1.biz_id                         =#{dto.bizId,jdbcType=DECIMAL},
+			           t1.org_type                       =#{dto.orgType,jdbcType=VARCHAR},
+			           t1.create_time                    =#{dto.createTime,jdbcType=TIMESTAMP},
+			           t1.create_by                      =#{dto.createBy,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 vmDATA_PRIV -->
+<delete id="deleteVmdataPrivByID" parameterType="java.util.Map">
+    	delete from vmdata_priv t1 where t1.ID in (${ids} )
+</delete>
+
+
+<delete id="deleteVmdataPrivByMappingId" parameterType="java.util.Map">
+    	delete from ${vmtableName} t1 where t1.VMRULE_MAPPING_Id in (${ids} )
+</delete>
+
+
+<!-- 根据USERIDS删除权限表 -->
+<delete id="deleteVmdataPrivByconditions" parameterType="java.util.Map">
+    	delete from ${vmPrivtableName} t1 where t1.VMRULE_MAPPING_Id is null and t1.user_id=#{userId}
+    	and t1.org_type=#{orgType}
+</delete>
+
+
+<!-- 主键假删除 vmDATA_PRIV -->
+<update id="deleteVmdataPrivByPrimaryKey" parameterType="java.util.Map">
+	     update vmdata_priv t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+
+<!-- 根据orgId删除下边离职人员业务权限信息 -->
+<delete id="modifyCleanVmruleDataPriv" parameterType="java.util.Map">
+    	delete from ${vmtableName} t1 where 
+    	1=1 and t1.org_type=#{orgType} 
+    	<if test="mapping != null and mapping != '' and mapping=='true'">
+			and t1.VMRULE_MAPPING_Id is not null
+    	</if>
+    	<if test="mapping != null and mapping != '' and mapping=='false'">
+			and t1.VMRULE_MAPPING_Id is null
+    	</if>
+    	 and t1.user_id in 
+    	 (select b.user_id 
+    	 from sys_org_user b 
+    	 	where b.org_id in
+    	 	(select id 
+    	 	from sys_org a 
+    	 		where a.id=#{startOrg,jdbcType=DECIMAL} or a.parent_ids like '%/'||#{startOrg,jdbcType=DECIMAL}||'/%') 
+    	 		and b.user_id in (select id from sys_user a where a.validate_state=0))
+    	
+</delete>
+<!-- 快速调岗 -->
+<!-- 删除旧的数据权限表 删除旧的数据映射表权限 删除旧的部门岗位归属  新增新的部门岗位归属 只考虑 本人看本人的数据权限 -->
+<!-- 如果是虚拟的机构则 考虑  虚拟映射表配置的 人对机构 需要配置此用户的数据权限 -->
+<update id="fastChangeOrg" parameterType="java.util.Map">
+    declare
+
+	begin 
+	  
+	  delete from ${orgType}_vmdata_priv t3 where t3.vmrule_mapping_id in(
+	  select t2.id from  ${orgType}_vmrule_mapping t2 where t2.map_type='1' and t2.org_type='${orgType}' and t2.map_value='${username}'
+	  )
+	  and t3.org_type='${orgType}'
+	  ;
+	  delete from ${orgType}_vmdata_priv t3 where t3.vmrule_mapping_id in(
+	  select t2.id from  ${orgType}_vmrule_mapping t2 where t2.map_type='1' and t2.org_type='${orgType}' and t2.map_key='${username}'
+	  )
+	  and t3.org_type='${orgType}'
+	  ;
+	  delete from ${orgType}_vmdata_priv t3 where t3.user_id='${username}'
+	  and t3.org_type='${orgType}'
+	  ;
+	  delete from ${orgType}_vmdata_priv t3 where t3.owner_id='${username}'
+	  and t3.org_type='${orgType}'
+	  ;
+	  
+	  delete from ${orgType}_vmrule_mapping t2 where t2.map_type='1' and t2.org_type='${orgType}' and t2.map_value='${username}';
+	  delete from ${orgType}_vmrule_mapping t2 where t2.org_type='${orgType}' and t2.map_key='${username}';
+
+	  delete from vmuser_vmorg_map t1 where t1.org_type='${orgType}' and t1.user_id='${username}';
+		
+		
+	  insert into vmuser_vmorg_map(id, user_id, org_id, org_type)
+	  values(seq_vmuser_vmorg_map.nextval,'${username}','${neworgId}','${orgType}');
+	  
+	  insert into ${orgType}_vmdata_priv(id, user_id, owner_id, org_type, create_time, create_by)
+	  values(seq_${orgType}_vmdata_priv.nextval,'${username}','${username}','${orgType}',systimestamp,'-1');
+	  
+	  insert into ${orgType}_vmdata_priv(id,user_id, owner_id, org_type, create_time, create_by,vmrule_mapping_id)
+	  select seq_${orgType}_vmdata_priv.nextval,t4.map_key,'${username}','${orgType}',systimestamp,'-1',t4.id 
+	  from ${orgType}_vmrule_mapping t4 
+	  where 1=1 and t4.map_type='2' and t4.org_type='${orgType}' and t4.map_value='${neworgId}'
+	  and not exists( select t6.id from  ${orgType}_vmdata_priv t6 where t6.user_id=t4.map_key and t6.owner_id='${username}' and t6.org_type='${orgType}')
+	  ;
+	
+	end;
+</update>
+
+</mapper>

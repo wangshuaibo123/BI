@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.sysbizlog.dao.SysBizLogDao">
+<resultMap id="SysBizLogDTO" type="com.jy.modules.platform.sysbizlog.dto.SysBizLogDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="clientIp" column="CLIENT_IP" jdbcType="VARCHAR" />
+				<result property="userId" column="USER_ID" jdbcType="DECIMAL" />
+				<result property="userName" column="USER_NAME" jdbcType="VARCHAR" />
+				<result property="logContent" column="LOG_CONTENT" jdbcType="VARCHAR" />
+				<result property="logTime" column="LOG_TIME" />
+				<result property="logType" column="LOG_TYPE" jdbcType="VARCHAR" />
+				<result property="logModule" column="LOG_MODULE" jdbcType="VARCHAR" />
+				<result property="logOperate" column="LOG_OPERATE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="isArchive" column="IS_ARCHIVE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_BIZ_LOG -->	
+<select id="searchSysBizLogByPaging" parameterType="java.util.Map" resultMap="SysBizLogDTO">
+    	 		select 
+						t1.id                             ,
+						t1.client_ip                      ,
+						t1.user_id                        ,
+						t1.user_name                      ,
+						t1.log_content                    ,
+						t1.log_time                       ,
+						t1.log_type                       ,
+						t1.log_module                     ,
+						t1.log_operate                    ,
+						t1.validate_state                 ,
+						t1.is_archive                     
+					
+				from sys_biz_log 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.clientIp != null and dto.clientIp != ''">
+						and t1.CLIENT_IP =#{dto.clientIp}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="dto.userName != null and dto.userName != ''">
+						and t1.USER_NAME =#{dto.userName}
+    			</if>
+    			<if test="dto.logContent != null and dto.logContent != ''">
+						and t1.LOG_CONTENT =#{dto.logContent}
+    			</if>
+    			<if test="dto.logTime != null and dto.logTime != ''">
+						and t1.LOG_TIME =#{dto.logTime}
+    			</if>
+    			<if test="dto.logType != null and dto.logType != ''">
+						and t1.LOG_TYPE =#{dto.logType}
+    			</if>
+    			<if test="dto.logModule != null and dto.logModule != ''">
+						and t1.LOG_MODULE =#{dto.logModule}
+    			</if>
+    			<if test="dto.logOperate != null and dto.logOperate != ''">
+						and t1.LOG_OPERATE =#{dto.logOperate}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.isArchive != null and dto.isArchive != ''">
+						and t1.IS_ARCHIVE =#{dto.isArchive}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_BIZ_LOG  -->
+<select id="searchSysBizLog" parameterType="java.util.Map" resultMap="SysBizLogDTO">
+    	     select 
+						t1.id                             ,
+						t1.client_ip                      ,
+						t1.user_id                        ,
+						t1.user_name                      ,
+						t1.log_content                    ,
+						t1.log_time                       ,
+						t1.log_type                       ,
+						t1.log_module                     ,
+						t1.log_operate                    ,
+						t1.validate_state                 ,
+						t1.is_archive                     
+				from sys_biz_log 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.clientIp != null and dto.clientIp != ''">
+						and t1.CLIENT_IP = #{dto.clientIp}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.userName != null and dto.userName != ''">
+						and t1.USER_NAME = #{dto.userName}
+    			</if>
+    			<if test="dto.logContent != null and dto.logContent != ''">
+						and t1.LOG_CONTENT = #{dto.logContent}
+    			</if>
+    			<if test="dto.logTime != null and dto.logTime != ''">
+						and t1.LOG_TIME = #{dto.logTime}
+    			</if>
+    			<if test="dto.logType != null and dto.logType != ''">
+						and t1.LOG_TYPE = #{dto.logType}
+    			</if>
+    			<if test="dto.logModule != null and dto.logModule != ''">
+						and t1.LOG_MODULE = #{dto.logModule}
+    			</if>
+    			<if test="dto.logOperate != null and dto.logOperate != ''">
+						and t1.LOG_OPERATE = #{dto.logOperate}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.isArchive != null and dto.isArchive != ''">
+						and t1.IS_ARCHIVE = #{dto.isArchive}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_BIZ_LOG -->
+<select id="findSysBizLogByPrimaryKey" parameterType="java.util.Map" resultMap="SysBizLogDTO">
+   	 		select 
+					t1.id                             ,
+					t1.client_ip                      ,
+					t1.user_id                        ,
+					t1.user_name                      ,
+					t1.log_content                    ,
+					t1.log_time                       ,
+					t1.log_type                       ,
+					t1.log_module                     ,
+					t1.log_operate                    ,
+					t1.validate_state                 ,
+					t1.is_archive                     
+			from sys_biz_log 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_BIZ_LOG -->
+<insert id="insertSysBizLog" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_BIZ_LOG.nextval as id from dual
+	</selectKey>
+			insert into sys_biz_log
+			(   		
+					id                             ,
+					client_ip                      ,
+					user_id                        ,
+					user_name                      ,
+					log_content                    ,
+					log_time                       ,
+					log_type                       ,
+					log_module                     ,
+					log_operate                    ,
+					validate_state                 ,
+					is_archive                     
+			)
+			values(#{dto.id}
+					,#{dto.clientIp,jdbcType=VARCHAR}
+					,#{dto.userId,jdbcType=DECIMAL}
+					,#{dto.userName,jdbcType=VARCHAR}
+					,#{dto.logContent,jdbcType=VARCHAR}
+					,sysdate
+					,#{dto.logType,jdbcType=VARCHAR}
+					,#{dto.logModule,jdbcType=VARCHAR}
+					,#{dto.logOperate,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.isArchive,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_BIZ_LOG -->
+<update id="updateSysBizLog" parameterType="java.util.Map">
+	     update sys_biz_log t1
+	           set 
+			           t1.client_ip                      =#{dto.clientIp,jdbcType=VARCHAR},
+			           t1.user_id                        =#{dto.userId,jdbcType=DECIMAL},
+			           t1.user_name                      =#{dto.userName,jdbcType=VARCHAR},
+			           t1.log_content                    =#{dto.logContent,jdbcType=VARCHAR},
+			           t1.log_time                       =sysdate
+			           t1.log_type                       =#{dto.logType,jdbcType=VARCHAR},
+			           t1.log_module                     =#{dto.logModule,jdbcType=VARCHAR},
+			           t1.log_operate                    =#{dto.logOperate,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1',
+			           t1.is_archive                     =#{dto.isArchive,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_BIZ_LOG -->
+<delete id="deleteSysBizLogByID" parameterType="java.util.Map">
+    	delete from sys_biz_log t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_BIZ_LOG -->
+<update id="deleteSysBizLogByPrimaryKey" parameterType="java.util.Map">
+	     update sys_biz_log t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.dataprv.sysprvroleresource.dao.SysPrvRoleResourceDao">
+<resultMap id="SysPrvRoleResourceDTO" type="com.jy.modules.platform.dataprv.sysprvroleresource.dto.SysPrvRoleResourceDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="roleId" column="ROLE_ID" jdbcType="DECIMAL" />
+				<result property="resourceId" column="RESOURCE_ID" jdbcType="DECIMAL" />
+				<result property="resourceType" column="RESOURCE_TYPE" jdbcType="VARCHAR" />
+				<result property="actionState" column="ACTION_STATE" jdbcType="VARCHAR" />
+				<result property="synState" column="SYN_STATE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_PRV_ROLE_RESOURCE -->	
+<select id="searchSysPrvRoleResourceByPaging" parameterType="java.util.Map" resultMap="SysPrvRoleResourceDTO">
+    	 		select 
+						t1.id                             ,
+						t1.role_id                        ,
+						t1.resource_id                    ,
+						t1.resource_type                  ,
+						t1.action_state                   ,
+						t1.syn_state                      ,
+						t2.role_name as validate_state                 
+				from sys_prv_role_resource 	t1
+				left join SYS_PRV_ROLE t2 on t1.role_id=t2.id
+				where  t1.validate_state='1'
+    			<if test="dto.roleId != null and dto.roleId != ''">
+						and t1.ROLE_ID =#{dto.roleId}
+    			</if>
+    			<if test="dto.resourceId != null and dto.resourceId != ''">
+						and t1.RESOURCE_ID =#{dto.resourceId}
+    			</if>
+    			<if test="dto.resourceType != null and dto.resourceType != ''">
+						and t1.RESOURCE_TYPE =#{dto.resourceType}
+    			</if>
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_PRV_ROLE_RESOURCE  -->
+<select id="searchSysPrvRoleResource" parameterType="java.util.Map" resultMap="SysPrvRoleResourceDTO">
+    	     select 
+						t1.id                             ,
+						t1.role_id                        ,
+						t1.resource_id                    ,
+						t1.resource_type                  ,
+						t1.action_state                   ,
+						t1.syn_state                      ,
+						t2.role_name as validate_state                 
+				from sys_prv_role_resource 		t1
+				left join SYS_PRV_ROLE t2 on t1.role_id=t2.id
+				where t1.validate_state='1'
+    			<if test="dto.roleId != null and dto.roleId != ''">
+						and t1.ROLE_ID = #{dto.roleId}
+    			</if>
+    			<if test="dto.resourceId != null and dto.resourceId != ''">
+						and t1.RESOURCE_ID = #{dto.resourceId}
+    			</if>
+    			<if test="dto.resourceType != null and dto.resourceType != ''">
+						and t1.RESOURCE_TYPE = #{dto.resourceType}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_PRV_ROLE_RESOURCE -->
+<select id="findSysPrvRoleResourceByPrimaryKey" parameterType="java.util.Map" resultMap="SysPrvRoleResourceDTO">
+   	 		select 
+					t1.id                             ,
+					t1.role_id                        ,
+					t1.resource_id                    ,
+					t1.resource_type                  ,
+					t1.action_state                   ,
+					t1.syn_state                      ,
+					t1.validate_state                 
+			from sys_prv_role_resource 		t1
+			where t1.validate_state='1' and
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_PRV_ROLE_RESOURCE -->
+<insert id="insertSysPrvRoleResource" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_PRV_ROLE_RESOURCE.nextval as id from dual
+	</selectKey>
+			insert into sys_prv_role_resource
+			(   		
+					id                             ,
+					role_id                        ,
+					resource_id                    ,
+					resource_type                  ,
+					action_state                   ,
+					syn_state                      ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.roleId,jdbcType=DECIMAL}
+					,#{dto.resourceId,jdbcType=DECIMAL}
+					,#{dto.resourceType,jdbcType=VARCHAR}
+					,'I'
+					,'0'
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 SYS_PRV_ROLE_RESOURCE -->
+<update id="updateSysPrvRoleResource" parameterType="java.util.Map">
+	     update sys_prv_role_resource t1
+	           set 
+			           t1.role_id                        =#{dto.roleId,jdbcType=DECIMAL},
+			           t1.resource_id                    =#{dto.resourceId,jdbcType=DECIMAL},
+			           t1.resource_type                  =#{dto.resourceType,jdbcType=VARCHAR},
+			           t1.action_state                   ='U',
+			           t1.syn_state                      ='0',
+			           t1.validate_state                 ='1'
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_PRV_ROLE_RESOURCE -->
+<delete id="deleteSysPrvRoleResourceByID" parameterType="java.util.Map">
+    	delete from sys_prv_role_resource t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_PRV_ROLE_RESOURCE -->
+<update id="deleteSysPrvRoleResourceByPrimaryKey" parameterType="java.util.Map">
+	     update sys_prv_role_resource t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+<delete id="deleteSysPrvRoleResourceByRoleIds" parameterType="java.util.Map" >
+		delete sys_prv_role_resource t1 where t1.role_id in (${roleIds})
+</delete>
+<!-- 主键查询对象  SYS_PRV_ROLE_RESOURCE -->
+<select id="searchSysPrvRoleResourceByPrimaryKeys" parameterType="java.util.Map" resultMap="SysPrvRoleResourceDTO">
+   	 		select 
+					t1.id                             ,
+					t1.role_id                        ,
+					t1.resource_id                    ,
+					t1.resource_type                  ,
+					t1.action_state                   ,
+					t1.syn_state                      ,
+					t1.validate_state                 
+			from sys_prv_role_resource 		t1
+			where t1.validate_state='1' and
+				t1.id in #{ids}
+</select>
+
+<select id="queryRoleResourceByResource" parameterType="java.util.Map" resultType="java.lang.String">
+	select count(id) num from sys_prv_role_resource t1
+	where t1.resource_id in (${resourceIds}) and role_id =${roleId}
+		and t1.resource_type='${resourceType}'
+</select>
+</mapper>

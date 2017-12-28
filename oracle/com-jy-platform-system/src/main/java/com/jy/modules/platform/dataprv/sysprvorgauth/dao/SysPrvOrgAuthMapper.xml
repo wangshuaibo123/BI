@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.dataprv.sysprvorgauth.dao.SysPrvOrgAuthDao">
+<resultMap id="SysPrvOrgAuthDTO" type="com.jy.modules.platform.dataprv.sysprvorgauth.dto.SysPrvOrgAuthDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="userId" column="USER_ID" jdbcType="DECIMAL" />
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+				<result property="actionState" column="ACTION_STATE" jdbcType="VARCHAR" />
+				<result property="synState" column="SYN_STATE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_PRV_ORG_AUTH -->	
+<select id="searchSysPrvOrgAuthByPaging" parameterType="java.util.Map" resultMap="SysPrvOrgAuthDTO">
+    	 		select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.org_id                         ,
+						t1.action_state                   ,
+						t1.syn_state                      ,
+						t1.validate_state                 
+					
+				from sys_prv_org_auth 	t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.actionState != null and dto.actionState != ''">
+						and t1.ACTION_STATE =#{dto.actionState}
+    			</if>
+    			<if test="dto.synState != null and dto.synState != ''">
+						and t1.SYN_STATE =#{dto.synState}
+    			</if>
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_PRV_ORG_AUTH  -->
+<select id="searchSysPrvOrgAuth" parameterType="java.util.Map" resultMap="SysPrvOrgAuthDTO">
+    	     select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.org_id                         ,
+						t1.action_state                   ,
+						t1.syn_state                      ,
+						t1.validate_state                 
+				from sys_prv_org_auth 		t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.actionState != null and dto.actionState != ''">
+						and t1.ACTION_STATE = #{dto.actionState}
+    			</if>
+    			<if test="dto.synState != null and dto.synState != ''">
+						and t1.SYN_STATE = #{dto.synState}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_PRV_ORG_AUTH -->
+<select id="findSysPrvOrgAuthByPrimaryKey" parameterType="java.util.Map" resultMap="SysPrvOrgAuthDTO">
+   	 		select 
+					t1.id                             ,
+					t1.user_id                        ,
+					t1.org_id                         ,
+					t1.action_state                   ,
+					t1.syn_state                      ,
+					t1.validate_state                 
+			from sys_prv_org_auth 		t1
+			where t1.validate_state='1' and
+				t1.id = #{id}
+</select>
+<!-- 主键查询对象  SYS_PRV_ORG_AUTH -->
+<select id="searchSysPrvOrgAuthsByPrimaryKeys" parameterType="java.util.Map" resultMap="SysPrvOrgAuthDTO">
+   	 		select 
+					t1.id                             ,
+					t1.user_id                        ,
+					t1.org_id                         ,
+					t1.action_state                   ,
+					t1.syn_state                      ,
+					t1.validate_state                 
+			from sys_prv_org_auth 		t1
+			where t1.id in (${ids})
+</select>
+  
+<!-- 新增对象 SYS_PRV_ORG_AUTH -->
+<insert id="insertSysPrvOrgAuth" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_PRV_ORG_AUTH.nextval as id from dual
+	</selectKey>
+			insert into sys_prv_org_auth
+			(   		
+					id                             ,
+					user_id                        ,
+					org_id                         ,
+					action_state                   ,
+					syn_state                      ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.userId,jdbcType=DECIMAL}
+					,#{dto.orgId,jdbcType=DECIMAL}
+					,'I'
+					,'0'
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 SYS_PRV_ORG_AUTH -->
+<update id="updateSysPrvOrgAuth" parameterType="java.util.Map">
+	     update sys_prv_org_auth t1
+	           set 
+			           t1.user_id                        =#{dto.userId,jdbcType=DECIMAL},
+			           t1.org_id                         =#{dto.orgId,jdbcType=DECIMAL},
+			           t1.action_state                   ='U',
+			           t1.syn_state                      ='0',
+			           t1.validate_state                 ='1'
+	     where t1.id = #{dto.id}
+</update>
+<!-- 更新对象 SYS_PRV_ORG_AUTH -->
+<update id="updateSysPrvOrgAuthSyn">
+	     update sys_prv_org_auth t1
+	           set t1.syn_state ='1'
+	     where t1.syn_state = '0'
+</update>
+   
+<!-- 主键删除 SYS_PRV_ORG_AUTH -->
+<delete id="deleteSysPrvOrgAuthByID" parameterType="java.util.Map">
+    	delete from sys_prv_org_auth t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_PRV_ORG_AUTH -->
+<update id="deleteSysPrvOrgAuthByPrimaryKey" parameterType="java.util.Map">
+	     update sys_prv_org_auth t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+<select id="queryInfoByUserAndOrg" parameterType="java.util.Map" resultType="java.lang.String">
+	select count(id) num from sys_prv_org_auth t1
+	where t1.user_id=${userId} and org_id in (${orgIds})
+</select>
+</mapper>

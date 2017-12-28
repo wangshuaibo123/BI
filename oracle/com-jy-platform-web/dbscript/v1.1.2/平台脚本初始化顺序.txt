@@ -1,0 +1,10 @@
+1. 首先执行system-create.sql
+2. 执行构建序列的语句system-seq-create.sql
+3. 依次执行dic-init文件夹里面的文件:init_dict_common1.sql，init_dict_common2.sql，init_dict_common3.sql，init_dict_logmonitor.sql，init_industry.sql，int_dict_DQ.sql
+4. 执行省市自治区文件:data-init.sql
+5. 执行管理员初始化文件:data-sys-init.sql
+6. 依次执行工作流SQL文件：jbpm-create.sql，jbpm-ext-create.sql，leave-demo-create.sql
+7. 依次执行批处理文件：quartz-create.sql，quartz-ext.sql
+8. 依次执行SQL文件:log-monitor.sql，masterdata_orgsyn_create.sql
+9. 执行MDSQL15.sql
+10. data-position.sql

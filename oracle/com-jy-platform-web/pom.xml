@@ -1,0 +1,461 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.jy.platform</groupId>
+		<artifactId>com-jy-platform</artifactId>
+		<version>3.0.0</version>
+	</parent>
+	<groupId>com.jy.platform</groupId>
+	<artifactId>com-jy-platform-web</artifactId>
+	<version>3.0.0</version>
+	<packaging>war</packaging>
+	<name>com-jy-platform-web</name>
+	<description>com-jy-platform-web-3.0.0</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<war.name>com-jy-platform-web-3.0.0</war.name>
+		<!-- 开发环境中依赖的配置，编译时自动加载 -->
+		
+		<!-- 默认datasource  对应jdbc.properties-->
+		<oracle.jdbc.driver>oracle.jdbc.driver.OracleDriver</oracle.jdbc.driver>
+		<oracle.jdbc.url>jdbc:oracle:thin:@172.18.100.86:1521:testdb</oracle.jdbc.url>
+		<oracle.jdbc.user>ptuser</oracle.jdbc.user>
+		<oracle.jdbc.password>ptuser</oracle.jdbc.password>
+		<oracle.jdbc.initialPoolSize>1</oracle.jdbc.initialPoolSize>
+		<oracle.jdbc.maxPoolSize>5</oracle.jdbc.maxPoolSize>
+		<oracle.jdbc.maxIdlePollSize>5</oracle.jdbc.maxIdlePollSize>
+		<oracle.jdbc.mixIdlePollSize>1</oracle.jdbc.mixIdlePollSize>
+		<!-- redis配置 对应 spring-redis.xml -->
+		<redis.master.url>172.18.100.204:26379</redis.master.url>
+		<redis.pool.maxTotal>200</redis.pool.maxTotal>
+		<redis.pool.maxIdle>100</redis.pool.maxIdle>
+		<redis.pool.maxWaitMillis>5000</redis.pool.maxWaitMillis>
+		<redis.pool.testOnBorrow>true</redis.pool.testOnBorrow>
+		<business.redis.master.url>172.18.100.176:26479</business.redis.master.url>
+		<business.redis.pool.maxTotal>200</business.redis.pool.maxTotal>
+		<business.redis.pool.maxIdle>100</business.redis.pool.maxIdle>
+		<business.redis.pool.maxWaitMillis>5000</business.redis.pool.maxWaitMillis>
+		<business.redis.pool.testOnBorrow>true</business.redis.pool.testOnBorrow>
+		<!-- cas 单点登录配置  对应 spring-shiro.xml-->
+		<shiro.casServerUrlPrefix><![CDATA[http://cas.jieyuechina.com/cas]]></shiro.casServerUrlPrefix>
+		<shiro.casService><![CDATA[http://app.test.com:8680/com-jy-platform-web/user/caslogin]]></shiro.casService>
+		<shiro.loginUrl><![CDATA[http://cas.jieyuechina.com/cas/login?source=S001&amp;service=http://app.test.com:8680/com-jy-platform-web/user/caslogin]]></shiro.loginUrl>
+		<shiro.forceUrl><![CDATA[http://cas.jieyuechina.com/cas/logout?source=S001&amp;service=http://app.test.com:8680/com-jy-platform-web/forceLogin.jsp]]></shiro.forceUrl>
+		<!-- auth-client配置 对应 auth-client.xml -->
+		<auth.client.appid>jypt</auth.client.appid>
+		<auth.client.apppwd>xx</auth.client.apppwd>
+		<auth.client.validtime>2015-12-01</auth.client.validtime>
+		<auth.client.serviceurl>http://app.test.com:8680/com-jy-platform-web</auth.client.serviceurl>
+	</properties>
+	<!-- 用于打包到测试环境  命令：package -P test-->
+	<profiles>
+		<profile>
+			<id>test</id>
+			<properties>
+			<!--datasource  对应jdbc.properties-->
+			<oracle.jdbc.driver>oracle.jdbc.driver.OracleDriver</oracle.jdbc.driver>
+			<oracle.jdbc.url>jdbc:oracle:thin:@172.18.100.86:1521:testdb</oracle.jdbc.url>
+			<oracle.jdbc.user>ptcommon</oracle.jdbc.user>
+			<oracle.jdbc.password>ptcommon</oracle.jdbc.password>
+			<oracle.jdbc.initialPoolSize>1</oracle.jdbc.initialPoolSize>
+			<oracle.jdbc.maxPoolSize>5</oracle.jdbc.maxPoolSize>
+			<oracle.jdbc.maxIdlePollSize>5</oracle.jdbc.maxIdlePollSize>
+			<oracle.jdbc.mixIdlePollSize>1</oracle.jdbc.mixIdlePollSize>
+			<!-- redis配置 对应 spring-redis.xml -->
+			<redis.master.url>172.18.100.204:26379</redis.master.url>
+			<!-- <redis.slave.url>172.18.100.204:26379</redis.slave.url> -->
+			<redis.pool.maxTotal>200</redis.pool.maxTotal>
+			<redis.pool.maxIdle>100</redis.pool.maxIdle>
+			<redis.pool.maxWaitMillis>5000</redis.pool.maxWaitMillis>
+			<redis.pool.testOnBorrow>true</redis.pool.testOnBorrow>
+			<business.redis.master.url>172.18.100.176:26479</business.redis.master.url>
+			<business.redis.pool.maxTotal>200</business.redis.pool.maxTotal>
+			<business.redis.pool.maxIdle>100</business.redis.pool.maxIdle>
+			<business.redis.pool.maxWaitMillis>5000</business.redis.pool.maxWaitMillis>
+			<business.redis.pool.testOnBorrow>true</business.redis.pool.testOnBorrow>
+			<!-- cas 单点登录配置  对应 spring-shiro.xml-->
+			<shiro.casServerUrlPrefix><![CDATA[https://cas.jypt.com:8443/cas]]></shiro.casServerUrlPrefix>
+			<shiro.casService><![CDATA[http://app.test.com:8180/com-jy-platform-web/user/caslogin]]></shiro.casService>
+			<shiro.loginUrl><![CDATA[https://cas.jypt.com:8443/cas/login?source=S001&amp;service=http://app.test.com:8180/com-jy-platform-web/user/caslogin]]></shiro.loginUrl>
+			<shiro.forceUrl><![CDATA[https://cas.jypt.com:8443/cas/logout?source=S001&amp;service=http://app.test.com:8180/com-jy-platform-web/forceLogin.jsp]]></shiro.forceUrl>
+			<!-- auth-client配置 对应 auth-client.xml -->
+			<auth.client.appid>jypt</auth.client.appid>
+			<auth.client.apppwd>xx</auth.client.apppwd>
+			<auth.client.validtime>2015-12-01</auth.client.validtime>
+			<auth.client.serviceurl>http://127.0.0.1:8180/com-jy-platform-web</auth.client.serviceurl>
+		</properties>
+		</profile>
+	</profiles>
+	
+	<repositories>
+		<repository>
+			<id>jy</id>
+			<name>jy</name>
+			<url>http://172.18.100.230:8080/nexus-2.5.1/content/groups/public/</url>
+		</repository>
+	</repositories>
+	
+	<dependencies>
+		<dependency>
+			<groupId>com.jy.platform</groupId>
+			<artifactId>com-jy-platform-api</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jy.platform</groupId>
+			<artifactId>com-jy-platform-rest</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jy.platform</groupId>
+			<artifactId>com-jy-platform-core</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jy.platform</groupId>
+			<artifactId>com-jy-platform-system</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+  			<groupId>com.jy.platform</groupId>
+  			<artifactId>com-jy-platform-excel</artifactId>
+  			<version>3.0.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.jy.platform</groupId>
+			<artifactId>com-jy-platform-orguser</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+	    
+  		
+		<dependency>
+			<groupId>org.jasig.cas.client</groupId>
+			<artifactId>cas-client-corejy</artifactId>
+			<version>3.2.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-cas</artifactId>
+			<version>1.2.2</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>cas-client-core</artifactId>
+					<groupId>org.jasig.cas.client</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc6</artifactId>
+		</dependency>
+		
+		<!-- connection pool -->
+		<dependency>
+			<groupId>org.springside</groupId>
+			<artifactId>springside-core</artifactId>
+		</dependency>
+
+		<!-- Spring -->
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
+		</dependency>
+
+		<!-- shiro -->
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-ehcache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-spring</artifactId>
+		</dependency>
+
+		<!-- AspectJ -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+		</dependency>
+
+		<!-- Logging -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.log4jdbc</groupId>
+			<artifactId>log4jdbc</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- @Inject -->
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+		</dependency>
+		<!-- Servlet -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp.jstl</groupId>
+			<artifactId>jstl-api</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>jstl-impl</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- Jackson JSON Processor -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.11</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<!-- Rome Atom+RSS -->
+		<dependency>
+			<groupId>com.rometools</groupId>
+			<artifactId>rome</artifactId>
+		</dependency>
+
+		<!-- JSR 303 with Hibernate Validator -->
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+
+		<!-- GENERAL UTILS begin -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+		</dependency>
+
+		<!-- Joda Time Library -->
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+		</dependency>
+		<!-- File Upload -->
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<!-- Security (used for CSRF protection only) -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+		</dependency>
+		<!-- Test -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>xmlunit</groupId>
+			<artifactId>xmlunit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+		</dependency>
+		
+		<dependency>
+		  <groupId>DJNativeSwing</groupId>
+		  <artifactId>DJNativeSwing</artifactId>
+		  <version>1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>DJNativeSwing-SWT</groupId>
+		  <artifactId>DJNativeSwing-SWT</artifactId>
+		  <version>1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>swt-3.6M3-win32-win32-x86</groupId>
+		  <artifactId>swt-3.6M3-win32-win32-x86</artifactId>
+		  <version>1.0</version>
+		  <classifier>x86</classifier>
+		</dependency>
+
+	</dependencies>
+	<build>
+		<!-- <finalName>com-jy-platform-web</finalName> -->
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			
+			<!-- maven插件配置 -->
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-assembly-plugin</artifactId>
+			    <executions>
+			      <execution>
+			        <id>make-zip</id>
+			        <phase>package</phase>
+			        <goals>
+			          <goal>single</goal>
+			        </goals>
+			      </execution>
+			    </executions>
+			    <configuration>
+			    	<appendAssemblyId>false</appendAssemblyId>
+			      	<descriptors>
+			        	<descriptor>zip.xml</descriptor>
+			      	</descriptors>
+			      	<meminitial>512m</meminitial>
+          	        <maxmem>1024m</maxmem>
+			    </configuration>
+			  </plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+					<exclude>**/.svn/*</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/*.xml</include>
+					<include>**/*.conf</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
+</project>

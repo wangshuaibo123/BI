@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.dataprv.sysprvrole.dao.SysPrvRoleDao">
+<resultMap id="SysPrvRoleDTO" type="com.jy.modules.platform.dataprv.sysprvrole.dto.SysPrvRoleDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="roleCode" column="ROLE_CODE" jdbcType="VARCHAR" />
+				<result property="roleName" column="ROLE_NAME" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_PRV_ROLE -->	
+<select id="searchSysPrvRoleByPaging" parameterType="java.util.Map" resultMap="SysPrvRoleDTO">
+    	 		select 
+						t1.id                             ,
+						t1.role_code                      ,
+						t1.role_name                      ,
+						t1.validate_state                 
+				from sys_prv_role 	t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.roleCode != null and dto.roleCode != ''">
+						and t1.ROLE_CODE like '%'||#{dto.roleCode}||'%'
+    			</if>
+    			<if test="dto.roleName != null and dto.roleName != ''">
+						and t1.ROLE_NAME like '%'||#{dto.roleName}||'%'
+    			</if>
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_PRV_ROLE  -->
+<select id="searchSysPrvRole" parameterType="java.util.Map" resultMap="SysPrvRoleDTO">
+    	     select 
+						t1.id                             ,
+						t1.role_code                      ,
+						t1.role_name                      ,
+						t1.validate_state                 
+				from sys_prv_role 		t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.roleCode != null and dto.roleCode != ''">
+						and t1.ROLE_CODE = #{dto.roleCode}
+    			</if>
+    			<if test="dto.roleName != null and dto.roleName != ''">
+						and t1.ROLE_NAME = #{dto.roleName}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_PRV_ROLE -->
+<select id="findSysPrvRoleByPrimaryKey" parameterType="java.util.Map" resultMap="SysPrvRoleDTO">
+   	 		select 
+					t1.id                             ,
+					t1.role_code                      ,
+					t1.role_name                      ,
+					t1.validate_state                 
+			from sys_prv_role 		t1
+			where t1.validate_state='1' and
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_PRV_ROLE -->
+<insert id="insertSysPrvRole" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_PRV_ROLE.nextval as id from dual
+	</selectKey>
+			insert into sys_prv_role
+			(   		
+					id                             ,
+					role_code                      ,
+					role_name                      ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.roleCode,jdbcType=VARCHAR}
+					,#{dto.roleName,jdbcType=VARCHAR}
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 SYS_PRV_ROLE -->
+<update id="updateSysPrvRole" parameterType="java.util.Map">
+	     update sys_prv_role t1
+	           set 
+			           t1.role_code                      =#{dto.roleCode,jdbcType=VARCHAR},
+			           t1.role_name                      =#{dto.roleName,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1'
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_PRV_ROLE -->
+<delete id="deleteSysPrvRoleByID" parameterType="java.util.Map">
+    	delete from sys_prv_role t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_PRV_ROLE -->
+<update id="deleteSysPrvRoleByPrimaryKey" parameterType="java.util.Map">
+	     update sys_prv_role t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+
+<select id="queryUserRoleResourceListByIds" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+		SPRA.USER_ID USREID,sprr.RESOURCE_ID RID,sprr.RESOURCE_TYPE RTYPE
+		FROM
+		SYS_PRV_ROLE_AUTH spra
+		LEFT JOIN SYS_PRV_ROLE spr ON spra.role_id = spr.ID
+		LEFT JOIN SYS_PRV_ROLE_RESOURCE sprr ON spr.ID = sprr.role_id
+		where SPRA.SYN_STATE='1'
+		<if test="roleIds != null and roleIds != ''">
+			and spr.id in (${roleIds})
+		</if>
+		<if test="authIds != null and authIds != ''">
+			and spra.id in (${authIds})
+		</if>
+		<if test="resourceIds != null and resourceIds != ''">
+			and sprr.id in (${resourceIds})
+		</if>
+		order by sprr.RESOURCE_TYPE
+</select>
+
+
+<!-- 唯一性验证  queryDictCodeIsOk  SYS_DICT -->
+<select id="queryRoleByCode" parameterType="java.util.Map" resultType="String">
+   	 		select  count(id) codeNum                   
+			from SYS_PRV_ROLE 		t1
+			where t1.role_code = #{code}
+</select>
+
+
+
+
+<!-- 查询角色下面机构和用户  pengliuxiang add 2015-1-12-->
+
+
+<select id="queryRoleResourceByRoleId"  parameterType="java.util.Map" resultType="java.util.Map" >
+		SELECT
+			sprr.RESOURCE_ID resourceId,
+			SPRR.RESOURCE_TYPE resourceType
+		FROM
+			SYS_PRV_ROLE spr
+		LEFT JOIN SYS_PRV_ROLE_RESOURCE sprr ON SPR."ID" = sprr.ROLE_ID
+		where spr."ID" = #{roleId}
+</select>
+
+
+
+<select id="queryRecursiveByOrgId"  parameterType="java.util.Map" resultType="java.util.Map"  > 
+		SELECT ID id FROM SYS_ORG START WITH ID = #{orgId} CONNECT BY PRIOR ID = TO_NUMBER (PARENT_ID)
+</select>
+
+
+
+
+
+
+
+
+
+
+</mapper>

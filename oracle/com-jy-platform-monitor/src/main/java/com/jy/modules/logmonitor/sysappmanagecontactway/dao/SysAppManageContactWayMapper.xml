@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.logmonitor.sysappmanagecontactway.dao.SysAppManageContactWayDao">
+<resultMap id="SysAppManageContactWayDTO" type="com.jy.modules.logmonitor.sysappmanagecontactway.dto.SysAppManageContactWayDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="appFlag" column="APP_FLAG" jdbcType="VARCHAR" />
+				<result property="email" column="EMAIL" jdbcType="VARCHAR" />
+				<result property="tel" column="TEL" jdbcType="VARCHAR" />
+				<result property="manageName" column="MANAGE_NAME" jdbcType="VARCHAR" />
+				<result property="logLevel" column="log_level" jdbcType="DECIMAL" />
+				<result property="keyWord" column="KEY_WORD" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_APP_MANAGE_CONTACT_WAY -->	
+<select id="searchSysAppManageContactWayByPaging" parameterType="java.util.Map" resultMap="SysAppManageContactWayDTO">
+    	 		select 
+						t1.id                             ,
+						t1.app_flag                       ,
+						t1.email                          ,
+						t1.tel                            ,
+						t1.log_level                      ,
+						t1.manage_name                    ,
+						t1.KEY_WORD
+					
+				from sys_app_manage_contact_way 	t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and t1.APP_FLAG =#{dto.appFlag}
+    			</if>
+    			<if test="dto.email != null and dto.email != ''">
+						and t1.EMAIL =#{dto.email}
+    			</if>
+    			<if test="dto.tel != null and dto.tel != ''">
+						and t1.TEL =#{dto.tel}
+    			</if>
+    			<if test="dto.manageName != null and dto.manageName != ''">
+						and t1.MANAGE_NAME like '%'||#{dto.manageName}||'%'
+    			</if>
+    			<if test="dto.logLevel != null and dto.logLevel != ''">
+						and t1.LOG_LEVEL =#{dto.logLevel}
+    			</if>
+    			<if test="dto.keyWord != null and dto.keyWord != ''">
+						and t1.KEY_WORD like '%'||#{dto.keyWord}||'%'
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_APP_MANAGE_CONTACT_WAY  -->
+<select id="searchSysAppManageContactWay" parameterType="java.util.Map" resultMap="SysAppManageContactWayDTO">
+    	     select 
+						t1.id                             ,
+						t1.app_flag                       ,
+						t1.email                          ,
+						t1.tel                            ,
+						t1.log_level                      ,
+						t1.manage_name                    ,
+						t1.KEY_WORD
+						              
+				from sys_app_manage_contact_way 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and t1.APP_FLAG = #{dto.appFlag}
+    			</if>
+    			<if test="dto.email != null and dto.email != ''">
+						and t1.EMAIL = #{dto.email}
+    			</if>
+    			<if test="dto.tel != null and dto.tel != ''">
+						and t1.TEL = #{dto.tel}
+    			</if>
+    			<if test="dto.manageName != null and dto.manageName != ''">
+						and t1.MANAGE_NAME like '%'||#{dto.manageName}||'%'
+    			</if>
+    			<if test="dto.logLevel != null and dto.logLevel != ''">
+						and t1.LOG_LEVEL =#{dto.logLevel}
+    			</if>
+    			<if test="dto.keyWord != null and dto.keyWord != ''">
+						and t1.KEY_WORD like '%'||#{dto.keyWord}||'%'
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_APP_MANAGE_CONTACT_WAY -->
+<select id="findSysAppManageContactWayByPrimaryKey" parameterType="java.util.Map" resultMap="SysAppManageContactWayDTO">
+   	 		select 
+					t1.id                             ,
+					t1.app_flag                       ,
+					t1.email                          ,
+					t1.tel                            ,
+					t1.log_level                      ,
+					t1.manage_name                    ,
+					t1.KEY_WORD     
+			from sys_app_manage_contact_way 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_APP_MANAGE_CONTACT_WAY -->
+<insert id="insertSysAppManageContactWay" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_APP_MANAGE_CONTACT_WAY.nextval as id from dual
+	</selectKey>
+			insert into sys_app_manage_contact_way
+			(   		
+					id                             ,
+					app_flag                       ,
+					email                          ,
+					tel                            ,
+					log_level                      ,
+					manage_name                    ,
+					KEY_WORD  
+			)
+			values(#{dto.id}
+					,#{dto.appFlag,jdbcType=VARCHAR}
+					,#{dto.email,jdbcType=VARCHAR}
+					,#{dto.tel,jdbcType=VARCHAR}
+					,#{dto.logLevel,jdbcType=VARCHAR}
+					,#{dto.manageName,jdbcType=VARCHAR}
+					,#{dto.keyWord,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_APP_MANAGE_CONTACT_WAY -->
+<update id="updateSysAppManageContactWay" parameterType="java.util.Map">
+	     update sys_app_manage_contact_way t1
+	           set 
+			           t1.app_flag                       =#{dto.appFlag,jdbcType=VARCHAR},
+			           t1.email                          =#{dto.email,jdbcType=VARCHAR},
+			           t1.tel                            =#{dto.tel,jdbcType=VARCHAR},
+			           t1.log_level                      =#{dto.logLevel,jdbcType=VARCHAR},
+			           t1.manage_name                    =#{dto.manageName,jdbcType=VARCHAR},
+			           t1.KEY_WORD                       =#{dto.keyWord,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_APP_MANAGE_CONTACT_WAY -->
+<delete id="deleteSysAppManageContactWayByID" parameterType="java.util.Map">
+    	delete from sys_app_manage_contact_way t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_APP_MANAGE_CONTACT_WAY -->
+<update id="deleteSysAppManageContactWayByPrimaryKey" parameterType="java.util.Map">
+	    delete from sys_app_manage_contact_way t1	 
+	     where t1.id in( ${ids})
+</update>
+</mapper>

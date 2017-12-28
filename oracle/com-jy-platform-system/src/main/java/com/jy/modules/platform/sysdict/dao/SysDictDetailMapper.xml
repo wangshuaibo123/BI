@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.sysdict.dao.SysDictDetailDao">
+<resultMap id="SysDictDetailDTO" type="com.jy.modules.platform.sysdict.dto.SysDictDetailDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="dictId" column="DICT_ID" jdbcType="DECIMAL" />
+				<result property="dictDetailName" column="DICT_DETAIL_NAME" jdbcType="VARCHAR" />
+				<result property="dictDetailValue" column="DICT_DETAIL_VALUE" jdbcType="VARCHAR" />
+				<result property="orderBy" column="ORDER_BY" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+</resultMap>
+<resultMap id="SysDictDetailVo" type="com.jy.modules.platform.sysdict.dto.SysDictDetailDTO">
+				<result property="dictDetailName" column="DICT_DETAIL_NAME" jdbcType="VARCHAR" />
+				<result property="dictDetailValue" column="DICT_DETAIL_VALUE" jdbcType="VARCHAR" />
+				<result property="orderBy" column="ORDER_BY" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_DICT_DETAIL -->	
+<select id="searchSysDictDetailByPaging" parameterType="java.util.Map" resultMap="SysDictDetailDTO">
+    	 		select 
+						t1.id                             ,
+						t1.dict_id                        ,
+						t1.dict_detail_name               ,
+						t1.dict_detail_value              ,
+						t1.order_by             		  ,
+						t1.validate_state                 ,
+						t1.version                        
+					
+				from sys_dict_detail 	t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.dictId != null and dto.dictId != ''">
+						and t1.DICT_ID =#{dto.dictId}
+    			</if>
+    			<if test="dto.dictDetailName != null and dto.dictDetailName != ''">
+						and t1.DICT_DETAIL_NAME =#{dto.dictDetailName}
+    			</if>
+    			<if test="dto.dictDetailValue != null and dto.dictDetailValue != ''">
+						and t1.DICT_DETAIL_VALUE =#{dto.dictDetailValue}
+    			</if>
+    			<if test="dto.orderBy != null and dto.orderBy != ''">
+						and t1.ORDER_BY =#{dto.orderBy}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+				order by to_number(t1.order_by)
+</select>
+  
+<!-- 查询列表 SYS_DICT_DETAIL  -->
+<select id="searchSysDictDetail" parameterType="java.util.Map" resultMap="SysDictDetailDTO">
+    	     select 
+						t1.id                             ,
+						t1.dict_id                        ,
+						t1.dict_detail_name               ,
+						t1.dict_detail_value              ,
+						t1.order_by                       ,
+						t1.validate_state                 ,
+						t1.version                        
+				from sys_dict_detail 		t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.dictId != null and dto.dictId != ''">
+						and t1.DICT_ID = #{dto.dictId}
+    			</if>
+    			<if test="dto.dictDetailName != null and dto.dictDetailName != ''">
+						and t1.DICT_DETAIL_NAME = #{dto.dictDetailName}
+    			</if>
+    			<if test="dto.dictDetailValue != null and dto.dictDetailValue != ''">
+						and t1.DICT_DETAIL_VALUE = #{dto.dictDetailValue}
+    			</if>
+    			<if test="dto.orderBy != null and dto.orderBy != ''">
+						and t1.ORDER_BY = #{dto.orderBy}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_DICT_DETAIL -->
+<select id="findSysDictDetailByPrimaryKey" parameterType="java.util.Map" resultMap="SysDictDetailDTO">
+   	 		select 
+					t1.id                             ,
+					t1.dict_id                        ,
+					t1.dict_detail_name               ,
+					t1.dict_detail_value              ,
+					t1.order_by                       ,
+					t1.validate_state                 ,
+					t1.version                        
+			from sys_dict_detail 		t1
+			where  t1.validate_state='1' and
+				t1.id = #{id}
+</select>
+<!-- 主键查询对象  SYS_DICT_DETAIL -->
+<select id="queryDetailByDictCode" parameterType="java.util.Map" resultType="java.util.Map">
+   	 		select * from (
+			select 
+					t1.dict_detail_name     DICNAME          ,
+					t1.dict_detail_value    DICVALUE          ,
+					to_number(t1.order_by)     ORDERBY                  
+			from sys_dict_detail 		t1 
+			where  t1.validate_state='1' 
+			and exists (select t2.* from sys_dict t2 where t2.validate_state='1' and t2.id=t1.dict_id and t2.dict_code='${code}')
+			) ORDER BY ORDERBY
+</select>
+<!-- 主键查询对象  SYS_DICT_DETAIL -->
+<select id="findSysDictMaxOrderBy"  parameterType="java.util.Map" resultType="java.lang.String">
+   	 		select nvl(max(to_number(t1.order_by)),0)+1 order_by
+			from sys_dict_detail t1
+			where t1.validate_state='1' AND
+				t1.dict_id = #{dictId}
+</select>
+  
+<!-- 主键查询对象  SYS_DICT_DETAIL -->
+<select id="queryDetailCodeIsOk"  parameterType="java.util.Map" resultType="java.lang.String">
+   	 		select count(1) codeNum
+			from sys_dict_detail t1
+			where t1.validate_state='1' AND
+				t1.dict_detail_name = #{dto.dictDetailName}
+			and	t1.dict_id = #{dto.dictId}
+</select>
+  
+<!-- 新增对象 SYS_DICT_DETAIL -->
+<insert id="insertSysDictDetail" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_DICT_DETAIL.nextval as id from dual
+	</selectKey>
+			insert into sys_dict_detail
+			(   		
+					id                             ,
+					dict_id                        ,
+					dict_detail_name               ,
+					dict_detail_value              ,
+					order_by                       ,
+					validate_state                 ,
+					version                        
+			)
+			values(#{dto.id}
+					,#{dto.dictId,jdbcType=DECIMAL}
+					,#{dto.dictDetailName,jdbcType=VARCHAR}
+					,#{dto.dictDetailValue,jdbcType=VARCHAR}
+					,#{dto.orderBy,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.version,jdbcType=DECIMAL}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_DICT_DETAIL -->
+<update id="updateSysDictDetail" parameterType="java.util.Map">
+	     update sys_dict_detail t1
+	           set 
+			           t1.dict_id                        =#{dto.dictId,jdbcType=DECIMAL},
+			           t1.dict_detail_name               =#{dto.dictDetailName,jdbcType=VARCHAR},
+			           t1.dict_detail_value              =#{dto.dictDetailValue,jdbcType=VARCHAR},
+			           t1.order_by                       =#{dto.orderBy,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1',
+			           t1.version                        =#{dto.version,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_DICT_DETAIL -->
+<delete id="deleteSysDictDetailByID" parameterType="java.util.Map">
+    	delete from sys_dict_detail t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_DICT_DETAIL -->
+<update id="deleteSysDictDetailByPrimaryKey" parameterType="java.util.Map">
+	     update sys_dict_detail t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+<!-- 主键假删除 SYS_DICT_DETAIL -->
+<update id="deleteSysDictDetailByDictKey" parameterType="java.util.Map">
+	     update sys_dict_detail t1
+	           set   t1.validate_state='0'	
+	     where t1.dict_id in (${ids} )
+</update>
+
+<select id="queryDetailByDictCodeAndDeatailValue" parameterType="java.util.Map" resultMap="SysDictDetailDTO">
+   	 		select t1.*  from sys_dict_detail 		t1
+			left join sys_dict t2 on t1.dict_id=t2.id
+			where  t1.validate_state='1' and
+				t2.dict_code = #{dict_code} and t1.dict_detail_value = #{detail_value}
+</select>  
+</mapper>

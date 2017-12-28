@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.sysmessage.dao.SysMessageDao">
+<resultMap id="SysMessageDTO" type="com.jy.modules.platform.sysmessage.dto.SysMessageDTO">
+				<result property="msgId" column="MSG_ID" jdbcType="DECIMAL" />
+				<result property="title" column="TITLE" jdbcType="VARCHAR" />
+				<result property="body" column="BODY" jdbcType="VARCHAR" />
+				<result property="url" column="URL" jdbcType="VARCHAR" />
+				<result property="createDate" column="CREATE_DATE" jdbcType="DATE" />
+				<result property="startDate" column="START_DATE" jdbcType="DATE" />
+				<result property="endDate" column="END_DATE" jdbcType="DATE" />
+				<result property="status" column="STATUS" jdbcType="CHAR" />
+				<result property="publisher" column="PUBLISHER" jdbcType="VARCHAR" />
+				<result property="type" column="TYPE" jdbcType="CHAR" />
+				<result property="charset" column="CHARSET" jdbcType="VARCHAR" />
+				<result property="urgentFlag" column="URGENT_FLAG" jdbcType="CHAR" />
+				<result property="sysFlag" column="SYS_FLAG" jdbcType="VARCHAR" />
+				<collection property="sysUserMsgRelations" resultMap="com.jy.modules.platform.sysmessage.dao.SysUserMsgRelationDao.SysUserMsgRelationDTO"/>
+</resultMap>
+<!-- 用户消息dto -->
+<resultMap id="UserSysMessageDTO" type="com.jy.modules.platform.sysmessage.dto.UserSysMessageDTO">
+				<result property="msgId" column="MSG_ID" jdbcType="DECIMAL" />
+				<result property="title" column="TITLE" jdbcType="VARCHAR" />
+				<result property="body" column="BODY" jdbcType="VARCHAR" />
+				<result property="url" column="URL" jdbcType="VARCHAR" />
+				<result property="createDate" column="CREATE_DATE" jdbcType="DATE" />
+				<result property="startDate" column="START_DATE" jdbcType="DATE" />
+				<result property="endDate" column="END_DATE" jdbcType="DATE" />
+				<result property="status" column="STATUS" jdbcType="CHAR" />
+				<result property="publisher" column="PUBLISHER" jdbcType="VARCHAR" />
+				<result property="type" column="TYPE" jdbcType="CHAR" />
+				<result property="charset" column="CHARSET" jdbcType="VARCHAR" />
+				<result property="urgentFlag" column="URGENT_FLAG" jdbcType="CHAR" />
+				<result property="sysFlag" column="SYS_FLAG" jdbcType="VARCHAR" />
+				<result property="readFlag" column="READ_FLAG" jdbcType="CHAR" />
+				
+</resultMap>
+
+				
+<!-- 分页查询 SYS_MESSAGE -->	
+<select id="searchSysMessageByPaging" parameterType="java.util.Map" resultMap="SysMessageDTO">
+    	 		select 
+						t1.msg_id                         ,
+						t1.title                          ,
+						t1.body                           ,
+						t1.url                            ,
+						t1.create_date                    ,
+						t1.start_date                     ,
+						t1.end_date                       ,
+						t1.status                         ,
+						t1.publisher                      ,
+						t1.type                           ,
+						t1.charset                        ,
+						t1.urgent_flag                    ,
+						t1.sys_flag                       
+					
+				from sys_message 	t1
+				where 1=1  
+				<!-- 过滤发布者删除的 -->
+				and t1.status != '3' 
+				
+    			<if test="dto.status != null and dto.status != ''">
+						and t1.STATUS =#{dto.status}
+    			</if>
+    			
+    			<if test="dto.type != null and dto.type != ''">
+						and t1.TYPE =#{dto.type}
+    			</if>
+    			
+    			<if test="dto.urgentFlag != null and dto.urgentFlag != ''">
+						and t1.URGENT_FLAG =#{dto.urgentFlag}
+    			</if>
+    			<if test="dto.sysFlag != null and dto.sysFlag != ''">
+						and t1.SYS_FLAG =#{dto.sysFlag}
+    			</if>
+				
+				order by t1.msg_id desc
+</select>
+
+<!-- 分页查询 SYS_MESSAGE 我的消息 过滤已经删除数据-->	
+<select id="searchMySysMessageByPaging" parameterType="java.util.Map" resultMap="UserSysMessageDTO">
+    	 		select 
+    	 		distinct
+						t1.msg_id                         ,
+						t1.title                          ,
+						t1.body                           ,
+						t1.url                            ,
+						t1.create_date                    ,
+						t1.start_date                     ,
+						t1.end_date                       ,
+						t1.status                         ,
+						t1.publisher                      ,
+						t1.type                           ,
+						t1.charset                        ,
+						t1.urgent_flag                    ,
+						t1.sys_flag                       ,
+						t2.read_flag
+					
+				from sys_message t1 left join SYS_USER_MSG_RELATION t2 on  t1.msg_id = t2.msg_id
+				where 1=1
+				<!-- 发布者删除 -->
+				and t1.status != '3' 
+				
+    			and (
+    			<!-- 专有消息(排除无效)-->
+    			(
+    			t1.type = '1'
+    			and
+    			t2.USER_ID = #{dto.userId} 
+    			and t2.rel_status = '0'
+    			)
+    			or 
+    			<!-- 全局消息(未读无记录,已读有记录(排除无效)) -->
+    			(t1.type = '0' and t2.USER_ID is null)
+    			or
+    			(t1.type = '0' and t2.rel_status = '0')
+    			
+    			)
+    			<if test="dto.status != null and dto.status != ''">
+						and t1.STATUS =#{dto.status}
+    			</if>
+    			
+    			<if test="dto.type != null and dto.type != ''">
+						and t1.TYPE =#{dto.type}
+    			</if>
+    			
+    			<if test="dto.urgentFlag != null and dto.urgentFlag != ''">
+						and t1.URGENT_FLAG =#{dto.urgentFlag}
+    			</if>
+    			<if test="dto.sysFlag != null and dto.sysFlag != ''">
+						and t1.SYS_FLAG =#{dto.sysFlag}
+    			</if>
+    			<if test="dto.readFlag != null and dto.readFlag != ''">
+						and t2.READ_FLAG =#{dto.readFlag}
+    			</if>
+				
+				order by t1.msg_id desc
+</select>
+  
+<!-- 查询列表 SYS_MESSAGE  -->
+<select id="searchSysMessage" parameterType="java.util.Map" resultMap="SysMessageDTO">
+    	     select 
+						t1.msg_id                         ,
+						t1.title                          ,
+						t1.body                           ,
+						t1.url                            ,
+						t1.create_date                    ,
+						t1.start_date                     ,
+						t1.end_date                       ,
+						t1.status                         ,
+						t1.publisher                      ,
+						t1.type                           ,
+						t1.charset                        ,
+						t1.urgent_flag                    ,
+						t1.sys_flag                       
+				from sys_message 		t1
+				where 1=1
+    			<if test="dto.msgId != null and dto.msgId != ''">
+						and t1.MSG_ID = #{dto.msgId}
+    			</if>
+    			<if test="dto.title != null and dto.title != ''">
+						and t1.TITLE = #{dto.title}
+    			</if>
+    			<if test="dto.body != null and dto.body != ''">
+						and t1.BODY = #{dto.body}
+    			</if>
+    			<if test="dto.url != null and dto.url != ''">
+						and t1.URL = #{dto.url}
+    			</if>
+    			<if test="dto.createDate != null and dto.createDate != ''">
+						and t1.CREATE_DATE = #{dto.createDate}
+    			</if>
+    			<if test="dto.startDate != null and dto.startDate != ''">
+						and t1.START_DATE = #{dto.startDate}
+    			</if>
+    			<if test="dto.endDate != null and dto.endDate != ''">
+						and t1.END_DATE = #{dto.endDate}
+    			</if>
+    			<if test="dto.status != null and dto.status != ''">
+						and t1.STATUS = #{dto.status}
+    			</if>
+    			<if test="dto.publisher != null and dto.publisher != ''">
+						and t1.PUBLISHER = #{dto.publisher}
+    			</if>
+    			<if test="dto.type != null and dto.type != ''">
+						and t1.TYPE = #{dto.type}
+    			</if>
+    			<if test="dto.charset != null and dto.charset != ''">
+						and t1.CHARSET = #{dto.charset}
+    			</if>
+    			<if test="dto.urgentFlag != null and dto.urgentFlag != ''">
+						and t1.URGENT_FLAG = #{dto.urgentFlag}
+    			</if>
+    			<if test="dto.sysFlag != null and dto.sysFlag != ''">
+						and t1.SYS_FLAG = #{dto.sysFlag}
+    			</if>
+</select>
+
+<!-- 查询列表 SYS_MESSAGE  -->
+<select id="searchUnRead2DSysMessage" parameterType="java.util.Map" resultMap="SysMessageDTO">
+    	     select 
+						t1.msg_id                         ,
+						t1.title                          ,
+						t1.body                           ,
+						t1.url                            ,
+						t1.create_date                    ,
+						t1.start_date                     ,
+						t1.end_date                       ,
+						t1.status                         ,
+						t1.publisher                      ,
+						t1.type                           ,
+						t1.charset                        ,
+						t1.urgent_flag                    ,
+						t1.sys_flag                       
+				from sys_message t1,
+			         sys_user_msg_relation t2
+			    where 1 = 1
+			    	  <!-- 发布者删除 -->
+			    	  and t1.status != '3' 
+			          and t1.msg_id = t2.msg_id
+			   		  <if test="dto.sysFlag != null and dto.sysFlag != ''">
+							and t1.SYS_FLAG = #{dto.sysFlag}
+	    			  </if>
+	    			  <if test="dto.userId != null and dto.userId != ''">
+							 and t2.user_id = #{dto.userId}
+	    			  </if>
+	    			  <!-- 最近两天 -->
+	    			  <if test="dto.createDate != null and dto.createDate != ''">
+							 and t1.CREATE_DATE >= #{dto.createDate}
+							 and t1.CREATE_DATE &lt;= sysdate
+	    			  </if>
+			   		  and t2.rel_status='0'   <!-- 0：有效1：用户删除；default0 -->
+			   		  and t2.read_flag='0'    <!-- 0:未读；1：已读 default:0 -->	
+			   		  and rownum &lt; 5
+</select>
+  
+<!-- 主键查询对象  SYS_MESSAGE -->
+<select id="findSysMessageByPrimaryKey" parameterType="java.util.Map" resultMap="SysMessageDTO">
+   	 		select 
+					t1.msg_id                         ,
+					t1.title                          ,
+					t1.body                           ,
+					t1.url                            ,
+					t1.create_date                    ,
+					t1.start_date                     ,
+					t1.end_date                       ,
+					t1.status                         ,
+					t1.publisher                      ,
+					t1.type                           ,
+					t1.charset                        ,
+					t1.urgent_flag                    ,
+					t1.sys_flag                       
+			from sys_message 		t1
+			where 
+				t1.msg_id = #{id}
+</select>
+
+<!-- 主键查询对象  SYS_MESSAGE 关联用户关系 -->
+<select id="findSysMessageAndRelationByID" parameterType="java.util.Map" resultMap="SysMessageDTO">
+   	 		select 
+					t1.msg_id                         ,
+					t1.title                          ,
+					t1.body                           ,
+					t1.url                            ,
+					t1.create_date                    ,
+					t1.start_date                     ,
+					t1.end_date                       ,
+					t1.status                         ,
+					t1.publisher                      ,
+					t1.type                           ,
+					t1.charset                        ,
+					t1.urgent_flag                    ,
+					t1.sys_flag                       ,
+					t2.rel_id                         ,
+					t2.rel_status                     ,
+					t2.user_id                        ,
+					t2.read_flag                      ,
+					t2.msg_id                         
+			from sys_message 		t1 
+			left join sys_user_msg_relation t2
+			on t1.msg_id = t2.msg_id 
+			where 
+				t1.msg_id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_MESSAGE -->
+<insert id="insertSysMessage" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.msgId" order="BEFORE">
+				select seq_SYS_MESSAGE.nextval as msgId from dual
+	</selectKey>
+			insert into sys_message
+			(   		
+					msg_id                         ,
+					title                          ,
+					body                           ,
+					url                            ,
+					create_date                    ,
+					start_date                     ,
+					end_date                       ,
+					status                         ,
+					publisher                      ,
+					type                           ,
+					charset                        ,
+					urgent_flag                    ,
+					sys_flag                       
+			)
+			values(#{dto.msgId}
+					,#{dto.title,jdbcType=VARCHAR}
+					,#{dto.body,jdbcType=VARCHAR}
+					,#{dto.url,jdbcType=VARCHAR}
+					,#{dto.createDate,jdbcType=DATE}
+					,#{dto.startDate,jdbcType=DATE}
+					,#{dto.endDate,jdbcType=DATE}
+					,#{dto.status,jdbcType=CHAR}
+					,#{dto.publisher,jdbcType=VARCHAR}
+					,#{dto.type,jdbcType=CHAR}
+					,#{dto.charset,jdbcType=VARCHAR}
+					,#{dto.urgentFlag,jdbcType=CHAR}
+					,#{dto.sysFlag,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_MESSAGE -->
+<update id="updateSysMessage" parameterType="java.util.Map">
+	     update sys_message t1
+	           set 
+	          		 <if test="dto.title != null and dto.title != ''">
+			          	 t1.title =#{dto.title,jdbcType=VARCHAR},
+			         </if> 
+			         <if test="dto.body != null and dto.body != ''"> 
+			           	t1.body=#{dto.body,jdbcType=VARCHAR},
+			          </if> 
+			          <if test="dto.url != null and dto.url != ''">
+			           		t1.url=#{dto.url,jdbcType=VARCHAR},
+			           </if>
+			           <if test="dto.createDate != null and dto.createDate != ''">
+			         	  t1.create_date=#{dto.createDate,jdbcType=DATE},
+			           </if>
+			           <if test="dto.startDate != null and dto.startDate != ''">
+			          		 t1.start_date =#{dto.startDate,jdbcType=DATE},
+			           </if>
+			           <if test="dto.endDate != null and dto.endDate != ''">
+			          	     t1.end_date=#{dto.endDate,jdbcType=DATE},
+			           </if>
+			           <if test="dto.status != null and dto.status != ''">
+			         		  t1.status=#{dto.status,jdbcType=CHAR},
+			           </if>
+			           <if test="dto.publisher != null and dto.publisher != ''">
+			         		  t1.publisher=#{dto.publisher,jdbcType=VARCHAR},
+			           </if>
+			           <if test="dto.type != null and dto.type != ''">
+			           			t1.type=#{dto.type,jdbcType=CHAR},
+			           </if>
+			           <if test="dto.charset != null and dto.charset != ''">
+			           			t1.charset = #{dto.charset,jdbcType=VARCHAR},
+			           </if>
+			           <if test="dto.urgentFlag != null and dto.urgentFlag != ''">
+			           			t1.urgent_flag=#{dto.urgentFlag,jdbcType=CHAR},
+			           </if>
+			           <if test="dto.sysFlag != null and dto.sysFlag != ''">
+			           			t1.sys_flag =#{dto.sysFlag,jdbcType=VARCHAR},
+			           </if>
+			          t1.msg_id = #{dto.msgId}
+	     where t1.msg_id = #{dto.msgId}
+</update>
+   
+<!-- 主键删除 SYS_MESSAGE -->
+<delete id="deleteSysMessageByID" parameterType="java.util.Map">
+    	delete from sys_message t1 where t1.msg_id in (${ids} )
+</delete>
+
+<!-- 主键假删除 SYS_MESSAGE -->
+<update id="deleteSysMessageByPrimaryKey" parameterType="java.util.Map">
+	     update sys_message t1
+	           set   t1.status='3'	
+	     where t1.msg_id in( ${ids})
+</update>
+<!-- 按用户ID统计消息数量 SYS_MESSAGE --><!-- 收件人  全局消息未读无记录,专有消息未读有记录,全局消息已读有记录-->
+<select id="countSysMessageByUserID" parameterType="java.util.Map" resultType="int">
+
+    	select distinct count(t1.msg_id) from sys_message t1 
+    	left join sys_user_msg_relation t2
+		on t1.msg_id = t2.msg_id 
+		where 1=1 
+		<!-- 发布者删除 -->
+		and t1.status != '3' 
+		
+  			and (
+  			<!-- 专有消息(排除无效)-->
+  			(
+  			t1.type = '1'
+  			and
+  			t2.USER_ID = #{userId} 
+  			and t2.rel_status = '0'
+  			and t2.read_flag = '0'
+  			)
+  			or 
+  			<!-- 全局消息(未读无记录) -->
+  			(t1.type = '0' and t2.USER_ID is null)
+  			or
+  			<!-- 全局消息(未读有记录,排除无效) -->
+  			(t1.type = '0' and t2.USER_ID = #{userId} 
+  			and t2.rel_status = '0'
+  			and t2.read_flag = '0')
+  			)
+		
+    	
+    	
+</select>
+
+
+<!-- 消息及用户关系关联查询 add by zhanglin 20141117 -->
+<select id="complexSearch" parameterType="java.util.Map" resultMap="SysMessageDTO">
+    	     select 
+						t1.msg_id                         ,
+						t1.title                          ,
+						t1.body                           ,
+						t1.url                            ,
+						t1.create_date                    ,
+						t1.start_date                     ,
+						t1.end_date                       ,
+						t1.status                         ,
+						t1.publisher                      ,
+						t1.type                           ,
+						t1.charset                        ,
+						t1.urgent_flag                    ,
+						t1.sys_flag                       
+				from sys_message t1 left join SYS_USER_MSG_RELATION t2 on  t1.msg_id = t2.msg_id
+				where 1=1
+    			<if test="dto.msgId != null and dto.msgId != ''">
+						and t1.MSG_ID = #{dto.msgId}
+    			</if>
+    			<if test="dto.title != null and dto.title != ''">
+						and t1.TITLE = #{dto.title}
+    			</if>
+    			<if test="dto.body != null and dto.body != ''">
+						and t1.BODY = #{dto.body}
+    			</if>
+    			<if test="dto.url != null and dto.url != ''">
+						and t1.URL = #{dto.url}
+    			</if>
+    			<if test="dto.createDate != null and dto.createDate != ''">
+						and t1.CREATE_DATE = #{dto.createDate}
+    			</if>
+    			<if test="dto.startDate != null and dto.startDate != ''">
+						and t1.START_DATE = #{dto.startDate}
+    			</if>
+    			<if test="dto.endDate != null and dto.endDate != ''">
+						and t1.END_DATE = #{dto.endDate}
+    			</if>
+    			<if test="dto.status != null and dto.status != ''">
+						and t1.STATUS = #{dto.status}
+    			</if>
+    			<if test="dto.publisher != null and dto.publisher != ''">
+						and t1.PUBLISHER = #{dto.publisher}
+    			</if>
+    			<if test="dto.type != null and dto.type != ''">
+						and t1.TYPE = #{dto.type}
+    			</if>
+    			<if test="dto.charset != null and dto.charset != ''">
+						and t1.CHARSET = #{dto.charset}
+    			</if>
+    			<if test="dto.urgentFlag != null and dto.urgentFlag != ''">
+						and t1.URGENT_FLAG = #{dto.urgentFlag}
+    			</if>
+    			<if test="dto.sysFlag != null and dto.sysFlag != ''">
+						and t1.SYS_FLAG = #{dto.sysFlag}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t2.USER_ID = #{dto.userId}
+    			</if>
+</select>
+
+
+
+
+</mapper>

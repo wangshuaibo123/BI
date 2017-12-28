@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.sysdict.dao.SysDictDao">
+<resultMap id="SysDictDTO" type="com.jy.modules.platform.sysdict.dto.SysDictDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="dictCode" column="DICT_CODE" jdbcType="VARCHAR" />
+				<result property="dictName" column="DICT_NAME" jdbcType="VARCHAR" />
+				<result property="dictType" column="DICT_TYPE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 SYS_DICT -->	
+<select id="searchSysDictByPaging" parameterType="java.util.Map" resultMap="SysDictDTO">
+    	 		select 
+						t1.id                             ,
+						t1.dict_code                      ,
+						t1.dict_name                      ,
+						t1.dict_type                      ,
+						t1.validate_state                 ,
+						t1.version                        
+					
+				from sys_dict 	t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.dictCode != null and dto.dictCode != ''">
+						and t1.DICT_CODE like '%'||#{dto.dictCode}||'%'
+    			</if>
+    			<if test="dto.dictName != null and dto.dictName != ''">
+						and t1.DICT_NAME like '%'||#{dto.dictName}||'%'
+    			</if>
+    			<if test="dto.dictType != null and dto.dictType != ''">
+						and t1.DICT_TYPE =#{dto.dictType}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+				order by t1.id
+</select>
+  
+<!-- 查询列表 SYS_DICT  -->
+<select id="searchSysDict" parameterType="java.util.Map" resultMap="SysDictDTO">
+    	     select 
+						t1.id                             ,
+						t1.dict_code                      ,
+						t1.dict_name                      ,
+						t1.dict_type                      ,
+						t1.validate_state                 ,
+						t1.version                        
+				from sys_dict 		t1
+				where  t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.dictCode != null and dto.dictCode != ''">
+						and t1.DICT_CODE = #{dto.dictCode}
+    			</if>
+    			<if test="dto.dictName != null and dto.dictName != ''">
+						and t1.DICT_NAME = #{dto.dictName}
+    			</if>
+    			<if test="dto.dictType != null and dto.dictType != ''">
+						and t1.DICT_TYPE = #{dto.dictType}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_DICT -->
+<select id="findSysDictByPrimaryKey" parameterType="java.util.Map" resultMap="SysDictDTO">
+   	 		select 
+					t1.id                             ,
+					t1.dict_code                      ,
+					t1.dict_name                      ,
+					t1.dict_type                      ,
+					t1.validate_state                 ,
+					t1.version                        
+			from sys_dict 		t1
+			where 
+				t1.id = #{id} and t1.VALIDATE_STATE = 1
+</select>
+  
+<!-- 唯一性验证  queryDictCodeIsOk  SYS_DICT -->
+<select id="queryDictCodeIsOk" parameterType="java.util.Map" resultType="String">
+   	 		select  count(id) codeNum                   
+			from sys_dict 		t1
+			where 
+				t1.dict_code = #{code}
+			and t1.VALIDATE_STATE = 1
+</select>
+<select id="queryDictInfoByCode" parameterType="java.util.Map" resultType="java.util.Map">
+   	 		select  *                 
+			from sys_dict 		t1
+			where 
+				t1.dict_code = #{code}
+			and t1.VALIDATE_STATE = 1
+</select>
+  
+<!-- 新增对象 SYS_DICT -->
+<insert id="insertSysDict" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_DICT.nextval as id from dual
+	</selectKey>
+			insert into sys_dict
+			(   		
+					id                             ,
+					dict_code                      ,
+					dict_name                      ,
+					dict_type                      ,
+					validate_state                 ,
+					version                        
+			)
+			values(#{dto.id}
+					,#{dto.dictCode,jdbcType=VARCHAR}
+					,#{dto.dictName,jdbcType=VARCHAR}
+					,#{dto.dictType,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.version,jdbcType=DECIMAL}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_DICT -->
+<update id="updateSysDict" parameterType="java.util.Map">
+	     update sys_dict t1
+	           set 
+			           t1.dict_code                      =#{dto.dictCode,jdbcType=VARCHAR},
+			           t1.dict_name                      =#{dto.dictName,jdbcType=VARCHAR},
+			           t1.dict_type                      =#{dto.dictType,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1',
+			           t1.version                        =#{dto.version,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_DICT -->
+<delete id="deleteSysDictByID" parameterType="java.util.Map">
+    	delete from sys_dict t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_DICT -->
+<update id="deleteSysDictByPrimaryKey" parameterType="java.util.Map">
+	     update sys_dict t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.syslog.dao.SysLogDao">
+<resultMap id="SysLogDTO" type="com.jy.modules.platform.syslog.dto.SysLogDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="userId" column="USER_ID" jdbcType="VARCHAR" />
+				<result property="moduleName" column="MODULE_NAME" jdbcType="VARCHAR" />
+				<result property="className" column="CONTROLLER_NAME" jdbcType="VARCHAR" />
+				<result property="methodName" column="METHOD_NAME" jdbcType="VARCHAR" />
+				<result property="paramInfo" column="PARAM_INFO" jdbcType="VARCHAR" />
+				<result property="created" column="CREATED" jdbcType="VARCHAR" />
+				<result property="uri" column="URI" jdbcType="VARCHAR" />
+				<result property="type" column="LOG_TYPE" jdbcType="VARCHAR"/>
+</resultMap>
+<!-- 分页查询 quartz_task_group_def -->
+	<select id="searchSysLogByPaging" parameterType="java.util.Map"
+		resultMap="SysLogDTO">
+		select
+		t.ID,t.USER_ID,t.MODULE_NAME,t.CONTROLLER_NAME,t.METHOD_NAME,t.PARAM_INFO,t.LOG_TYPE,t.CREATED  
+
+		from log_info t
+		where 1=1
+		<if test="dto.id != null and dto.id != ''">
+			and t.ID =#{dto.id} 
+		</if>
+		<if test="dto.userId != null and dto.userId != ''">
+			and t.USER_ID =#{dto.userId} 
+		</if>
+		<if test="dto.moduleName != null and dto.moduleName != ''">
+			and t.MODULE_NAME like '%'||#{dto.moduleName}||'%' 
+		</if>
+		<if test="dto.className != null and dto.className != ''"> 
+			and t.CONTROLLER_NAME like '%'||#{dto.className}||'%' 
+		</if>
+		<if test="dto.methodName != null and dto.methodName != ''">
+			and t.METHOD_NAME like '%'||#{dto.methodName}||'%' 
+		</if>
+		<if test="dto.type != null and dto.type != ''">
+			and t.LOG_TYPE=#{dto.type} 
+		</if>
+		order by t.CREATED desc
+	</select>
+	<!-- 主键查询对象 Sys-log -->
+	<select id="findSysLogByPrimaryKey" parameterType="java.util.Map"
+		resultMap="SysLogDTO">
+		select
+		t.ID,t.USER_ID,t.MODULE_NAME,t.CONTROLLER_NAME,t.METHOD_NAME,t.PARAM_INFO,t.URI,t.LOG_TYPE
+
+		from log_info t
+		where t.ID =#{id} 
+	</select>
+<!-- 新增对象 LOG_INFO -->
+<insert id="insertSysLog" parameterType="java.util.ArrayList">
+ begin
+ <foreach collection="list" item="dto">
+			insert into LOG_INFO
+			(   		
+					id                             ,
+					USER_ID                      ,
+					MODULE_NAME                      ,
+					CONTROLLER_NAME                      ,
+					METHOD_NAME                 ,
+					PARAM_INFO                ,
+					CREATED   ,
+					URI     ,
+					LOG_TYPE                
+			) 
+			select  seq_LOG_INFO.nextval
+					,#{dto.userId,jdbcType=VARCHAR}
+					,#{dto.moduleName,jdbcType=VARCHAR}
+					,#{dto.className,jdbcType=VARCHAR}
+					,#{dto.methodName,jdbcType=VARCHAR} 
+					,#{dto.paramInfo,jdbcType=VARCHAR}
+					,#{dto.created,jdbcType=VARCHAR}
+					,#{dto.uri,jdbcType=VARCHAR}
+					,#{dto.type,jdbcType=VARCHAR} from dual;
+			</foreach>
+end;
+</insert>
+</mapper>

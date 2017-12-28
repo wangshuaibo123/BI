@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.bizauth.vmauthregisterinfo.dao.VmauthRegisterInfoDao">
+<resultMap id="VmauthRegisterInfoDTO" type="com.jy.modules.platform.bizauth.vmauthregisterinfo.dto.VmauthRegisterInfoDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="vmtreeCode" column="VMTREE_CODE" jdbcType="VARCHAR" />
+				<result property="vmtreeName" column="VMTREE_NAME" jdbcType="VARCHAR" />
+				<result property="mapTabName" column="MAP_TAB_NAME" jdbcType="VARCHAR" />
+				<result property="dataTabName" column="DATA_TAB_NAME" jdbcType="VARCHAR" />
+				<result property="mapInitSql" column="MAP_INIT_SQL" jdbcType="VARCHAR" />
+				<result property="dataInitSql" column="DATA_INIT_SQL" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="createBy" column="CREATE_BY" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 vmauth_register_info -->	
+<select id="searchVmauthRegisterInfoByPaging" parameterType="java.util.Map" resultMap="VmauthRegisterInfoDTO">
+    	 		select 
+						t1.id                             ,
+						t1.vmtree_code                    ,
+						t1.vmtree_name                    ,
+						t1.map_tab_name                   ,
+						t1.data_tab_name                  ,
+						t1.map_init_sql                   ,
+						t1.data_init_sql                  ,
+						t1.create_time                    ,
+						t1.create_by                      
+					
+				from vmauth_register_info 	t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.vmtreeCode != null and dto.vmtreeCode != ''">
+						and t1.VMTREE_CODE like '%'||#{dto.vmtreeCode}||'%'
+    			</if>
+    			<if test="dto.vmtreeName != null and dto.vmtreeName != ''">
+						and t1.VMTREE_NAME like '%'||#{dto.vmtreeName}||'%'
+    			</if>
+    			<if test="dto.mapTabName != null and dto.mapTabName != ''">
+						and t1.MAP_TAB_NAME like '%'||#{dto.mapTabName}||'%'
+    			</if>
+    			<if test="dto.dataTabName != null and dto.dataTabName != ''">
+						and t1.DATA_TAB_NAME like '%'||#{dto.dataTabName}||'%'
+    			</if>
+    			<if test="dto.mapInitSql != null and dto.mapInitSql != ''">
+						and t1.MAP_INIT_SQL =#{dto.mapInitSql}
+    			</if>
+    			<if test="dto.dataInitSql != null and dto.dataInitSql != ''">
+						and t1.DATA_INIT_SQL =#{dto.dataInitSql}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY =#{dto.createBy}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 vmauth_register_info  -->
+<select id="searchVmauthRegisterInfo" parameterType="java.util.Map" resultMap="VmauthRegisterInfoDTO">
+    	     select 
+						t1.id                             ,
+						t1.vmtree_code                    ,
+						t1.vmtree_name                    ,
+						t1.map_tab_name                   ,
+						t1.data_tab_name                  ,
+						t1.map_init_sql                   ,
+						t1.data_init_sql                  ,
+						t1.create_time                    ,
+						t1.create_by                      
+				from vmauth_register_info 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.vmtreeCode != null and dto.vmtreeCode != ''">
+						and t1.VMTREE_CODE = #{dto.vmtreeCode}
+    			</if>
+    			<if test="dto.vmtreeName != null and dto.vmtreeName != ''">
+						and t1.VMTREE_NAME = #{dto.vmtreeName}
+    			</if>
+    			<if test="dto.mapTabName != null and dto.mapTabName != ''">
+						and t1.MAP_TAB_NAME = #{dto.mapTabName}
+    			</if>
+    			<if test="dto.dataTabName != null and dto.dataTabName != ''">
+						and t1.DATA_TAB_NAME = #{dto.dataTabName}
+    			</if>
+    			<if test="dto.mapInitSql != null and dto.mapInitSql != ''">
+						and t1.MAP_INIT_SQL = #{dto.mapInitSql}
+    			</if>
+    			<if test="dto.dataInitSql != null and dto.dataInitSql != ''">
+						and t1.DATA_INIT_SQL = #{dto.dataInitSql}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  vmauth_register_info -->
+<select id="findVmauthRegisterInfoByPrimaryKey" parameterType="java.util.Map" resultMap="VmauthRegisterInfoDTO">
+   	 		select 
+					t1.id                             ,
+					t1.vmtree_code                    ,
+					t1.vmtree_name                    ,
+					t1.map_tab_name                   ,
+					t1.data_tab_name                  ,
+					t1.map_init_sql                   ,
+					t1.data_init_sql                  ,
+					t1.create_time                    ,
+					t1.create_by                      
+			from vmauth_register_info 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 vmauth_register_info -->
+<insert id="insertVmauthRegisterInfo" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_vmauth_register_info.nextval as id from dual
+	</selectKey>
+			insert into vmauth_register_info
+			(   		
+					id                             ,
+					vmtree_code                    ,
+					vmtree_name                    ,
+					map_tab_name                   ,
+					data_tab_name                  ,
+					map_init_sql                   ,
+					data_init_sql                  ,
+					create_time                    ,
+					create_by                      
+			)
+			values(#{dto.id}
+					,#{dto.vmtreeCode,jdbcType=VARCHAR}
+					,#{dto.vmtreeName,jdbcType=VARCHAR}
+					,#{dto.mapTabName,jdbcType=VARCHAR}
+					,#{dto.dataTabName,jdbcType=VARCHAR}
+					,#{dto.mapInitSql,jdbcType=VARCHAR}
+					,#{dto.dataInitSql,jdbcType=VARCHAR}
+					,#{dto.createTime,jdbcType=TIMESTAMP}
+					,#{dto.createBy,jdbcType=DECIMAL}
+			)
+</insert>
+    
+<!-- 更新对象 vmauth_register_info -->
+<update id="updateVmauthRegisterInfo" parameterType="java.util.Map">
+	     update vmauth_register_info t1
+	           set 
+			           t1.vmtree_code                    =#{dto.vmtreeCode,jdbcType=VARCHAR},
+			           t1.vmtree_name                    =#{dto.vmtreeName,jdbcType=VARCHAR},
+			           t1.map_tab_name                   =#{dto.mapTabName,jdbcType=VARCHAR},
+			           t1.data_tab_name                  =#{dto.dataTabName,jdbcType=VARCHAR},
+			           t1.map_init_sql                   =#{dto.mapInitSql,jdbcType=VARCHAR},
+			           t1.data_init_sql                  =#{dto.dataInitSql,jdbcType=VARCHAR},
+			           t1.create_time                    =#{dto.createTime,jdbcType=TIMESTAMP},
+			           t1.create_by                      =#{dto.createBy,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+<!-- 通过sql 创建表 -->
+<update id="createTableBySQL" parameterType="java.util.Map">
+${EXECUT_SQL}
+</update>
+<update id="createTableBySQL2" parameterType="java.util.Map">
+create sequence seq_${dto.vmtreeCode}_VMDATA_PRIV start with 1 increment by 1
+</update>
+<update id="createTableBySQL3" parameterType="java.util.Map">
+create table ${dto.vmtreeCode}_VMRULE_MAPPING
+(
+  ID          NUMBER(18) not null primary key,
+  MAP_TYPE    VARCHAR2(2) not null,
+  MAP_KEY     VARCHAR2(20) not null,
+  MAP_VALUE   VARCHAR2(20) not null,
+  ORG_TYPE    VARCHAR2(10) default '${dto.vmtreeCode}',
+  CREATE_TIME TIMESTAMP(6),
+  CREATE_BY   NUMBER(18)
+)
+</update>
+<update id="createTableBySQL4" parameterType="java.util.Map">
+create sequence seq_${dto.vmtreeCode}_VMRULE_MAPPING start with 1 increment by 1
+</update>
+<!-- 主键删除 vmauth_register_info -->
+<update id="deleteVmauthRegisterInfoByPrimaryKey" parameterType="java.util.Map">
+	     delete from vmauth_register_info t1 where t1.ID in (${ids} )
+</update>
+<update id="dropTabinfo" parameterType="java.util.Map">
+	     drop table ${vmtreeCode}_VMRULE_MAPPING
+</update>
+<update id="dropTabinfo2" parameterType="java.util.Map">
+	     drop sequence seq_${vmtreeCode}_VMRULE_MAPPING
+</update>
+<update id="dropTabinfo3" parameterType="java.util.Map">
+	     drop table ${vmtreeCode}_VMDATA_PRIV
+</update>
+<update id="dropTabinfo4" parameterType="java.util.Map">
+	     drop sequence seq_${vmtreeCode}_VMDATA_PRIV
+</update>
+
+</mapper>

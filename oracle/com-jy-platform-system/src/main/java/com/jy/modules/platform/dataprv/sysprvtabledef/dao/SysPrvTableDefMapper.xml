@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.dataprv.sysprvtabledef.dao.SysPrvTableDefDao">
+<resultMap id="SysPrvTableDefDTO" type="com.jy.modules.platform.dataprv.sysprvtabledef.dto.SysPrvTableDefDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="tableName" column="TABLE_NAME" jdbcType="VARCHAR" />
+				<result property="tableDesc" column="TABLE_DESC" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_PRV_TABLE_DEF -->	
+<select id="searchSysPrvTableDefByPaging" parameterType="java.util.Map" resultMap="SysPrvTableDefDTO">
+    	 		select 
+						t1.id                             ,
+						t1.table_name                     ,
+						t1.table_desc                     ,
+						t1.validate_state                 
+					
+				from sys_prv_table_def 	t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.tableName != null and dto.tableName != ''">
+						and t1.TABLE_NAME like '%'||#{dto.tableName}||'%'
+    			</if>
+    			<if test="dto.tableDesc != null and dto.tableDesc != ''">
+						and t1.TABLE_DESC like '%'||#{dto.tableDesc}||'%'
+    			</if>
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_PRV_TABLE_DEF  -->
+<select id="searchSysPrvTableDef" parameterType="java.util.Map" resultMap="SysPrvTableDefDTO">
+    	     select 
+						t1.id                             ,
+						t1.table_name                     ,
+						t1.table_desc                     ,
+						t1.validate_state                 
+				from sys_prv_table_def 		t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.tableName != null and dto.tableName != ''">
+						and t1.TABLE_NAME = #{dto.tableName}
+    			</if>
+    			<if test="dto.tableDesc != null and dto.tableDesc != ''">
+						and t1.TABLE_DESC = #{dto.tableDesc}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_PRV_TABLE_DEF -->
+<select id="findSysPrvTableDefByPrimaryKey" parameterType="java.util.Map" resultMap="SysPrvTableDefDTO">
+   	 		select 
+					t1.id                             ,
+					t1.table_name                     ,
+					t1.table_desc                     ,
+					t1.validate_state                 
+			from sys_prv_table_def 		t1
+			where t1.validate_state='1' 
+			and	t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_PRV_TABLE_DEF -->
+<insert id="insertSysPrvTableDef" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_PRV_TABLE_DEF.nextval as id from dual
+	</selectKey>
+			insert into sys_prv_table_def
+			(   		
+					id                             ,
+					table_name                     ,
+					table_desc                     ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.tableName,jdbcType=VARCHAR}
+					,#{dto.tableDesc,jdbcType=VARCHAR}
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 SYS_PRV_TABLE_DEF -->
+<update id="updateSysPrvTableDef" parameterType="java.util.Map">
+	     update sys_prv_table_def t1
+	           set 
+			           t1.table_name                     =#{dto.tableName,jdbcType=VARCHAR},
+			           t1.table_desc                     =#{dto.tableDesc,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1'
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_PRV_TABLE_DEF -->
+<delete id="deleteSysPrvTableDefByID" parameterType="java.util.Map">
+    	delete from sys_prv_table_def t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_PRV_TABLE_DEF -->
+<update id="deleteSysPrvTableDefByPrimaryKey" parameterType="java.util.Map">
+	     update sys_prv_table_def t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+
+<select id="queryTableList" resultType="java.lang.String">
+
+	select table_name from tabs t1 where t1.table_name not like 'SYS_%'
+			and t1.table_name not like 'JBPM4_%'
+			and t1.table_name not like 'QRTZ_%'
+			and t1.table_name not in (select table_name from SYS_PRV_TABLE_DEF ) ORDER BY table_name
+</select>
+<select id="queryDataPrvTableList" resultType="java.lang.String">
+	select table_name from SYS_PRV_TABLE_DEF ORDER BY table_name
+</select>
+</mapper>

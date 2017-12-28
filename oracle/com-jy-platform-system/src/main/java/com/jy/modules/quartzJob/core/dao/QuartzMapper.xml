@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.quartzJob.core.dao.QuartzMapper" >
+
+  <select id="getQuartzByPage" parameterType="java.util.Map" resultType="java.util.Map" >
+         select * from (select 
+         t.prev_fire_time
+        ,t.NEXT_FIRE_TIME
+        ,t.TRIGGER_NAME
+        ,t.TRIGGER_GROUP
+        ,t.JOB_NAME
+        ,t.JOB_GROUP
+        ,t.IS_VOLATILE
+        ,t.DESCRIPTION
+        ,t.PRIORITY
+        ,t.TRIGGER_STATE
+        ,t.TRIGGER_TYPE
+        ,t.START_TIME
+        ,t.END_TIME
+        ,t.CALENDAR_NAME
+        ,t.MISFIRE_INSTR
+        ,t.JOB_DATA
+		,ROW_NUMBER () OVER (ORDER BY t.START_TIME asc) RWN 
+		,ct.CRON_EXPRESSION
+     	from QRTZ_TRIGGERS t 
+     	join QRTZ_CRON_TRIGGERS ct
+     	on t.SCHED_NAME = ct.SCHED_NAME and t.TRIGGER_GROUP=ct.TRIGGER_GROUP and t.TRIGGER_NAME=ct.TRIGGER_NAME
+    	where 1 = 1 
+ 	    <if test="triggerName != null and triggerName != ''">
+       		and t.TRIGGER_NAME like '%'||#{triggerName}||'%'
+	 	</if>
+ 	    <if test="triggerGroup != null and triggerGroup != ''">
+       		and t.TRIGGER_GROUP like '%'||#{triggerGroup}||'%'
+	 	</if>
+	 	<if test="jobName != null and jobName != ''">
+       		and t.JOB_NAME like '%'||#{jobName}||'%'
+	 	</if>
+	 	<if test="jobGroup != null and jobGroup != ''">
+       		and t.JOB_GROUP like '%'||#{jobGroup}||'%'
+	 	</if>
+	 	<if test="triggerState != null and triggerState != ''">
+	 		and t.TRIGGER_STATE = #{triggerState}
+	 	</if>
+    	) res where res.RWN <![CDATA[>=]]> #{startIndex}  and res.RWN <![CDATA[<]]> #{endIndex} 
+  </select>
+  
+  <select id="getConsignTask" parameterType="java.util.Map" resultType="java.util.Map" >
+        
+  </select>
+  
+  
+    <select id="findAllQuartzCount" resultType="int" parameterType="java.util.Map">
+        select count(1) from QRTZ_TRIGGERS t where 1 = 1 
+        <if test="triggerName != null and triggerName != ''">
+       		and t.TRIGGER_NAME like '%'||#{triggerName}||'%'
+	 	</if>
+ 	    <if test="triggerGroup != null and triggerGroup != ''">
+       		and t.TRIGGER_GROUP like '%'||#{triggerGroup}||'%'
+	 	</if>
+	 	<if test="jobName != null and jobName != ''">
+       		and t.JOB_NAME like '%'||#{jobName}||'%'
+	 	</if>
+	 	<if test="jobGroup != null and jobGroup != ''">
+       		and t.JOB_GROUP like '%'||#{jobGroup}||'%'
+	 	</if>
+    </select>
+    
+      <select id="findQuartzCronByName" parameterType="java.util.Map" resultType="String" >
+        select Q1.CRON_EXPRESSION from QRTZ_CRON_TRIGGERS q1 
+        where Q1.TRIGGER_NAME = #{triggerName}
+  	 </select>
+  	 
+	  <select id="findQuartzJobByName" parameterType="java.util.Map" resultType="java.util.Map" >
+        select Q2.JOB_CLASS_NAME,Q2.JOB_NAME from QRTZ_JOB_DETAILS q2 INNER JOIN QRTZ_TRIGGERS q3 on Q3.JOB_NAME=Q2.JOB_NAME
+         where Q3.TRIGGER_NAME = #{triggerName}
+  	 </select>
+  
+
+<insert id="insertStepLog" parameterType="java.util.HashMap">
+	<selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE" >
+				select seq_quartz_task_his.nextval from dual
+	</selectKey>
+	insert into quartz_task_his
+			(id
+			,batch_no
+			,group_id
+			,thread_Id
+			,task_id
+			,bean_id
+			,task_start_time
+			,task_info
+			)  values(
+			#{id}
+			,(select gi.batch_no from quartz_task_group_instance gi where gi.id =#{keyID} and rownum <![CDATA[ < ]]> 2)
+			,(select gi.group_id from quartz_task_group_instance gi where gi.id =#{keyID} and rownum <![CDATA[ < ]]> 2)
+			,#{threadId,jdbcType=VARCHAR}
+			,(select gi.task_id from quartz_task_group_instance gi where gi.id =#{keyID} and rownum <![CDATA[ < ]]> 2)
+			,#{beanId,jdbcType=VARCHAR}
+			,systimestamp
+			,#{taskInfo,jdbcType=VARCHAR}
+	)
+	</insert>
+
+	<update id="updateStepLog" parameterType="java.util.HashMap">
+		declare 
+		
+		begin 
+
+			update quartz_task_his h 
+				set h.task_state = #{taskState,jdbcType=VARCHAR}
+				,h.task_end_time = systimestamp
+				,h.error_info = #{exceptionInfo,jdbcType=VARCHAR}
+				where h.id = #{keyId};
+				
+			update quartz_task_group_instance gi 
+					set gi.task_ins_state = #{taskState,jdbcType=VARCHAR}, gi.task_start_time=#{start}, gi.task_end_time=#{end}, gi.fail_times=(nvl(gi.fail_times,0)+1) 
+			where  id=${keyID}<!-- gi.batch_No=(select h.batch_No   from quartz_task_his h  where h.id = ${keyId})
+			 and gi.task_id = (select h.task_id   from quartz_task_his h  where h.id = ${keyId}) 
+			 and gi.bean_id = (select h.bean_id   from quartz_task_his h  where h.id = ${keyId}) --> 
+			 ;	
+		end;		
+	  </update>
+	  <!-- 按组查询出待 执行的任务组定义 -->
+	  <select id="findQuartzTaskGroupDef" parameterType="java.util.Map" resultType="java.util.Map" >
+        select 	 distinct
+        		 gd.group_id
+       			,gd.group_name　
+       from quartz_task_group_def gd
+	   
+	   where gd.group_state = '1'
+		     and gd.validate_state = '1'
+  	 </select>
+	<!-- 按每一组定义的任务 初始化 -->
+	<insert id="initGroupInstanceInfo" parameterType="java.util.HashMap">
+	<selectKey resultType="java.lang.String" keyProperty="uuid" order="BEFORE" >
+				select sys_guid() from dual
+	</selectKey>
+	insert into quartz_task_group_instance (
+			ID                      
+			,GROUP_ID                
+			,GROUP_NAME              
+			,BATCH_NO                
+			,TASK_ID                 
+			,TASK_NAME               
+			,BEAN_ID                 
+			,DEAL_STEP               
+			,PRE_STEP                
+			,PRE_STEP_STATE          
+			,AUTO_EXEC               
+			,DEAL_CHANCE             
+			          
+			,BUG_CONTINUE            
+			,IS_END                  
+			,VALIDATE_STATE          
+			,CREATED                   
+			) 
+			select seq_quartz_task_group_instance.nextval
+			,gd.group_id
+			,gd.group_name
+			,#{uuid}
+			,gd.task_id
+			,gd.task_name
+			,gd.bean_id
+			,gd.deal_step
+			,gd.pre_step
+			,gd.pre_step_state
+			,gd.auto_exec
+			,gd.deal_chance
+			,'0'
+			,'1' 
+			,'1'
+			,sysdate
+		
+		　from quartz_task_group_def gd 
+
+			where gd.group_state='1'
+			and gd.group_id=#{groupId}
+			and gd.is_end=0 and (gd.run_time is null or substr(gd.run_time,0,5)=#{runTime})
+			<!-- 日中任务每天执行一次 -->
+			and not exists (select * from quartz_task_group_instance gi 
+			where  gi.group_id=#{groupId}
+			and to_char(gi.created,'yyyy-mm-dd') = to_char(sysdate,'yyyy-mm-dd') 
+			)
+	</insert>	
+<insert id="initGroupInstanceInfoOne" parameterType="java.util.HashMap">
+	<selectKey resultType="java.lang.String" keyProperty="uuid" order="BEFORE" >
+				select sys_guid() from dual
+	</selectKey>
+	insert into quartz_task_group_instance (
+			ID                      
+			,GROUP_ID                
+			,GROUP_NAME              
+			,BATCH_NO                
+			,TASK_ID                 
+			,TASK_NAME               
+			,BEAN_ID                 
+			,DEAL_STEP               
+			,PRE_STEP                
+			,PRE_STEP_STATE          
+			,AUTO_EXEC               
+			,DEAL_CHANCE             
+			          
+			,BUG_CONTINUE            
+			,IS_END                  
+			,VALIDATE_STATE          
+			,CREATED                   
+			) 
+			select seq_quartz_task_group_instance.nextval
+			,gd.group_id
+			,gd.group_name
+			,#{uuid}
+			,gd.task_id
+			,gd.task_name
+			,gd.bean_id
+			,gd.deal_step
+			,gd.pre_step
+			,gd.pre_step_state
+			,gd.auto_exec
+			,gd.deal_chance
+			,'0'
+			,'1' 
+			,'1'
+			,sysdate
+		
+		　from quartz_task_group_def gd 
+			where gd.group_state='1'
+			and gd.group_id=#{groupId}
+			and gd.is_end=0
+	</insert>
+	<update id="updateTaskInstanceIsEnd" parameterType="java.lang.String">
+	   	update quartz_task_group_instance gi
+				set gi.is_end = '0' --设置成执行 状态
+				where gi.id = #{taskInstanceId}
+	  </update>
+	<!--  按批次 查询 每一批次 的任务步骤 未执行的信息 -->
+	 <select id="queryQuartzTaskGroupInstancList" parameterType="java.util.Map" resultType="java.util.Map" >
+			select  
+					(select case when (count(*) >0 or gi.pre_step is null ) then 'Y' else 'N' end 
+					from quartz_task_group_instance t 
+					where t.batch_no = gi.batch_no 
+					and t.task_name = gi.pre_step 
+					and (t.task_ins_state = gi.pre_step_state
+					or t.task_ins_state is null )
+					and t.is_end = '0'
+					) check_run
+					,(select case when (count(*) >0 or (gi.deal_step-1)=0) then 'Y' else 'N' end
+	                 from quartz_task_group_instance t1 
+	                 where t1.task_ins_state is not null 
+	                 and t1.is_end='0' 
+	                 and t1.deal_step = gi.deal_step -1
+	                 and t1.batch_no = gi.batch_no
+	                 )    is_next    
+					,gi.*
+					
+			from quartz_task_group_instance gi 
+			
+			where gi.validate_state ='1'
+			--and gi.is_end ='1' 
+			and (gi.is_end='1' or (nvl(gi.fail_times,0)<![CDATA[<3]]> and 
+			((gi.task_ins_state is null and gi.is_end!='0') or (gi.task_ins_state='0' and to_char(created,'yyyy-mm-dd')=to_char(sysdate,'yyyy-mm-dd') 
+			and to_char(sysdate-(nvl(fail_times,1)*nvl(fail_times,1)*30)/24/60,'yyyy-mm-dd HH24:MI')=to_char(created,'yyyy-mm-dd HH24:MI'))))) 
+			and gi.auto_exec = '1'
+			and gi.group_id =#{groupId}
+			and gi.group_name = #{groupName}
+			and gi.batch_no=#{batchNo}
+			order by gi.deal_step asc 
+  	 </select>
+  	 <!-- 查询 任务实例 未完成的批次信息 -->
+  	 <select id="findQuartzInstanceBatchInfo" parameterType="java.util.Map" resultType="java.util.Map" >
+			select distinct 
+			       gi.group_id
+			       ,gi.group_name
+			       ,gi.batch_no
+			          
+			      from quartz_task_group_instance gi 
+			      
+			      where gi.validate_state ='1'
+			      and (gi.is_end='1' or gi.fail_times<![CDATA[<3]]>) and nvl(gi.task_ins_state,0)<![CDATA[<>1]]> --未完成以及执行失败三次以内
+			      order by gi.batch_no asc
+  	 </select>
+</mapper>

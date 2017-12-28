@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.platform.rule.ruledefinition.dao.RuleDefinitionDao">
+<resultMap id="RuleDefinitionDTO" type="com.jy.platform.rule.ruledefinition.dto.RuleDefinitionDTO">
+	<result property="id" column="ID" jdbcType="DECIMAL" />
+	<result property="parentId" column="PARENT_ID" jdbcType="DECIMAL" />
+	<result property="ruleName" column="RULE_NAME" jdbcType="VARCHAR" />
+	<result property="ruleResource" column="RULE_RESOURCE" jdbcType="VARCHAR" />
+	<result property="resourceType" column="RESOURCE_TYPE" jdbcType="VARCHAR" />
+	<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+	<result property="version" column="VERSION" jdbcType="DECIMAL" />
+	<!-- 扩展属性 -->
+	<result property="ruleCode" column="RULE_CODE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 RULE_DEFINITION-列表显示用 -->	
+<select id="searchRuleDefinitionByPaging" parameterType="java.util.Map" resultMap="RuleDefinitionDTO">
+	select 
+		t1.id
+		,t1.parent_id
+		,t1.rule_name
+		,t1.resource_type
+		,t1.validate_state
+		,t1.version
+		,t2.node_code as rule_code
+	from rule_definition t1
+	    ,rule_tree t2
+	where t1.parent_id = t2.id
+	<if test="dto.parentId != null and dto.parentId != ''">
+    and t1.PARENT_ID = #{dto.parentId}
+	</if>
+	<if test="dto.ruleCode != null and dto.ruleCode != ''">
+    and t2.NODE_CODE like '${dto.ruleCode}%'
+	</if>
+	<if test="dto.ruleName != null and dto.ruleName != ''">
+    and t1.RULE_NAME like '%${dto.ruleName}%'
+	</if>
+	<if test="dto.validateState != null and dto.validateState != ''">
+    and t1.VALIDATE_STATE = #{dto.validateState}
+	</if>
+    order by t1.id
+</select>
+  
+<!-- 根据规则编码查询列表 RULE_DEFINITION-执行规则的时候用  -->
+<select id="searchRuleDefinition" parameterType="java.util.Map" resultMap="RuleDefinitionDTO">
+	select 
+		t1.id
+		,t1.parent_id
+		,t1.rule_name
+		,t1.rule_resource
+		,t1.resource_type
+		,t1.validate_state
+		,t1.version
+	from rule_definition t1
+	where t1.parent_id = (select t2.id from rule_tree t2 where t2.node_code = #{ruleCode}) 
+	  and t1.VALIDATE_STATE = '1'
+</select>
+  
+<!-- 主键查询对象  RULE_DEFINITION -->
+<select id="findRuleDefinitionByID" parameterType="java.util.Map" resultMap="RuleDefinitionDTO">
+	select 
+		t1.id
+		,t1.parent_id
+		,t1.rule_name
+		,t1.rule_resource
+		,t1.resource_type
+		,t1.validate_state
+		,t1.version
+		,t2.node_code as rule_code
+	from rule_definition t1
+	    ,rule_tree t2
+	where t1.parent_id = t2.id
+	  and t1.id = #{id}
+</select>
+  
+<!-- 新增对象 RULE_DEFINITION -->
+<insert id="insertRuleDefinition" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+    select seq_RULE_DEFINITION.nextval as id from dual
+	</selectKey>
+	insert into rule_definition
+	(
+		id
+		,parent_id
+		,rule_name
+		,rule_resource
+		,resource_type
+		,validate_state
+		,version
+		,create_time
+		,create_by
+	)
+	values(
+		#{dto.id}
+		,#{dto.parentId,jdbcType=DECIMAL}
+		,#{dto.ruleName,jdbcType=VARCHAR}
+		,#{dto.ruleResource,jdbcType=VARCHAR}
+		,#{dto.resourceType,jdbcType=VARCHAR}
+		,#{dto.validateState,jdbcType=VARCHAR}
+		,0
+		,sysdate
+		,#{dto.opUserId,jdbcType=DECIMAL}
+	)
+</insert>
+    
+<!-- 更新对象 RULE_DEFINITION -->
+<update id="updateRuleDefinition" parameterType="java.util.Map">
+	update rule_definition t1
+	  set 
+		t1.rule_name      =#{dto.ruleName,jdbcType=VARCHAR},
+		t1.rule_resource  =#{dto.ruleResource,jdbcType=VARCHAR},
+		t1.resource_type  =#{dto.resourceType,jdbcType=VARCHAR},
+		t1.validate_state =#{dto.validateState,jdbcType=VARCHAR},
+		t1.version        = t1.version+1,
+		t1.update_time    = sysdate,
+		t1.update_by      = #{dto.opUserId,jdbcType=DECIMAL}
+	where t1.id = #{dto.id}
+	  and t1.version = #{dto.version}
+</update>
+   
+<!-- 主键删除 RULE_DEFINITION -->
+<delete id="deleteRuleDefinitionByID" parameterType="java.util.Map">
+    delete from rule_definition t1 where t1.ID in (${ids} )
+</delete>
+
+</mapper>

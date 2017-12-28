@@ -1,0 +1,103 @@
+.resizable {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 4px;
+}
+.resizable h3 {
+	text-align: left;
+	 background:#DDEDFA;
+	height: 30px;
+}
+
+.ui-widget-header {
+  border: none;
+  border-bottom: 1px solid #aed0ea;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  
+}
+
+.ui-button {
+  margin: 0px 5px;
+  border: 1px solid #aed0ea;
+  font-weight: bold;
+  color: #2779aa;
+}
+
+.resizable .titleSpan {
+	float: left;
+	margin: 7px;
+}
+.resizable .buttonSpan {
+	float: right;
+	height: 26px;
+	line-height: 26px;
+}
+.resizable .tableSpan {
+	margin: 0px;
+}
+.field {
+	float: left;
+	margin: 2px 0;
+	min-width:230px;
+	height:30px;
+}
+.field .fieldName {
+    display: block;
+    float: left;
+    /* min-width: 80px; */
+    padding: 4px 2px;
+    padding-left:20px;
+    text-align: right;
+    white-space: nowrap;
+}
+.field .fieldSelect{
+	min-width: 100px;
+	margin-left: 0px !important;
+	padding:3px;
+}
+
+.field input[type='text']{
+	padding: 3px;
+  	/* width: 170px; */
+}
+
+.field .ui-multiselect{
+	padding: 3px;
+	background-color: white;
+    border:1px solid rgb(169, 169, 169);
+}
+.ui-button{
+    border-radius:2px;
+    border: 1px solid #aed0ea;
+    background: #d7ebf9 url(images/ui-bg_glass_80_d7ebf9_1x400.png) 50% 50% repeat-x;
+    font-weight: bold;
+    color: #2779aa;
+}
+.ui-button:nth-child(even){
+	background:#fff;
+}
+.ui-button:hover{
+	border: 1px solid #74b2e2;
+    /* background: #e4f1fb url(images/ui-bg_glass_100_e4f1fb_1x400.png) 50% 50% repeat-x; */
+    font-weight: bold;
+    color: #0070a3;
+}
+.searchBtn {
+	text-align: left;
+  	clear: both;
+    padding: 10px 0px 10px 95px;
+    border-radius : 6px;
+}
+.searchBtn button:nth-child(even), .ui-dialog-buttonset button:nth-child(even){
+	background: #fff;
+}
+.searchBtn button:nth-child(even).ui-state-active,.ui-dialog-buttonset button:nth-child(even).ui-state-active{
+	background: #3baae3;
+}
+.searchFrom{
+	display: inline-block;
+	/* padding-top: 10px; */
+	width:100%;
+}

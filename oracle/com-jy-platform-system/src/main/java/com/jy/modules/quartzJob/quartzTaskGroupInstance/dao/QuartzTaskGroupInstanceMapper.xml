@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper
+	namespace="com.jy.modules.quartzJob.quartzTaskGroupInstance.dao.QuartzTaskGroupInstanceDao">
+	<resultMap id="QuartzTaskGroupInstanceDTO"
+		type="com.jy.modules.quartzJob.quartzTaskGroupInstance.dto.QuartzTaskGroupInstanceDTO">
+		<result property="id" column="ID" jdbcType="DECIMAL" />
+		<result property="groupId" column="GROUP_ID" jdbcType="VARCHAR" />
+		<result property="groupName" column="GROUP_NAME" jdbcType="VARCHAR" />
+		<result property="batchNo" column="BATCH_NO" jdbcType="VARCHAR" />
+		<result property="taskId" column="TASK_ID" jdbcType="VARCHAR" />
+		<result property="taskName" column="TASK_NAME" jdbcType="VARCHAR" />
+		<result property="beanId" column="BEAN_ID" jdbcType="VARCHAR" />
+		<result property="dealStep" column="DEAL_STEP" jdbcType="DECIMAL" />
+		<result property="preStep" column="PRE_STEP" jdbcType="VARCHAR" />
+		<result property="preStepState" column="PRE_STEP_STATE"
+			jdbcType="VARCHAR" />
+		<result property="autoExec" column="AUTO_EXEC" jdbcType="VARCHAR" />
+		<result property="dealChance" column="DEAL_CHANCE" jdbcType="VARCHAR" />
+		<result property="taskInsState" column="TASK_INS_STATE"
+			jdbcType="VARCHAR" />
+		<result property="bugContinue" column="BUG_CONTINUE" jdbcType="VARCHAR" />
+		<result property="isEnd" column="IS_END" jdbcType="VARCHAR" />
+		<result property="validateState" column="VALIDATE_STATE"
+			jdbcType="VARCHAR" />
+		<result property="created" column="CREATED" jdbcType="DATE" />
+		<result property="lastUpd" column="LAST_UPD" jdbcType="DATE" />
+		<result property="remark" column="REMARK" jdbcType="VARCHAR" />
+		<result property="taskStartTime" column="TASK_START_TIME" jdbcType="VARCHAR"/>
+		<result property="taskEndTime" column="TASK_END_TIME" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<resultMap
+		type="com.jy.modules.quartzJob.quartzTaskGroupDef.dto.QuartzGroupDTO"
+		id="QuartzGroupDTO">
+		<result property="groupId" column="GROUP_ID" jdbcType="VARCHAR" />
+		<result property="groupName" column="GROUP_NAME" jdbcType="VARCHAR" />
+		<result property="groupState" column="BATCH_NO" jdbcType="VARCHAR" />
+		<result property="autoExec" column="AUTO_EXEC" jdbcType="VARCHAR" />
+		<result property="dealChance" column="DEAL_CHANCE" jdbcType="VARCHAR" />
+		<result property="isStop" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+		<result property="taskStartTime" column="TASK_START_TIME" jdbcType="VARCHAR"/>
+		<result property="taskEndTime" column="TASK_END_TIME" jdbcType="VARCHAR"/>
+		<result property="taskInsState" column="TASK_INS_STATE" jdbcType="VARCHAR"/>
+		<result property="created" column="CREATED" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<!-- 分页查询 quartz_task_group_instance -->
+	<select id="searchQuartzTaskGroupInstanceByPaging"
+		parameterType="java.util.Map" resultMap="QuartzTaskGroupInstanceDTO">
+		select
+		t1.id ,
+		t1.group_id ,
+		t1.group_name ,
+		t1.batch_no ,
+		t1.task_id ,
+		t1.task_name ,
+		t1.bean_id ,
+		t1.deal_step ,
+		t1.pre_step ,
+		t1.pre_step_state ,
+		t1.auto_exec ,
+		t1.deal_chance ,
+		t1.task_ins_state ,
+		t1.bug_continue ,
+		t1.is_end ,
+		t1.validate_state ,
+		t1.created ,
+		t1.last_upd ,
+		t1.remark
+
+		from quartz_task_group_instance t1
+		where 1=1
+		and t1.validate_state='1'
+		<if test="dto.id != null and dto.id != ''">
+			and t1.ID =#{dto.id}
+		</if>
+		<if test="dto.groupId != null and dto.groupId != ''">
+			and t1.GROUP_ID =#{dto.groupId}
+		</if>
+		<if test="dto.groupName != null and dto.groupName != ''">
+			and t1.GROUP_NAME =#{dto.groupName}
+		</if>
+		<if test="dto.batchNo != null and dto.batchNo != ''">
+			and t1.BATCH_NO =#{dto.batchNo}
+		</if>
+		<if test="dto.taskId != null and dto.taskId != ''">
+			and t1.TASK_ID =#{dto.taskId}
+		</if>
+		<if test="dto.taskName != null and dto.taskName != ''">
+			and t1.TASK_NAME =#{dto.taskName}
+		</if>
+		<if test="dto.beanId != null and dto.beanId != ''">
+			and t1.BEAN_ID =#{dto.beanId}
+		</if>
+		<if test="dto.dealStep != null and dto.dealStep != ''">
+			and t1.DEAL_STEP =#{dto.dealStep}
+		</if>
+		<if test="dto.preStep != null and dto.preStep != ''">
+			and t1.PRE_STEP =#{dto.preStep}
+		</if>
+		<if test="dto.preStepState != null and dto.preStepState != ''">
+			and t1.PRE_STEP_STATE =#{dto.preStepState}
+		</if>
+		<if test="dto.autoExec != null and dto.autoExec != ''">
+			and t1.AUTO_EXEC =#{dto.autoExec}
+		</if>
+		<if test="dto.dealChance != null and dto.dealChance != ''">
+			and t1.DEAL_CHANCE =#{dto.dealChance}
+		</if>
+		<if test="dto.taskInsState != null and dto.taskInsState != ''">
+			and t1.TASK_INS_STATE =#{dto.taskInsState}
+		</if>
+		<if test="dto.bugContinue != null and dto.bugContinue != ''">
+			and t1.BUG_CONTINUE =#{dto.bugContinue}
+		</if>
+		<if test="dto.isEnd != null and dto.isEnd != ''">
+			and t1.IS_END =#{dto.isEnd}
+		</if>
+		<if test="dto.validateState != null and dto.validateState != ''">
+			and t1.VALIDATE_STATE =#{dto.validateState}
+		</if>
+		<if test="dto.created != null and dto.created != ''">
+			and t1.CREATED =#{dto.created}
+		</if>
+		<if test="dto.lastUpd != null and dto.lastUpd != ''">
+			and t1.LAST_UPD =#{dto.lastUpd}
+		</if>
+		<if test="dto.remark != null and dto.remark != ''">
+			and t1.REMARK =#{dto.remark}
+		</if>
+
+		order by t1.deal_step 
+	</select>
+
+	<!-- 查询列表 quartz_task_group_instance -->
+	<select id="searchQuartzTaskGroupInstance" parameterType="java.util.Map"
+		resultMap="QuartzTaskGroupInstanceDTO">
+		select
+		t1.id ,
+		t1.group_id ,
+		t1.group_name ,
+		t1.batch_no ,
+		t1.task_id ,
+		t1.task_name ,
+		t1.bean_id ,
+		t1.deal_step ,
+		t1.pre_step ,
+		t1.pre_step_state ,
+		t1.auto_exec ,
+		t1.deal_chance ,
+		t1.task_ins_state ,
+		t1.bug_continue ,
+		t1.is_end ,
+		t1.validate_state ,
+		t1.created ,
+		t1.last_upd ,
+		t1.remark,
+		t1.task_start_time,
+		t1.task_end_time
+		from quartz_task_group_instance t1
+		where 1=1
+		<if test="dto.id != null and dto.id != ''">
+			and t1.ID = #{dto.id}
+		</if>
+		<if test="dto.groupId != null and dto.groupId != ''">
+			and t1.GROUP_ID = #{dto.groupId}
+		</if>
+		<if test="dto.groupName != null and dto.groupName != ''">
+			and t1.GROUP_NAME = #{dto.groupName}
+		</if>
+		<if test="dto.batchNo != null and dto.batchNo != ''">
+			and t1.BATCH_NO = #{dto.batchNo}
+		</if>
+		<if test="dto.taskId != null and dto.taskId != ''">
+			and t1.TASK_ID = #{dto.taskId}
+		</if>
+		<if test="dto.taskName != null and dto.taskName != ''">
+			and t1.TASK_NAME = #{dto.taskName}
+		</if>
+		<if test="dto.beanId != null and dto.beanId != ''">
+			and t1.BEAN_ID = #{dto.beanId}
+		</if>
+		<if test="dto.dealStep != null and dto.dealStep != ''">
+			and t1.DEAL_STEP = #{dto.dealStep}
+		</if>
+		<if test="dto.preStep != null and dto.preStep != ''">
+			and t1.PRE_STEP = #{dto.preStep}
+		</if>
+		<if test="dto.preStepState != null and dto.preStepState != ''">
+			and t1.PRE_STEP_STATE = #{dto.preStepState}
+		</if>
+		<if test="dto.autoExec != null and dto.autoExec != ''">
+			and t1.AUTO_EXEC = #{dto.autoExec}
+		</if>
+		<if test="dto.dealChance != null and dto.dealChance != ''">
+			and t1.DEAL_CHANCE = #{dto.dealChance}
+		</if>
+		<if test="dto.taskInsState != null and dto.taskInsState != ''">
+			and t1.TASK_INS_STATE = #{dto.taskInsState}
+		</if>
+		<if test="dto.bugContinue != null and dto.bugContinue != ''">
+			and t1.BUG_CONTINUE = #{dto.bugContinue}
+		</if>
+		<if test="dto.isEnd != null and dto.isEnd != ''">
+			and t1.IS_END = #{dto.isEnd}
+		</if>
+		<if test="dto.validateState != null and dto.validateState != ''">
+			and t1.VALIDATE_STATE = #{dto.validateState}
+		</if>
+		<if test="dto.created != null and dto.created != ''">
+			and t1.CREATED = #{dto.created}
+		</if>
+		<if test="dto.lastUpd != null and dto.lastUpd != ''">
+			and t1.LAST_UPD = #{dto.lastUpd}
+		</if>
+		<if test="dto.remark != null and dto.remark != ''">
+			and t1.REMARK = #{dto.remark}
+		</if>
+		order by t1.deal_step 
+	</select>
+
+	<!-- 主键查询对象 quartz_task_group_instance -->
+	<select id="findQuartzTaskGroupInstanceByPrimaryKey"
+		parameterType="java.util.Map" resultMap="QuartzTaskGroupInstanceDTO">
+		select
+		t1.id ,
+		t1.group_id ,
+		t1.group_name ,
+		t1.batch_no ,
+		t1.task_id ,
+		t1.task_name ,
+		t1.bean_id ,
+		t1.deal_step ,
+		t1.pre_step ,
+		t1.pre_step_state ,
+		t1.auto_exec ,
+		t1.deal_chance ,
+		t1.task_ins_state ,
+		t1.bug_continue ,
+		t1.is_end ,
+		t1.validate_state ,
+		t1.created ,
+		t1.last_upd ,
+		t1.remark
+		from quartz_task_group_instance t1
+		where
+		t1.id = #{id}
+	</select>
+
+	<!-- 新增对象 quartz_task_group_instance -->
+	<insert id="insertQuartzTaskGroupInstance" parameterType="java.util.Map"
+		useGeneratedKeys="true">
+		<selectKey resultType="java.lang.Long" keyProperty="dto.id"
+			order="BEFORE">
+			select seq_quartz_task_group_instance.nextval as id from dual
+		</selectKey>
+		insert into quartz_task_group_instance
+		(
+		id ,
+		group_id ,
+		group_name ,
+		batch_no ,
+		task_id ,
+		task_name ,
+		bean_id ,
+		deal_step ,
+		pre_step ,
+		pre_step_state ,
+		auto_exec ,
+		deal_chance ,
+		task_ins_state ,
+		bug_continue ,
+		is_end ,
+		validate_state ,
+		created ,
+		remark
+		)
+		values(#{dto.id}
+		,#{dto.groupId,jdbcType=VARCHAR}
+		,#{dto.groupName,jdbcType=VARCHAR}
+		,#{dto.batchNo,jdbcType=VARCHAR}
+		,#{dto.taskId,jdbcType=VARCHAR}
+		,#{dto.taskName,jdbcType=VARCHAR}
+		,#{dto.beanId,jdbcType=VARCHAR}
+		,#{dto.dealStep,jdbcType=DECIMAL}
+		,#{dto.preStep,jdbcType=VARCHAR}
+		,#{dto.preStepState,jdbcType=VARCHAR}
+		,#{dto.autoExec,jdbcType=VARCHAR}
+		,#{dto.dealChance,jdbcType=VARCHAR}
+		,#{dto.taskInsState,jdbcType=VARCHAR}
+		,#{dto.bugContinue,jdbcType=VARCHAR}
+		,#{dto.isEnd,jdbcType=VARCHAR}
+		,'1'
+		,sysdate
+		,#{dto.remark,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<!-- 更新对象 quartz_task_group_instance -->
+	<update id="updateQuartzTaskGroupInstance" parameterType="java.util.Map">
+		update quartz_task_group_instance t1
+		set
+		t1.group_id =#{dto.groupId,jdbcType=VARCHAR},
+		t1.group_name =#{dto.groupName,jdbcType=VARCHAR},
+		t1.batch_no =#{dto.batchNo,jdbcType=VARCHAR},
+		t1.task_id =#{dto.taskId,jdbcType=VARCHAR},
+		t1.task_name =#{dto.taskName,jdbcType=VARCHAR},
+		t1.bean_id =#{dto.beanId,jdbcType=VARCHAR},
+		t1.deal_step =#{dto.dealStep,jdbcType=DECIMAL},
+		t1.pre_step =#{dto.preStep,jdbcType=VARCHAR},
+		t1.pre_step_state =#{dto.preStepState,jdbcType=VARCHAR},
+		t1.auto_exec =#{dto.autoExec,jdbcType=VARCHAR},
+		t1.deal_chance =#{dto.dealChance,jdbcType=VARCHAR},
+		t1.task_ins_state =#{dto.taskInsState,jdbcType=VARCHAR},
+		t1.bug_continue =#{dto.bugContinue,jdbcType=VARCHAR},
+		t1.is_end =#{dto.isEnd,jdbcType=VARCHAR},
+		t1.validate_state ='1',
+		t1.last_upd =sysdate,
+		t1.remark =#{dto.remark,jdbcType=VARCHAR}
+		where t1.id = #{dto.id}
+	</update>
+
+	<!-- 主键删除 quartz_task_group_instance -->
+	<delete id="deleteQuartzTaskGroupInstanceByID" parameterType="java.util.Map">
+		delete from quartz_task_group_instance t1 where t1.ID in (${ids} )
+	</delete>
+	<!-- 主键假删除 quartz_task_group_instance -->
+	<update id="deleteQuartzTaskGroupInstanceByPrimaryKey"
+		parameterType="java.util.Map">
+		update quartz_task_group_instance t1
+		set t1.validate_state='0'
+		where t1.id in( ${ids})
+	</update>
+
+	<select id="queryQuartzGroupListByPaging" parameterType="java.util.Map"
+		resultMap="QuartzGroupDTO">
+		select group_id,group_name,BATCH_NO,auto_exec,deal_chance,
+		max(case when task_ins_state is null then '3' when task_ins_state = 0 then '4' else task_ins_state end) task_ins_state,
+		VALIDATE_STATE,min(task_start_time) task_start_time,max(task_end_time) task_end_time,
+		to_char(max(created),'yyyy-mm-dd hh24:mi:ss') created
+		from quartz_task_group_instance where 1=1 
+		<if test="dto.groupId != null and dto.groupId != ''">
+			and GROUP_ID = #{dto.groupId}
+		</if>
+		<if test="dto.groupName != null and dto.groupName != ''">
+			and GROUP_NAME = #{dto.groupName}
+		</if> 
+		group by group_id,group_name,BATCH_NO,auto_exec,deal_chance,VALIDATE_STATE order by group_id,created desc
+	</select>
+	<update id="updateGroupTaskByNo" parameterType="java.util.Map">
+		update quartz_task_group_instance t1
+		set t1.validate_state=#{val}
+		where t1.batch_no = #{no}
+
+	</update>
+	<update id="updateTaskIsEndByNo" parameterType="java.util.Map">
+		update quartz_task_group_instance t1
+		set t1.task_ins_state = null , is_end=1 , t1.validate_state=1
+		where t1.batch_no = #{no}
+	</update>
+	<update id="updateAutoExceGroupTaskByNo" parameterType="java.util.Map">
+		update quartz_task_group_instance t1
+		set t1.AUTO_EXEC=#{autoExec}
+		where t1.batch_no = #{no}
+
+	</update>
+	
+	<update id="updateAutoExceGroupTaskByGroup" parameterType="java.util.Map">
+		update quartz_task_group_instance t1
+		set t1.AUTO_EXEC=#{autoExec}
+		where t1.GROUP_ID = #{groupId} and t1.validate_state ='1' and t1.is_end='1' and to_char(created,'yyyy-MM-dd')=to_char(sysdate,'yyyy-MM-dd') 
+
+	</update>
+	
+	<update id="resetTaskState" parameterType="java.util.Map">
+		update QUARTZ_TASK_GROUP_INSTANCE set task_ins_state=null ,is_end=1 where id=#{id}  
+		and task_ins_state is not null and task_ins_state!='1' and is_end='0' 
+	</update>
+	
+	<update id="updateAutoExceByTaskClass" parameterType="java.util.Map">
+		update quartz_task_group_instance t1
+		set t1.AUTO_EXEC=#{autoExec}
+		where t1.BEAN_ID = #{beanId} and t1.validate_state ='1' and t1.is_end='1' and to_char(created,'yyyy-MM-dd')=to_char(sysdate,'yyyy-MM-dd') 
+
+	</update>
+	
+	<select id="searchByTaskClassStatus"
+		parameterType="java.util.Map" resultMap="QuartzGroupDTO">
+		select  min(AUTO_EXEC) AUTO_EXEC
+		from quartz_task_group_instance t1
+		where
+		t1.BEAN_ID = #{beanId} and t1.validate_state ='1' and t1.is_end='1' and to_char(created,'yyyy-MM-dd')=to_char(sysdate,'yyyy-MM-dd') 
+	</select>
+</mapper>

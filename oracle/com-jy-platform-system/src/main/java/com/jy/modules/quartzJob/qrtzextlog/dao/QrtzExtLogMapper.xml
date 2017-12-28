@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.quartzJob.qrtzextlog.dao.QrtzExtLogDao">
+<resultMap id="QrtzExtLogDTO" type="com.jy.modules.quartzJob.qrtzextlog.dto.QrtzExtLogDTO">
+	<result property="id" column="ID" jdbcType="DECIMAL" />
+	<result property="jobName" column="JOB_NAME" jdbcType="VARCHAR" />
+	<result property="fireTime" column="FIRE_TIME" jdbcType="TIMESTAMP" />
+	<result property="threadId" column="THREAD_ID" jdbcType="VARCHAR" />
+	<result property="startTime" column="START_TIME" jdbcType="TIMESTAMP" />
+	<result property="endTime" column="END_TIME" jdbcType="TIMESTAMP" />
+	<result property="state" column="STATE" jdbcType="VARCHAR" />
+	<result property="result" column="RESULT" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 QRTZ_EXT_LOG -->	
+<select id="searchQrtzExtLogByPaging" fetchSize="10" 
+	parameterType="java.util.Map" resultMap="QrtzExtLogDTO">
+  	   select 
+			t1.id,
+			t1.job_name,
+			t1.fire_time,
+			t1.thread_id,
+			t1.start_time,
+			t1.end_time,
+			t1.state,
+			t1.result 
+		from qrtz_ext_log t1
+  			<if test="dto.jobName != null and dto.jobName != ''">
+		where t1.JOB_NAME =#{dto.jobName}
+  			</if>
+		order by t1.id desc
+</select>
+  
+<!-- 主键查询对象  QRTZ_EXT_LOG -->
+<select id="findQrtzExtLogByPrimaryKey" parameterType="java.util.Map" resultMap="QrtzExtLogDTO">
+  	   select 
+			t1.id,
+			t1.job_name,
+			t1.fire_time,
+			t1.thread_id,
+			t1.start_time,
+			t1.end_time,
+			t1.state,
+			t1.result 
+		from qrtz_ext_log t1
+		where 
+			t1.id = #{id}
+</select>
+  
+<!-- 新增对象 QRTZ_EXT_LOG -->
+<insert id="insertQrtzExtLog" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+	    select seq_QRTZ_EXT_LOG.nextval as id from dual
+	</selectKey>
+		insert into qrtz_ext_log
+		(   		
+			id,
+			job_name,
+			fire_time,
+			thread_id,
+			start_time,
+			end_time,
+			state,
+			result
+		)
+		values(#{dto.id}
+			,#{dto.jobName,jdbcType=VARCHAR}
+			,#{dto.fireTime,jdbcType=TIMESTAMP}
+			,#{dto.threadId,jdbcType=VARCHAR}
+			,#{dto.startTime,jdbcType=TIMESTAMP}
+			,#{dto.endTime,jdbcType=TIMESTAMP}
+			,#{dto.state,jdbcType=VARCHAR}
+			,#{dto.result,jdbcType=VARCHAR}
+		)
+</insert>
+    
+<!-- 更新对象 QRTZ_EXT_LOG -->
+<update id="updateQrtzExtLogFinish" parameterType="java.util.Map">
+     update qrtz_ext_log t1
+        set 
+         t1.end_time  =#{dto.endTime,jdbcType=TIMESTAMP},
+         t1.state     =#{dto.state,jdbcType=VARCHAR},
+         t1.result    =#{dto.result,jdbcType=VARCHAR}
+     where t1.id = #{dto.id}
+</update>
+
+<!-- 主键查询对象  QRTZ_EXT_LOG -->
+<select id="getQrtzTriggersWriteLogByPrimaryKey" parameterType="java.util.Map" resultType="java.util.Map">
+       select 
+            t1.write_log
+        from qrtz_triggers t1
+        where 
+            t1.sched_name = 'startQuertz'
+        and t1.trigger_name = #{triggerName}
+        and t1.trigger_group = 'DEFAULT'
+</select>
+
+</mapper>

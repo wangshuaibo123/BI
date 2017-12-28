@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.sysauth.dao.SysRoleDao">
+<resultMap id="SysRoleDTO" type="com.jy.modules.platform.sysauth.dto.SysRoleDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="roleName" column="ROLE_NAME" jdbcType="VARCHAR" />
+				<result property="roleCode" column="ROLE_CODE" jdbcType="VARCHAR" />
+				<result property="roleType" column="ROLE_TYPE" jdbcType="VARCHAR" />
+				<result property="appId" column="APP_ID" jdbcType="DECIMAL" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="version" column="VERSION" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 SYS_ROLE -->	
+<select id="searchSysRoleByPaging" parameterType="java.util.Map" resultMap="SysRoleDTO">
+    	 		select 
+						t1.id                             ,
+						t1.role_name                      ,
+						t1.role_code                      ,
+						t1.role_type                      ,
+						t1.app_id                         ,
+						t1.validate_state                 ,
+						t1.version                        
+					
+				from sys_role 	t1
+				<if test="groupIds != null and groupIds != ''">
+						left join sys_role_group_role t2 on t1.id = t2.role_id
+    			</if>
+				where 1=1
+				and t1.validate_state='1'
+				<if test="groupIds != null and groupIds != ''">
+						and t2.role_group_id in (${groupIds})
+    			</if>
+				
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.roleName != null and dto.roleName != ''">
+    					and t1.role_name like '%'||#{dto.roleName}||'%'
+    			</if>
+    			<if test="dto.roleCode != null and dto.roleCode != ''">
+    						and t1.ROLE_CODE like '%'||#{dto.roleCode}||'%'
+    			</if>
+    			<if test="dto.roleType != null and dto.roleType != ''">
+						and t1.ROLE_TYPE =#{dto.roleType}
+    			</if>
+    			<if test="dto.appId != null and dto.appId != ''">
+						and t1.APP_ID =#{dto.appId}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION =#{dto.version}
+    			</if>
+    			<if test="orgId != null and orgId != ''">
+    					and t1.id in (select a.role_id from sys_role_user a where a.target_id in 
+    					(select id from sys_org a where a.id=#{orgId} or a.parent_ids like '%/'||#{orgId}||'/%') and a.target_type='org') 
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_ROLE  -->
+<select id="searchSysRole" parameterType="java.util.Map" resultMap="SysRoleDTO">
+    	     select 
+						t1.id                             ,
+						t1.role_name                      ,
+						t1.role_code                      ,
+						t1.role_type                      ,
+						t1.app_id                         ,
+						t1.validate_state                 ,
+						t1.version                        
+				from sys_role 		t1
+				<if test="groupIds != null and groupIds != ''">
+						left join sys_role_group_role t2 on t1.id = t2.role_id
+    			</if>
+				where 1=1
+				
+				<if test="groupIds != null and groupIds != ''">
+						and t2.role_group_id in (${groupIds})
+    			</if>
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.roleName != null and dto.roleName != ''">
+						and t1.ROLE_NAME = #{dto.roleName}
+    			</if>
+    			<if test="dto.roleCode != null and dto.roleCode != ''">
+						and t1.ROLE_CODE = #{dto.roleCode}
+    			</if>
+    			<if test="dto.roleType != null and dto.roleType != ''">
+						and t1.ROLE_TYPE = #{dto.roleType}
+    			</if>
+    			<if test="dto.appId != null and dto.appId != ''">
+						and t1.APP_ID = #{dto.appId}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.version != null and dto.version != ''">
+						and t1.VERSION = #{dto.version}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_ROLE -->
+<select id="findSysRoleByPrimaryKey" parameterType="java.util.Map" resultMap="SysRoleDTO">
+   	 		select 
+					t1.id                             ,
+					t1.role_name                      ,
+					t1.role_code                      ,
+					t1.role_type                      ,
+					t1.app_id                         ,
+					t1.validate_state                 ,
+					t1.version                        
+			from sys_role 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_ROLE -->
+<insert id="insertSysRole" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_ROLE.nextval as id from dual
+	</selectKey>
+			insert into sys_role
+			(   		
+					id                             ,
+					role_name                      ,
+					role_code                      ,
+					role_type                      ,
+					app_id                         ,
+					validate_state                 ,
+					version                        
+			)
+			values(#{dto.id}
+					,#{dto.roleName,jdbcType=VARCHAR}
+					,#{dto.roleCode,jdbcType=VARCHAR}
+					,#{dto.roleType,jdbcType=VARCHAR}
+					,#{dto.appId,jdbcType=DECIMAL}
+					,'1'
+					,#{dto.version,jdbcType=DECIMAL}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_ROLE -->
+<update id="updateSysRole" parameterType="java.util.Map">
+	     update sys_role t1
+	           set 
+			           t1.role_name                      =#{dto.roleName,jdbcType=VARCHAR},
+			           t1.role_code                      =#{dto.roleCode,jdbcType=VARCHAR},
+			           t1.role_type                      =#{dto.roleType,jdbcType=VARCHAR},
+			           t1.app_id                         =#{dto.appId,jdbcType=DECIMAL},
+			           t1.validate_state                 ='1',
+			           t1.version                        =#{dto.version,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+
+<!-- 主键假删除 SYS_ROLE -->
+<update id="deleteSysRoleByPrimaryKey" parameterType="java.util.Map">
+	     delete from sys_role where id in (${ids})
+</update>
+<select id="getSysRoleByTargetId" parameterType="java.util.Map" resultMap="SysRoleDTO">
+    	     select 
+						t1.id                             ,
+						t1.role_name                      ,
+						t1.role_code                      ,
+						t1.role_type                      ,
+						t1.app_id                         ,
+						t1.validate_state                 ,
+						t1.version                        
+				from sys_role 		t1, sys_role_user t2
+				where t1.id = t2.role_id 
+				and t2.target_id = '${targetId}'
+				and  t1.validate_state='1'	
+</select>
+
+<select id="getRoleByOrgId" parameterType="long" resultType="int">
+    	   select count(*) from sys_role_user where target_id in (select org_id from sys_org_user where user_id=#{userId}) and target_type='org'
+</select>
+</mapper>

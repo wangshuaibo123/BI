@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.platform.rule.ruletree.dao.RuleTreeDao">
+<resultMap id="RuleTreeDTO" type="com.jy.platform.rule.ruletree.dto.RuleTreeDTO">
+		<result property="id" column="ID" jdbcType="DECIMAL" />
+		<result property="parentId" column="PARENT_ID" jdbcType="DECIMAL" />
+		<result property="nodeCode" column="NODE_CODE" jdbcType="VARCHAR" />
+		<result property="nodeName" column="NODE_NAME" jdbcType="VARCHAR" />
+		<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+		<result property="version" column="VERSION" jdbcType="DECIMAL" />
+		<!-- 父节点编码，显示用 -->
+		<result property="parentCode" column="PARENT_CODE" jdbcType="VARCHAR" />
+		<!-- 父节点名称，显示用 -->
+		<result property="parentName" column="PARENT_NAME" jdbcType="VARCHAR" />
+</resultMap>
+
+<!-- 查询列表 RULE_TREE  -->
+<select id="searchRuleTree" parameterType="java.util.Map" resultMap="RuleTreeDTO">
+	select 
+	    t1.id,
+	    t1.parent_id,
+	    t1.node_code,
+	    t1.node_name,
+	    t1.validate_state,
+	    t1.version
+	from rule_tree t1
+	order by t1.id
+</select>
+
+<!-- 主键查询对象  RULE_TREE -->
+<select id="findRuleTreeByID" parameterType="java.util.Map" resultMap="RuleTreeDTO">
+	select
+		t1.id,
+		t1.parent_id,
+		t1.node_code,
+		t1.node_name,
+		t1.validate_state,
+		t1.version
+	from rule_tree t1
+	where 
+	    t1.id = #{id}
+</select>
+  
+<!-- 主键查询对象  RULE_TREE-包含父节点名称 -->
+<select id="findRuleTreeByID2" parameterType="java.util.Map" resultMap="RuleTreeDTO">
+	select
+		t1.id,
+		t1.parent_id,
+		t1.node_code,
+		t1.node_name,
+		t1.validate_state,
+		t1.version,
+		t2.node_code as parent_code,
+		t2.node_name as parent_name
+	from rule_tree t1
+	    left join rule_tree t2 on t1.parent_id = t2.id
+	where 
+	    t1.id = #{id}
+</select>
+  
+<!-- 新增对象 RULE_TREE -->
+<insert id="insertRuleTree" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+	   select seq_RULE_DEFINITION.nextval as id from dual
+	</selectKey>
+	insert into rule_tree
+	(
+		id,
+		parent_id,
+		node_code,
+		node_name,
+		validate_state,
+		version,
+		create_time,
+		create_by
+	) values (
+		 #{dto.id}
+		,#{dto.parentId,jdbcType=DECIMAL}
+		,#{dto.nodeCode,jdbcType=VARCHAR}
+		,#{dto.nodeName,jdbcType=VARCHAR}
+		,'1'
+		,0
+		,sysdate
+		,#{dto.opUserId,jdbcType=DECIMAL}
+	)
+</insert>
+
+<!-- 更新对象 RULE_TREE -->
+<update id="updateRuleTree" parameterType="java.util.Map">
+	update rule_tree t1
+	set 
+		t1.parent_id =#{dto.parentId,jdbcType=DECIMAL},
+		t1.node_code =#{dto.nodeCode,jdbcType=VARCHAR},
+		t1.node_name =#{dto.nodeName,jdbcType=VARCHAR},
+		t1.validate_state ='1',
+		t1.version =t1.version + 1,
+		t1.update_time = sysdate,
+		t1.update_by = #{dto.opUserId,jdbcType=DECIMAL}
+	where t1.id = #{dto.id}
+	  and t1.version =#{dto.version,jdbcType=DECIMAL}
+</update>
+   
+<!-- 主键删除 RULE_TREE -->
+<delete id="deleteRuleTreeByID" parameterType="java.util.Map">
+    delete from rule_tree t1 where t1.ID = #{id}
+</delete>
+
+<!-- 主键查询对象  RULE_TREE -->
+<select id="findRuleDefCountByID" parameterType="java.util.Map" resultType="long">
+    select
+        count(t1.id) as defCount
+    from rule_definition t1
+    where 
+        t1.parent_id = #{id}
+</select>
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.platform.jbpm4.repository.BizCalendarHolidayMapper">
+	<resultMap id="BaseResultMap" type="com.jy.platform.jbpm4.dto.BizCalendarHoliday">
+		<id column="ID" property="id" jdbcType="DECIMAL" />
+		<result column="HOLIDAY" property="holiday" jdbcType="VARCHAR" />
+		<result column="VALIDATE_STATE" property="validateState" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<insert id="insertBizHoliday" parameterType="com.jy.platform.jbpm4.dto.BizCalendarHoliday">
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			SELECT SEQ_BIZ_CALENDAR.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		insert into biz_calendar
+		  (id, holidays, validate_state)
+		values
+		  (#{id}, #{holiday}, #{validateState})
+	</insert>
+	
+	<delete id="deleteBizHoliday" parameterType="map">
+		delete from biz_calendar t where holidays like #{yearmonth}||'%'
+	</delete>
+	
+	<select id="queryBizHoliday" resultType="String" parameterType="String">
+		select t.holidays
+		from biz_calendar t 
+		where t.holidays like #{yearmonth}||'%' 
+		order by t.holidays
+	</select>
+	
+	<select id="queryHolidayByStartAndEndTime" resultType="String" parameterType="java.util.HashMap">
+		select t.holidays
+		from biz_calendar t 
+		where t.validate_state='1'
+		 <if test="startTime != null and startTime != ''">
+			 and t.holidays <![CDATA[>=#{startTime}]]>
+		 </if>
+		 <if test="endTime != null and endTime != ''">
+			 and t.holidays <![CDATA[<=#{endTime}]]>
+		 </if>
+		order by t.holidays
+	</select>
+	
+	<insert id="batchInsertHoliday" parameterType="java.util.List">
+		<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			SELECT SEQ_BIZ_CALENDAR.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		insert into biz_calendar
+		  (id, holidays, validate_state)
+		  select  SEQ_BIZ_CALENDAR.NEXTVAL,A.*  from( 
+		<foreach collection="list" item="item" index="index" separator="UNION ALL">
+			select 
+				#{item}, 
+				1
+			from dual
+		</foreach>) A
+	
+	</insert>
+</mapper>

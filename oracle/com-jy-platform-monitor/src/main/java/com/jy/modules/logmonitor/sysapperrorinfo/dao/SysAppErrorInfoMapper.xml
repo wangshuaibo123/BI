@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.logmonitor.sysapperrorinfo.dao.SysAppErrorInfoDao">
+<resultMap id="SysAppErrorInfoDTO" type="com.jy.modules.logmonitor.sysapperrorinfo.dto.SysAppErrorInfoDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="nodeName" column="NODE_NAME" jdbcType="VARCHAR" />
+				<result property="appFlag" column="APP_FLAG" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="VARCHAR" />
+				<result property="concent" column="CONCENT" jdbcType="VARCHAR" />
+				<result property="fileName" column="FILE_NAME" jdbcType="VARCHAR" />
+				<result property="logLevel" column="LOG_LEVEL" jdbcType="VARCHAR" />
+				<result property="levelSetupId" column="LEVEL_SETUP_ID" jdbcType="DECIMAL" />
+</resultMap>
+
+<resultMap id="SysAppErrorLevelDetailDTO" type="com.jy.modules.logmonitor.sysapperrorinfo.dto.SysAppErrorLevelDetailDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="appFlag" column="APP_FLAG" jdbcType="VARCHAR" />
+				<result property="keyWord" column="key_word" jdbcType="VARCHAR" />
+				<result property="logLevel" column="log_level" jdbcType="VARCHAR" />
+				<result property="emailFlag" column="email_flag" jdbcType="VARCHAR" />
+				<result property="smsFlag" column="SMS_FLAG" jdbcType="VARCHAR" />
+				<result property="showDetailFlag" column="SHOW_DETAIL_FLAG" jdbcType="VARCHAR" />
+				<result property="count" column="count" jdbcType="DECIMAL" />
+				<result property="errorIds" column="errorIds" jdbcType="VARCHAR" />
+</resultMap>
+
+<resultMap id="SysAppErrorCountDTO" type="com.jy.modules.logmonitor.sysapperrorinfo.dto.SysAppErrorInfoDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="nodeName" column="NODE_NAME" jdbcType="VARCHAR" />
+				<result property="appFlag" column="APP_FLAG" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="VARCHAR" />
+				<result property="concent" column="CONCENT" jdbcType="VARCHAR" />
+				<result property="fileName" column="FILE_NAME" jdbcType="VARCHAR" />
+				<result property="logLevel" column="LOG_LEVEL" jdbcType="DECIMAL" />
+				<result property="count" column="COUNT" jdbcType="DECIMAL" />
+				<result property="ctime" column="CTIME" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 统计查询  按月中每天统计 SYS_APP_ERROR_INFO -->	
+<select id="countSysAppErrorByDay" parameterType="java.util.Map" resultMap="SysAppErrorCountDTO">
+    	 		SELECT
+				  SUBSTR(T1.CREATE_TIME,9,2) CTIME,
+				  T1.LOG_LEVEL,
+					COUNT (T1.APP_FLAG) AS COUNT,
+					T1.APP_FLAG
+				FROM
+					SYS_APP_ERROR_INFO T1
+				WHERE
+					1 = 1
+				
+    			<if test="dto.nodeName != null and dto.nodeName != ''">
+						AND T1.NODE_NAME = #{dto.nodeName}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						AND T1.APP_FLAG = #{dto.appFlag}
+    			</if>
+    			<if test="dto.ctime != null and dto.ctime != ''">
+						AND SUBSTR (T1.CREATE_TIME, 0, 7) = #{dto.ctime}
+    			</if>
+    			<if test="dto.logLevel != null and dto.logLevel != ''">
+						AND T1.LOG_LEVEL = #{dto.logLevel}
+    			</if>
+				
+				 GROUP BY
+					T1.APP_FLAG,SUBSTR(T1.CREATE_TIME,9,2),T1.LOG_LEVEL
+</select>
+<!-- 统计查询  按天中每小时统计 SYS_APP_ERROR_INFO -->	
+<select id="countSysAppErrorByHour" parameterType="java.util.Map" resultMap="SysAppErrorCountDTO">
+    	 		SELECT
+				  SUBSTR(T1.CREATE_TIME,12,2) CTIME,
+				  T1.LOG_LEVEL,
+					COUNT (T1.APP_FLAG) AS COUNT,
+					T1.APP_FLAG
+				FROM
+					SYS_APP_ERROR_INFO T1
+				WHERE
+					1 = 1
+				
+    			<if test="dto.nodeName != null and dto.nodeName != ''">
+						AND T1.NODE_NAME = #{dto.nodeName}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						AND T1.APP_FLAG = #{dto.appFlag}
+    			</if>
+    			<if test="dto.ctime != null and dto.ctime != ''">
+						AND SUBSTR (T1.CREATE_TIME, 0, 10)  = #{dto.ctime}
+    			</if>
+    			<if test="dto.logLevel != null and dto.logLevel != ''">
+						AND T1.LOG_LEVEL = #{dto.logLevel}
+    			</if>
+				 GROUP BY
+					T1.APP_FLAG,SUBSTR(T1.CREATE_TIME,12,2),T1.LOG_LEVEL
+</select>
+<!-- 统计查询  按月中每天统计 SYS_APP_ERROR_INFO -->	
+<select id="percentSysAppErrorByDay" parameterType="java.util.Map" resultMap="SysAppErrorCountDTO">
+    	 		SELECT
+				  
+				  T1.LOG_LEVEL,
+					COUNT (T1.APP_FLAG) AS COUNT,
+					T1.APP_FLAG
+				FROM
+					SYS_APP_ERROR_INFO T1
+				WHERE
+					1 = 1
+				
+    			<if test="dto.nodeName != null and dto.nodeName != ''">
+						AND T1.NODE_NAME = #{dto.nodeName}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						AND T1.APP_FLAG = #{dto.appFlag}
+    			</if>
+    			<if test="dto.ctime != null and dto.ctime != ''">
+						AND SUBSTR (T1.CREATE_TIME, 0, 7) = #{dto.ctime}
+    			</if>
+    			<if test="dto.logLevel != null and dto.logLevel != ''">
+						AND T1.LOG_LEVEL = #{dto.logLevel}
+    			</if>
+				
+				 GROUP BY
+					T1.APP_FLAG,T1.LOG_LEVEL
+</select>
+<!-- 统计查询  按天中每小时统计 SYS_APP_ERROR_INFO -->	
+<select id="percentSysAppErrorByHour" parameterType="java.util.Map" resultMap="SysAppErrorCountDTO">
+    	 		SELECT
+				  
+				  T1.LOG_LEVEL,
+					COUNT (T1.APP_FLAG) AS COUNT,
+					T1.APP_FLAG
+				FROM
+					SYS_APP_ERROR_INFO T1
+				WHERE
+					1 = 1
+				
+    			<if test="dto.nodeName != null and dto.nodeName != ''">
+						AND T1.NODE_NAME = #{dto.nodeName}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						AND T1.APP_FLAG = #{dto.appFlag}
+    			</if>
+    			<if test="dto.ctime != null and dto.ctime != ''">
+						AND SUBSTR (T1.CREATE_TIME, 0, 10)  = #{dto.ctime}
+    			</if>
+    			<if test="dto.logLevel != null and dto.logLevel != ''">
+						AND T1.LOG_LEVEL = #{dto.logLevel}
+    			</if>
+				 GROUP BY
+					T1.APP_FLAG,T1.LOG_LEVEL
+</select>
+<!-- 分页查询 SYS_APP_ERROR_INFO -->	
+<select id="searchSysAppErrorInfoByPaging" parameterType="java.util.Map" resultMap="SysAppErrorInfoDTO">
+    	 		select 
+						t1.id                             ,
+						t1.node_name                      ,
+						t1.app_flag                       ,
+						t1.create_time                    ,
+						t1.concent                        ,
+						t1.FILE_NAME                      ,
+						t1.LEVEL_SETUP_ID                      ,
+						t1.log_level      
+						
+					
+				from sys_app_error_info 	t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.nodeName != null and dto.nodeName != ''">
+						and t1.NODE_NAME =#{dto.nodeName}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != '' and dto.appFlag != 'ALL'">
+						and t1.APP_FLAG =#{dto.appFlag}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="startTime != null and startTime != ''">
+						and <![CDATA[ t1.CREATE_TIME >= to_char(to_date(#{startTime},'yyyy-mm-dd'),'yyyy-mm-dd HH24:MI:SS') ]]>
+    			</if>
+    			<if test="endTime != null and endTime != ''">
+						and <![CDATA[ t1.CREATE_TIME < to_char(to_date(#{endTime},'yyyy-mm-dd')+1,'yyyy-mm-dd HH24:MI:SS') ]]>
+    			</if>
+    			<if test="dto.concent != null and dto.concent != ''">
+						and t1.CONCENT like '%'||#{dto.concent}||'%'
+    			</if>
+    			<if test="dto.logLevel != null and dto.logLevel != ''">
+						and t1.LOG_LEVEL =#{dto.logLevel}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_APP_ERROR_INFO  -->
+<select id="searchSysAppErrorInfo" parameterType="java.util.Map" resultMap="SysAppErrorInfoDTO">
+    	     select 
+						t1.id                             ,
+						t1.node_name                      ,
+						t1.app_flag                       ,
+						t1.create_time                    ,
+						t1.concent                        ,
+						t1.LEVEL_SETUP_ID                      ,
+						t1.FILE_NAME
+				from sys_app_error_info 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.nodeName != null and dto.nodeName != '' and dto.appFlag != null and dto.appFlag != '' and dto.fileName != null and dto.fileName!=''" >
+						and t1.ID = ( select max(id) id from SYS_APP_ERROR_INFO t where t.node_name=#{dto.nodeName} and t.FILE_NAME=#{dto.fileName} and t.app_flag=#{dto.appFlag}) 
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.concent != null and dto.concent != ''">
+						and t1.CONCENT = #{dto.concent}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_APP_ERROR_INFO -->
+<select id="findSysAppErrorInfoByPrimaryKey" parameterType="java.util.Map" resultMap="SysAppErrorInfoDTO">
+   	 		select 
+					t1.id                             ,
+					t1.node_name                      ,
+					t1.app_flag                       ,
+					t1.create_time                    ,
+					t1.concent                        ,
+					t1.FILE_NAME                      ,
+					t1.LEVEL_SETUP_ID                      ,
+					t1.log_level      
+			from sys_app_error_info 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_APP_ERROR_INFO -->
+<insert id="insertSysAppErrorInfo" parameterType="java.util.ArrayList">
+begin
+ <foreach collection="list" item="dto">
+			insert into sys_app_error_info
+			(   		
+					id                             ,
+					node_name                      ,
+					app_flag                       ,
+					create_time                    ,
+					concent                        ,
+					FILE_NAME      
+			)
+			select  seq_SYS_APP_ERROR_INFO.nextval
+					,#{dto.nodeName,jdbcType=VARCHAR}
+					,#{dto.appFlag,jdbcType=VARCHAR}
+					,#{dto.createTime,jdbcType=VARCHAR}
+					,#{dto.concent,jdbcType=VARCHAR}
+					,#{dto.fileName,jdbcType=VARCHAR} from dual;
+			</foreach>
+end;
+</insert>
+    
+<!-- 更新对象 SYS_APP_ERROR_INFO -->
+<update id="updateSysAppErrorInfo" parameterType="java.util.Map">
+	     update sys_app_error_info t1
+	           set 
+			           t1.node_name                      =#{dto.nodeName,jdbcType=VARCHAR},
+			           t1.app_flag                       =#{dto.appFlag,jdbcType=VARCHAR},
+			           t1.create_time                    =#{dto.createTime,jdbcType=VARCHAR},
+			           t1.concent                        =#{dto.concent,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_APP_ERROR_INFO -->
+<delete id="deleteSysAppErrorInfoByID" parameterType="java.util.Map">
+    	delete from sys_app_error_info t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_APP_ERROR_INFO -->
+<delete id="deleteSysAppErrorInfoByPrimaryKey" parameterType="java.util.Map">
+	     delete from sys_app_error_info t1	where t1.id in( ${ids})
+</delete>
+<!-- 根据关键字更新日志级别 -->
+<update id="updateSysAppErrorInfoLevel" parameterType="java.util.Map">
+	     update sys_app_error_info t1
+	     set 
+	          t1.LOG_LEVEL                      =#{level,jdbcType=VARCHAR}
+			 ,t1.LEVEL_SETUP_ID                 =#{levelSetupId,jdbcType=VARCHAR}
+			 /* ,t1.MATCHED_FLAG                   ='Y' */
+	     where t1.MATCHED_FLAG='N'
+	     and t1.concent like '%'||#{keyWord,jdbcType=VARCHAR}||'%'
+	     <if test="appFlag != null and appFlag != '' and appFlag != 'ALL' ">
+	     and t1.APP_FLAG = #{appFlag}
+	     </if>
+</update>
+
+<update id="updateSysAppErrorMatched">
+      update sys_app_error_info t2
+	     set   t2.MATCHED_FLAG='Y'
+	     where t2.MATCHED_FLAG='N'
+</update>
+
+<!-- 查询列表 SYS_APP_ERROR_INFO 根据级别进行统计列表  -->
+<select id="getErrorForLevelCount" parameterType="java.util.Map" resultMap="SysAppErrorLevelDetailDTO">
+    			select 
+		    			e.app_flag, 
+		    			s.id, 
+		    			s.key_word, 
+		    			s.log_level, 
+		    			s.email_flag,
+		    			s.SMS_FLAG,
+		    			s.SHOW_DETAIL_FLAG,
+		    			count(e.id) count,
+		    			wmsys.wm_concat(e.ID) errorIds
+				  from sys_app_error_info e, sys_app_level_setup s
+				
+				 where e.level_setup_id = s.id 
+				    <if test="time != null and time != ''">
+						and mod(#{time}, s.rate) = 0
+    				</if>
+    				<if test="maxRate != null and maxRate != ''">
+    				    and s.rate_unit = 1 and e.create_time <![CDATA[>to_char(sysdate - #{maxRate} / 24 / 60, 'yyyy-mm-dd HH24:MI:SS')]]>
+    				</if>
+    				<if test="rateUnit != null and rateUnit != '' and rateUnit==1">
+						and s.rate_unit = 1 and e.create_time <![CDATA[>to_char(sysdate - s.rate / 24 / 60, 'yyyy-mm-dd HH24:MI:SS')]]>
+    				</if>
+    				<if test="rateUnit != null and rateUnit != '' and rateUnit==2">
+						and s.rate_unit = 2 and e.create_time <![CDATA[>to_char(sysdate - s.rate / 24 , 'yyyy-mm-dd HH24:MI:SS')]]>
+    				</if>
+				   
+				 group by e.app_flag, s.id, s.key_word, s.log_level, s.email_flag, s.SMS_FLAG, s.SHOW_DETAIL_FLAG
+</select>
+</mapper>

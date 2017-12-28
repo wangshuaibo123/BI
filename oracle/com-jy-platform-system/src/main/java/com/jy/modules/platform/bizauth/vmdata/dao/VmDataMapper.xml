@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.bizauth.vmdata.dao.VmDataDao" >
+ <select id="searchVmDataPriv" parameterType="java.util.Map" resultType="java.util.Map" >
+         select * from (select 
+         t.ID
+        ,t.USER_ID
+        ,t.OWNER_ID
+        ,t.ORG_ID
+        ,t.BIZ_ID
+        ,t.ORG_TYPE
+        ,to_char(t.CREATE_TIME,'YYYY-MM-DD HH24:MI:SS') CREATE_TIME
+        ,t.VMRULE_MAPPING_ID
+		,ROW_NUMBER () OVER (ORDER BY t.CREATE_TIME desc) RWN 
+     	from ${tableName} t 
+    	where 1 = 1 
+ 	   	<if test="id != null and id != ''">
+       		and t.ID = #{id,jdbcType=DECIMAL} 
+	 	</if>
+	 	<if test="userId != null and userId != ''">
+       		and t.USER_ID = #{userId,jdbcType=DECIMAL} 
+	 	</if>
+		<if test="ownerId != null and ownerId != ''">
+       		and t.OWNER_ID = #{ownerId,jdbcType=DECIMAL} 
+	 	</if>
+	 	<if test="orgId != null and orgId != ''">
+       		and t.ORG_ID = #{orgId,jdbcType=DECIMAL} 
+	 	</if>
+	 	<if test="bizId != null and bizId != ''">
+       		and t.BIZ_ID = #{bizId,jdbcType=DECIMAL}  
+	 	</if>
+	 	<if test="orgType != null and orgType != ''">
+       		and t.ORG_TYPE = #{orgType,jdbcType=VARCHAR} 
+	 	</if>
+	 	<if test="vmruleMappingId != null and vmruleMappingId != ''">
+       		and t.VMRULE_MAPPING_ID = #{vmruleMappingId,jdbcType=DECIMAL}  
+	 	</if>
+	 	)
+  </select>
+  
+   <select id="searchVmRegisterInfo" parameterType="java.util.Map" resultType="java.util.Map" >
+         select * from (select 
+           t.ID
+        ,t.VMTREE_CODE
+        ,t.VMTREE_NAME
+        ,t.DATA_TAB_NAME
+        ,t.MAP_TAB_NAME
+        ,t.MAP_INIT_SQL
+        ,t.DATA_INIT_SQL
+        ,to_char(t.CREATE_TIME,'YYYY-MM-DD HH24:MI:SS') CREATE_TIME
+        ,t.CREATE_BY
+		,ROW_NUMBER () OVER (ORDER BY t.CREATE_TIME desc) RWN 
+     	from VMAUTH_REGISTER_INFO t 
+    	where 1 = 1 
+ 	   	<if test="id != null and id != ''">
+       		and t.ID = #{id,jdbcType=DECIMAL} 
+	 	</if>
+	 	<if test="vmtreeCode != null and vmtreeCode != ''">
+       		and t.VMTREE_CODE = #{vmtreeCode,jdbcType=VARCHAR} 
+	 	</if>
+		<if test="vmtreeName != null and vmtreeName != ''">
+       		and t.VMTREE_NAME like CONCAT('%',#{vmtreeName,jdbcType=VARCHAR}, '%') 
+	 	</if>
+	 	<if test="dataTabName != null and dataTabName != ''">
+       		and t.DATA_TAB_NAME like CONCAT('%',#{dataTabName,jdbcType=VARCHAR}, '%') 
+	 	</if>
+	 	<if test="mapTabName != null and mapTabName != ''">
+       		and t.MAP_TAB_NAME like CONCAT('%',#{mapTabName,jdbcType=VARCHAR}, '%') 
+	 	</if>
+	 	<if test="createBy != null and createBy != ''">
+       		and t.CREATE_BY = #{createBy,jdbcType=DECIMAL}  
+	 	</if>
+	 	)
+  </select>
+  
+  <update id="updateVmdataPrivPart" parameterType="java.util.Map">
+	declare
+	
+	my_user_id 	number(18):=0;
+	my_alter 	varchar2(500); 
+	my_tab 		varchar2(50);
+	my_org_type varchar2(50);
+	my_trun		varchar2(50);
+	begin
+	      my_tab :='${tabName}';
+	      my_org_type :='${orgType}';
+	      my_trun :='${truncateType}';
+	      my_user_id :=${userId};
+	      my_alter:='alter table '||my_tab||' add partition D_'||my_user_id||' values('||my_user_id||')  ';
+	      execute immediate my_alter;
+	      exception when others then dbms_output.put_line('创建分区异常：'||my_alter);
+	      
+	      if 'Y' = my_trun then 
+	        my_alter:='alter table '||my_tab||' truncate partition D_'||my_user_id||' ';
+	        execute immediate my_alter;
+	      end if;
+	      
+	      insert into vmdata_priv_part(owner_id, user_id, data_type)
+	
+	      select tt1.owner_id
+	           ,my_user_id  user_id
+	           ,my_org_type data_type 
+	           from ( select vmd1.owner_id from  ${orgType}_vmdata_priv vmd1 
+	                         where vmd1.owner_id is not null and vmd1.user_id=my_user_id
+	               union all
+	               select m.user_id owner_id from vmuser_vmorg_map m 
+	                      where m.org_id in
+	                      (select vmd1.org_id from  ${orgType}_vmdata_priv vmd1 
+	                              where vmd1.org_id is not null and vmd1.user_id=my_user_id)
+	               and m.org_type=my_org_type
+	                  )tt1;
+	      commit;
+	
+	end;
+	  	
+  </update>
+</mapper>

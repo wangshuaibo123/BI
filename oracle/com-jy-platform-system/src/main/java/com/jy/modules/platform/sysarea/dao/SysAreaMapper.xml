@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.sysarea.dao.SysAreaDao">
+<resultMap id="SysAreaDTO" type="com.jy.modules.platform.sysarea.dto.SysAreaDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="areaCode" column="AREA_CODE" jdbcType="VARCHAR" />
+				<result property="areaName" column="AREA_NAME" jdbcType="VARCHAR" />
+				<result property="parentId" column="PARENT_ID" jdbcType="DECIMAL" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 sys_area -->	
+<select id="searchSysAreaByPaging" parameterType="java.util.Map" resultMap="SysAreaDTO">
+    	 		select 
+						t1.id                             ,
+						t1.area_code                      ,
+						t1.area_name                      ,
+						t1.parent_id                      ,
+						t1.validate_state                 
+					
+				from sys_area 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.areaCode != null and dto.areaCode != ''">
+						and t1.AREA_CODE =#{dto.areaCode}
+    			</if>
+    			<if test="dto.areaName != null and dto.areaName != ''">
+						and t1.AREA_NAME =#{dto.areaName}
+    			</if>
+    			<if test="dto.parentId != null and dto.parentId != ''">
+						and t1.PARENT_ID =#{dto.parentId}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 sys_area  -->
+<select id="searchSysArea" parameterType="java.util.Map" resultMap="SysAreaDTO">
+    	     select 
+						t1.id                             ,
+						t1.area_code                      ,
+						t1.area_name                      ,
+						t1.parent_id                      ,
+						t1.validate_state                 
+				from sys_area 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.areaCode != null and dto.areaCode != ''">
+						and t1.AREA_CODE = #{dto.areaCode}
+    			</if>
+    			<if test="dto.areaName != null and dto.areaName != ''">
+						and t1.AREA_NAME = #{dto.areaName}
+    			</if>
+    			<if test="dto.parentId != null and dto.parentId != ''">
+						and t1.PARENT_ID = #{dto.parentId}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			order by t1.id 
+</select>
+  
+<!-- 主键查询对象  sys_area -->
+<select id="findSysAreaByPrimaryKey" parameterType="java.util.Map" resultMap="SysAreaDTO">
+   	 		select 
+					t1.id                             ,
+					t1.area_code                      ,
+					t1.area_name                      ,
+					t1.parent_id                      ,
+					t1.validate_state                 
+			from sys_area 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 sys_area -->
+<insert id="insertSysArea" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_sys_area.nextval as id from dual
+	</selectKey>
+			insert into sys_area
+			(   		
+					id                             ,
+					area_code                      ,
+					area_name                      ,
+					parent_id                      ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.areaCode,jdbcType=VARCHAR}
+					,#{dto.areaName,jdbcType=VARCHAR}
+					,#{dto.parentId,jdbcType=DECIMAL}
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 sys_area -->
+<update id="updateSysArea" parameterType="java.util.Map">
+	     update sys_area t1
+	           set 
+			           t1.area_code                      =#{dto.areaCode,jdbcType=VARCHAR},
+			           t1.area_name                      =#{dto.areaName,jdbcType=VARCHAR},
+			           t1.parent_id                      =#{dto.parentId,jdbcType=DECIMAL},
+			           t1.validate_state                 ='1'
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 sys_area -->
+<delete id="deleteSysAreaByID" parameterType="java.util.Map">
+    	delete from sys_area t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 sys_area -->
+<update id="deleteSysAreaByPrimaryKey" parameterType="java.util.Map">
+	     update sys_area t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+
+
+
+<!-- add by lin 20141028 根据城市编码查询父节点  -->
+<select id="searchSysAreaByAreaCode" parameterType="java.util.Map" resultMap="SysAreaDTO">
+    	     select id                             ,
+					area_code                      ,
+					area_name                      ,
+					parent_id                      ,
+					validate_state
+			 from SYS_AREA sa START WITH area_code= #{dto.areaCode}
+    	     connect by  prior  sa.parent_id=sa.ID
+    		 ORDER BY sa.id 
+</select>
+
+<!-- add by bieshuangping 20141029 -->
+<select id="queryChildAreaByCode" parameterType="java.lang.String" resultType="java.util.Map">
+	SELECT area_code AREACODE, area_name AREANAME
+  		FROM sys_area
+		WHERE parent_id = (SELECT ID
+                      FROM sys_area
+                     WHERE area_code = #{areaCode})
+        order by area_code        
+</select>
+
+<!-- add by bieshuangping 20141029 -->
+<select id="queryChildAreaByPid" parameterType="java.lang.String" resultType="java.util.Map">
+	SELECT area_code AREACODE, area_name AREANAME
+  		FROM sys_area
+		WHERE parent_id = #{parentId}
+		order by area_code
+</select>
+
+<!-- add by bieshuangping 20141029 -->
+<select id="getParentCodeByCode" parameterType="java.lang.String" resultType="java.util.Map">
+	SELECT area_code AREACODE, PARENT_ID PARENTID
+  		FROM sys_area
+		WHERE id = (SELECT PARENT_ID
+                      FROM sys_area
+                     WHERE area_code = #{areaCode}) 
+</select>
+
+<!-- add by bieshuangping 20141029 -->
+<select id="getAreaByCode" parameterType="java.lang.String" resultType="java.util.Map">
+	SELECT area_name AREANAME, (SELECT parent_id
+                     FROM sys_area
+                    WHERE ID = t.parent_id) PARENTID,
+       (SELECT area_name
+          FROM sys_area
+         WHERE ID = t.parent_id) PNAME, (SELECT area_code
+                                           FROM sys_area
+                                          WHERE ID = t.parent_id) PCODE
+  FROM sys_area t
+ WHERE area_code = #{areaCode}
+</select>
+
+</mapper>

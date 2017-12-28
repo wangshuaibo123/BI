@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.quartztaskhis.dao.QuartzTaskHisDao">
+<resultMap id="QuartzTaskHisDTO" type="com.jy.modules.platform.quartztaskhis.dto.QuartzTaskHisDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="batchNo" column="BATCH_NO" jdbcType="VARCHAR" />
+				<result property="groupId" column="GROUP_ID" jdbcType="VARCHAR" />
+				<result property="threadId" column="THREAD_ID" jdbcType="VARCHAR" />
+				<result property="taskId" column="TASK_ID" jdbcType="VARCHAR" />
+				<result property="beanId" column="BEAN_ID" jdbcType="VARCHAR" />
+				<result property="taskState" column="TASK_STATE" jdbcType="VARCHAR" />
+				<result property="taskStartTime" column="TASK_START_TIME" jdbcType="TIMESTAMP" />
+				<result property="taskEndTime" column="TASK_END_TIME" jdbcType="TIMESTAMP" />
+				<result property="taskInfo" column="TASK_INFO" jdbcType="VARCHAR" />
+				<result property="errorInfo" column="ERROR_INFO" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 QUARTZ_TASK_HIS -->	
+<select id="searchQuartzTaskHisByPaging" parameterType="java.util.Map" resultMap="QuartzTaskHisDTO">
+    	 		select 
+						t1.id                             ,
+						t1.batch_no                       ,
+						t1.group_id                       ,
+						t1.thread_id                      ,
+						t1.task_id                        ,
+						t1.bean_id                        ,
+						t1.task_state                     ,
+						t1.task_start_time                ,
+						t1.task_end_time                  ,
+						t1.task_info                      ,
+						t1.error_info                     
+					
+				from quartz_task_his 	t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.batchNo != null and dto.batchNo != ''">
+						and t1.BATCH_NO like '%'||#{dto.batchNo}||'%'
+    			</if>
+    			<if test="dto.groupId != null and dto.groupId != ''">
+						and t1.GROUP_ID like '%'||#{dto.groupId}||'%'
+    			</if>
+    			<if test="dto.threadId != null and dto.threadId != ''">
+						and t1.THREAD_ID like '%'||#{dto.threadId}||'%'
+    			</if>
+    			<if test="dto.taskId != null and dto.taskId != ''">
+						and t1.TASK_ID like '%'||#{dto.taskId}||'%'
+    			</if>
+    			<if test="dto.beanId != null and dto.beanId != ''">
+						and t1.BEAN_ID like '%'||#{dto.beanId}||'%'
+    			</if>
+    			<if test="dto.taskState != null and dto.taskState != ''">
+						and t1.TASK_STATE =#{dto.taskState}
+    			</if>
+    			<if test="dto.taskStartTime != null and dto.taskStartTime != ''">
+						and to_char(t1.TASK_START_TIME,'YYYY-MM-DD') =#{dto.taskStartTime}
+    			</if>
+    			<if test="dto.taskEndTime != null and dto.taskEndTime != ''">
+						and to_char(t1.TASK_END_TIME,'YYYY-MM-DD') =#{dto.taskEndTime}
+    			</if>
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 QUARTZ_TASK_HIS  -->
+<select id="searchQuartzTaskHis" parameterType="java.util.Map" resultMap="QuartzTaskHisDTO">
+    	     select 
+						t1.id                             ,
+						t1.batch_no                       ,
+						t1.group_id                       ,
+						t1.thread_id                      ,
+						t1.task_id                        ,
+						t1.bean_id                        ,
+						t1.task_state                     ,
+						t1.task_start_time                ,
+						t1.task_end_time                  ,
+						t1.task_info                      ,
+						t1.error_info                     
+				from quartz_task_his 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.batchNo != null and dto.batchNo != ''">
+						and t1.BATCH_NO = #{dto.batchNo}
+    			</if>
+    			<if test="dto.groupId != null and dto.groupId != ''">
+						and t1.GROUP_ID = #{dto.groupId}
+    			</if>
+    			<if test="dto.threadId != null and dto.threadId != ''">
+						and t1.THREAD_ID = #{dto.threadId}
+    			</if>
+    			<if test="dto.taskId != null and dto.taskId != ''">
+						and t1.TASK_ID = #{dto.taskId}
+    			</if>
+    			<if test="dto.beanId != null and dto.beanId != ''">
+						and t1.BEAN_ID = #{dto.beanId}
+    			</if>
+    			<if test="dto.taskState != null and dto.taskState != ''">
+						and t1.TASK_STATE = #{dto.taskState}
+    			</if>
+    			<if test="dto.taskStartTime != null and dto.taskStartTime != ''">
+						and t1.TASK_START_TIME = #{dto.taskStartTime}
+    			</if>
+    			<if test="dto.taskEndTime != null and dto.taskEndTime != ''">
+						and t1.TASK_END_TIME = #{dto.taskEndTime}
+    			</if>
+    			<if test="dto.taskInfo != null and dto.taskInfo != ''">
+						and t1.TASK_INFO = #{dto.taskInfo}
+    			</if>
+    			<if test="dto.errorInfo != null and dto.errorInfo != ''">
+						and t1.ERROR_INFO = #{dto.errorInfo}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  QUARTZ_TASK_HIS -->
+<select id="findQuartzTaskHisByPrimaryKey" parameterType="java.util.Map" resultMap="QuartzTaskHisDTO">
+   	 		select 
+					t1.id                             ,
+					t1.batch_no                       ,
+					t1.group_id                       ,
+					t1.thread_id                      ,
+					t1.task_id                        ,
+					t1.bean_id                        ,
+					t1.task_state                     ,
+					t1.task_start_time                ,
+					t1.task_end_time                  ,
+					t1.task_info                      ,
+					t1.error_info                     
+			from quartz_task_his 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 QUARTZ_TASK_HIS -->
+<insert id="insertQuartzTaskHis" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_QUARTZ_TASK_HIS.nextval as id from dual
+	</selectKey>
+			insert into quartz_task_his
+			(   		
+					id                             ,
+					batch_no                       ,
+					group_id                       ,
+					thread_id                      ,
+					task_id                        ,
+					bean_id                        ,
+					task_state                     ,
+					task_start_time                ,
+					task_end_time                  ,
+					task_info                      ,
+					error_info                     
+			)
+			values(#{dto.id}
+					,#{dto.batchNo,jdbcType=VARCHAR}
+					,#{dto.groupId,jdbcType=VARCHAR}
+					,#{dto.threadId,jdbcType=VARCHAR}
+					,#{dto.taskId,jdbcType=VARCHAR}
+					,#{dto.beanId,jdbcType=VARCHAR}
+					,#{dto.taskState,jdbcType=VARCHAR}
+					,#{dto.taskStartTime,jdbcType=TIMESTAMP}
+					,#{dto.taskEndTime,jdbcType=TIMESTAMP}
+					,#{dto.taskInfo,jdbcType=VARCHAR}
+					,#{dto.errorInfo,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 QUARTZ_TASK_HIS -->
+<update id="updateQuartzTaskHis" parameterType="java.util.Map">
+	     update quartz_task_his t1
+	           set 
+			           t1.batch_no                       =#{dto.batchNo,jdbcType=VARCHAR},
+			           t1.group_id                       =#{dto.groupId,jdbcType=VARCHAR},
+			           t1.thread_id                      =#{dto.threadId,jdbcType=VARCHAR},
+			           t1.task_id                        =#{dto.taskId,jdbcType=VARCHAR},
+			           t1.bean_id                        =#{dto.beanId,jdbcType=VARCHAR},
+			           t1.task_state                     =#{dto.taskState,jdbcType=VARCHAR},
+			           t1.task_start_time                =#{dto.taskStartTime,jdbcType=TIMESTAMP},
+			           t1.task_end_time                  =#{dto.taskEndTime,jdbcType=TIMESTAMP},
+			           t1.task_info                      =#{dto.taskInfo,jdbcType=VARCHAR},
+			           t1.error_info                     =#{dto.errorInfo,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 QUARTZ_TASK_HIS -->
+<delete id="deleteQuartzTaskHisByID" parameterType="java.util.Map">
+    	delete from quartz_task_his t1 where t1.ID in (${ids} )
+</delete>
+</mapper>

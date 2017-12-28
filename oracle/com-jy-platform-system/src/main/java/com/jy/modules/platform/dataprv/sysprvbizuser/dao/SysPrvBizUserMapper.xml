@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.dataprv.sysprvbizuser.dao.SysPrvBizUserDao">
+<resultMap id="SysPrvBizUserDTO" type="com.jy.modules.platform.dataprv.sysprvbizuser.dto.SysPrvBizUserDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="userId" column="USER_ID" jdbcType="DECIMAL" />
+				<result property="orgId" column="ORG_ID" jdbcType="DECIMAL" />
+				<result property="bizId" column="BIZ_ID" jdbcType="DECIMAL" />
+				<result property="tableName" column="TABLE_NAME" jdbcType="VARCHAR" />
+				<result property="actionState" column="ACTION_STATE" jdbcType="VARCHAR" />
+				<result property="synState" column="SYN_STATE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="userName" column="user_name" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 SYS_PRV_BIZ_USER -->	
+<select id="searchSysPrvBizUserByPaging" parameterType="java.util.Map" resultMap="SysPrvBizUserDTO">
+    	 		select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.org_id                         ,
+						t1.biz_id                         ,
+						t1.table_name                     ,
+						t1.action_state                   ,
+						t1.syn_state                      ,
+						t1.validate_state                 
+					
+				from sys_prv_biz_user 	t1
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.bizId != null and dto.bizId != ''">
+						and t1.BIZ_ID =#{dto.bizId}
+    			</if>
+    			<if test="dto.tableName != null and dto.tableName != ''">
+						and t1.TABLE_NAME like '%'||#{dto.tableName}||'%'
+    			</if>
+    			<if test="dto.actionState != null and dto.actionState != ''">
+						and t1.ACTION_STATE =#{dto.actionState}
+    			</if>
+    			<if test="dto.synState != null and dto.synState != ''">
+						and t1.SYN_STATE =#{dto.synState}
+    			</if>
+				order by t1.id desc
+</select>
+
+<select id="searchSysPrvBizUserNameByPaging" parameterType="java.util.Map" resultMap="SysPrvBizUserDTO">
+    	 		select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.org_id                         ,
+						t1.biz_id                         ,
+						t1.table_name                     ,
+						t1.action_state                   ,
+						t1.syn_state                      ,
+						t1.validate_state             ,    
+						t2.user_name
+				from sys_prv_biz_user 	t1 
+				left join sys_user t2 
+				on t1.USER_ID = t2.ID 
+				where t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID =#{dto.userId}
+    			</if>
+    			<if test="dto.userName != null and dto.userName != ''">
+						and t2.USER_NAME =#{dto.userName}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.bizId != null and dto.bizId != ''">
+						and t1.BIZ_ID =#{dto.bizId}
+    			</if>
+    			<if test="dto.tableName != null and dto.tableName != ''">
+						and t1.TABLE_NAME =#{dto.tableName}
+    			</if>
+    			<if test="dto.actionState != null and dto.actionState != ''">
+						and t1.ACTION_STATE =#{dto.actionState}
+    			</if>
+    			<if test="dto.synState != null and dto.synState != ''">
+						and t1.SYN_STATE =#{dto.synState}
+    			</if>
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_PRV_BIZ_USER  -->
+<select id="searchSysPrvBizUser" parameterType="java.util.Map" resultMap="SysPrvBizUserDTO">
+    	     select 
+						t1.id                             ,
+						t1.user_id                        ,
+						t1.org_id                         ,
+						t1.biz_id                         ,
+						t1.table_name                     ,
+						t1.action_state                   ,
+						t1.syn_state                      ,
+						t1.validate_state                 
+				from sys_prv_biz_user 		t1
+				where  t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.userId != null and dto.userId != ''">
+						and t1.USER_ID = #{dto.userId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.bizId != null and dto.bizId != ''">
+						and t1.BIZ_ID = #{dto.bizId}
+    			</if>
+    			<if test="dto.tableName != null and dto.tableName != ''">
+						and t1.TABLE_NAME = #{dto.tableName}
+    			</if>
+    			<if test="dto.actionState != null and dto.actionState != ''">
+						and t1.ACTION_STATE = #{dto.actionState}
+    			</if>
+    			<if test="dto.synState != null and dto.synState != ''">
+						and t1.SYN_STATE = #{dto.synState}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_PRV_BIZ_USER -->
+<select id="findSysPrvBizUserByPrimaryKey" parameterType="java.util.Map" resultMap="SysPrvBizUserDTO">
+   	 		select 
+					t1.id                             ,
+					t1.user_id                        ,
+					t1.org_id                         ,
+					t1.biz_id                         ,
+					t1.table_name                     ,
+					t1.action_state                   ,
+					t1.syn_state                      ,
+					t1.validate_state                 
+			from sys_prv_biz_user 		t1
+			where 
+				t1.id = #{id} and  t1.validate_state='1'
+</select>
+  
+<!-- 新增对象 SYS_PRV_BIZ_USER -->
+<insert id="insertSysPrvBizUser" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_PRV_BIZ_USER.nextval as id from dual
+	</selectKey>
+			insert into sys_prv_biz_user
+			(   		
+					id                             ,
+					user_id                        ,
+					org_id                         ,
+					biz_id                         ,
+					table_name                     ,
+					action_state                   ,
+					syn_state                      ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.userId,jdbcType=DECIMAL}
+					,#{dto.orgId,jdbcType=DECIMAL}
+					,#{dto.bizId,jdbcType=DECIMAL}
+					,#{dto.tableName,jdbcType=VARCHAR}
+					,'I'
+					,'0'
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 SYS_PRV_BIZ_USER -->
+<update id="updateSysPrvBizUser" parameterType="java.util.Map">
+	     update sys_prv_biz_user t1
+	           set 
+			           t1.user_id                        =#{toUserId,jdbcType=DECIMAL}
+	     where t1.validate_state='1'
+	     <if test="fromUserId != null and fromUserId != ''">
+	     	 	and t1.user_id=#{fromUserId,jdbcType=DECIMAL} 
+	     </if>
+	     <if test="bizIds != null and bizIds != ''">
+				and t1.BIZ_ID in (#{bizIds})
+ 		</if>
+ 		<if test="tableName != null and tableName != ''">
+				and t1.TABLE_NAME = #{tableName}
+ 		</if>
+</update>
+
+<!-- 更新对象 SYS_PRV_ORG_AUTH -->
+<update id="updateSysPrvBizUserSyn">
+	     update sys_prv_biz_user t1
+	           set t1.syn_state ='1'
+	     where t1.syn_state = '0'
+</update>
+
+   
+<!-- 主键删除 SYS_PRV_BIZ_USER -->
+<delete id="deleteSysPrvBizUserByID" parameterType="java.util.Map">
+    	delete from sys_prv_biz_user t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_PRV_BIZ_USER -->
+<update id="deleteSysPrvBizUserByPrimaryKey" parameterType="java.util.Map">
+	     update sys_prv_biz_user t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+<!-- 主键假删除 SYS_PRV_BIZ_USER -->
+<update id="deleteSysPrvBizUserByParams" parameterType="java.util.Map">
+	     delete from sys_prv_biz_user t1 
+	     where t1.table_name=#{tableName} 
+	     and t1.biz_id in(${bizIds})
+</update>
+</mapper>

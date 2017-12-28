@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.sysflumeconfigzk.dao.SysFlumeConfigZkDao">
+<resultMap id="SysFlumeConfigZkDTO" type="com.jy.modules.platform.sysflumeconfigzk.dto.SysFlumeConfigZkDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="appFlag" column="APP_FLAG" jdbcType="VARCHAR" />
+				<result property="appIp" column="APP_IP" jdbcType="VARCHAR" />
+				<result property="appRole" column="APP_ROLE" jdbcType="VARCHAR" />
+				<result property="status" column="STATUS" jdbcType="VARCHAR" />
+				<result property="config" column="CONFIG" javaType="String" jdbcType="VARBINARY" />
+				<result property="createBy" column="CREATE_BY" jdbcType="VARCHAR" />
+				<result property="createByName" column="CREATE_BY_NAME" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="updateBy" column="UPDATE_BY" jdbcType="VARCHAR" />
+				<result property="updateByName" column="UPDATE_BY_NAME" jdbcType="VARCHAR" />
+				<result property="updateTime" column="UPDATE_TIME" jdbcType="TIMESTAMP" />
+</resultMap>
+				
+<!-- 分页查询 SYS_FLUME_CONFIG_ZK -->	
+<select id="searchSysFlumeConfigZkByPaging" parameterType="java.util.Map" resultMap="SysFlumeConfigZkDTO">
+    	 		select 
+						t1.id                             ,
+						t1.app_flag                       ,
+						t1.app_ip                         ,
+						t1.app_role                       ,
+						t1.status                         ,
+						t1.create_by                      ,
+						t1.create_by_name                 ,
+						t1.create_time                    ,
+						t1.update_by                      ,
+						t1.update_by_name                 ,
+						t1.update_time                    
+					
+				from sys_flume_config_zk 	t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and t1.APP_FLAG like '%'||#{dto.appFlag}||'%'
+    			</if>
+    			<if test="dto.appIp != null and dto.appIp != ''">
+						and t1.APP_IP like '%'||#{dto.appIp}||'%'
+    			</if>
+    			<if test="dto.appRole != null and dto.appRole != ''">
+						and t1.APP_ROLE =#{dto.appRole}
+    			</if>
+    			<if test="dto.status != null and dto.status != ''">
+						and t1.STATUS =#{dto.status}
+    			</if>
+    			<if test="dto.config != null and dto.config != ''">
+						and t1.CONFIG =#{dto.config}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY =#{dto.createBy}
+    			</if>
+    			<if test="dto.createByName != null and dto.createByName != ''">
+						and t1.CREATE_BY_NAME =#{dto.createByName}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.updateBy != null and dto.updateBy != ''">
+						and t1.UPDATE_BY =#{dto.updateBy}
+    			</if>
+    			<if test="dto.updateByName != null and dto.updateByName != ''">
+						and t1.UPDATE_BY_NAME =#{dto.updateByName}
+    			</if>
+    			<if test="dto.updateTime != null and dto.updateTime != ''">
+						and t1.UPDATE_TIME =#{dto.updateTime}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 SYS_FLUME_CONFIG_ZK  -->
+<select id="searchSysFlumeConfigZk" parameterType="java.util.Map" resultMap="SysFlumeConfigZkDTO">
+    	     select 
+						t1.id                             ,
+						t1.app_flag                       ,
+						t1.app_ip                         ,
+						t1.app_role                       ,
+						t1.status                         ,
+						t1.create_by                      ,
+						t1.create_by_name                 ,
+						t1.create_time                    ,
+						t1.update_by                      ,
+						t1.update_by_name                 ,
+						t1.update_time                    
+				from sys_flume_config_zk 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.appFlag != null and dto.appFlag != ''">
+						and t1.APP_FLAG = #{dto.appFlag}
+    			</if>
+    			<if test="dto.appIp != null and dto.appIp != ''">
+						and t1.APP_IP = #{dto.appIp}
+    			</if>
+    			<if test="dto.appRole != null and dto.appRole != ''">
+						and t1.APP_ROLE = #{dto.appRole}
+    			</if>
+    			<if test="dto.status != null and dto.status != ''">
+						and t1.STATUS = #{dto.status}
+    			</if>
+    			<if test="dto.config != null and dto.config != ''">
+						and t1.CONFIG = #{dto.config}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+    			<if test="dto.createByName != null and dto.createByName != ''">
+						and t1.CREATE_BY_NAME = #{dto.createByName}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.updateBy != null and dto.updateBy != ''">
+						and t1.UPDATE_BY = #{dto.updateBy}
+    			</if>
+    			<if test="dto.updateByName != null and dto.updateByName != ''">
+						and t1.UPDATE_BY_NAME = #{dto.updateByName}
+    			</if>
+    			<if test="dto.updateTime != null and dto.updateTime != ''">
+						and t1.UPDATE_TIME = #{dto.updateTime}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  SYS_FLUME_CONFIG_ZK -->
+<select id="findSysFlumeConfigZkByPrimaryKey" parameterType="java.util.Map" resultMap="SysFlumeConfigZkDTO">
+   	 		select 
+					t1.id                             ,
+					t1.app_flag                       ,
+					t1.app_ip                         ,
+					t1.app_role                       ,
+					t1.status                         ,
+					t1.config                         ,
+					t1.create_by                      ,
+					t1.create_by_name                 ,
+					t1.create_time                    ,
+					t1.update_by                      ,
+					t1.update_by_name                 ,
+					t1.update_time                    
+			from sys_flume_config_zk 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 SYS_FLUME_CONFIG_ZK -->
+<insert id="insertSysFlumeConfigZk" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_SYS_FLUME_CONFIG_ZK.nextval as id from dual
+	</selectKey>
+			insert into sys_flume_config_zk
+			(   		
+					id                             ,
+					app_flag                       ,
+					app_ip                         ,
+					app_role                       ,
+					status                         ,
+					config                         ,
+					create_by                      ,
+					create_by_name                 ,
+					create_time                    ,
+					update_by                      ,
+					update_by_name                 ,
+					update_time                    
+			)
+			values(#{dto.id}
+					,#{dto.appFlag,jdbcType=VARCHAR}
+					,#{dto.appIp,jdbcType=VARCHAR}
+					,#{dto.appRole,jdbcType=VARCHAR}
+					,#{dto.status,jdbcType=VARCHAR}
+					,#{dto.config,jdbcType=VARBINARY}
+					,#{dto.createBy,jdbcType=VARCHAR}
+					,#{dto.createByName,jdbcType=VARCHAR}
+					,#{dto.createTime,jdbcType=TIMESTAMP}
+					,#{dto.updateBy,jdbcType=VARCHAR}
+					,#{dto.updateByName,jdbcType=VARCHAR}
+					,#{dto.updateTime,jdbcType=TIMESTAMP}
+			)
+</insert>
+    
+<!-- 更新对象 SYS_FLUME_CONFIG_ZK -->
+<update id="updateSysFlumeConfigZk" parameterType="java.util.Map">
+	     update sys_flume_config_zk t1
+	           set 
+			           t1.app_flag                       =#{dto.appFlag,jdbcType=VARCHAR},
+			           t1.app_ip                         =#{dto.appIp,jdbcType=VARCHAR},
+			           t1.app_role                       =#{dto.appRole,jdbcType=VARCHAR},
+			           t1.status                         =#{dto.status,jdbcType=VARCHAR},
+			           t1.config                         =#{dto.config,jdbcType=VARBINARY},
+			           t1.update_by                      =#{dto.updateBy,jdbcType=VARCHAR},
+			           t1.update_by_name                 =#{dto.updateByName,jdbcType=VARCHAR},
+			           t1.update_time                    =#{dto.updateTime,jdbcType=TIMESTAMP}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 SYS_FLUME_CONFIG_ZK -->
+<delete id="deleteSysFlumeConfigZkByID" parameterType="java.util.Map">
+    	delete from sys_flume_config_zk t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 SYS_FLUME_CONFIG_ZK -->
+<update id="deleteSysFlumeConfigZkByPrimaryKey" parameterType="java.util.Map">
+	     update sys_flume_config_zk t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

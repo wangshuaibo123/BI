@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.schedule2.ptschedlog.dao.PtSchedLogDao">
+<resultMap id="PtSchedLogDTO" type="com.jy.modules.platform.schedule2.ptschedlog.dto.PtSchedLogDTO">
+	<result property="id" column="ID" jdbcType="DECIMAL" />
+	<result property="jobName" column="JOB_NAME" jdbcType="VARCHAR" />
+	<result property="fireTime" column="FIRE_TIME" jdbcType="TIMESTAMP" />
+	<result property="bizModule" column="BIZ_MODULE" jdbcType="VARCHAR" />
+	<result property="startTime" column="START_TIME" jdbcType="TIMESTAMP" />
+	<result property="endTime" column="END_TIME" jdbcType="TIMESTAMP" />
+	<result property="state" column="STATE" jdbcType="VARCHAR" />
+	<result property="threadId" column="THREAD_ID" jdbcType="VARCHAR" />
+	<result property="result" column="RESULT" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 pt_sched_log -->	
+<select id="searchPtSchedLogByPaging" parameterType="java.util.Map" resultMap="PtSchedLogDTO" fetchSize="10">
+	select 
+		t1.id                             ,
+		t1.job_name                       ,
+		t1.fire_time                      ,
+		t1.biz_module                     ,
+		t1.start_time                     ,
+		t1.end_time                       ,
+		t1.state                          ,
+		t1.thread_id                      ,
+		t1.result                         
+		from pt_sched_log 	t1
+	where 1=1
+				
+	<if test="dto.jobName != null and dto.jobName != ''">
+		and t1.JOB_NAME =#{dto.jobName}
+	</if>
+	<if test="dto.fireTime != null and dto.fireTime != ''">
+		and t1.FIRE_TIME =#{dto.fireTime}
+	</if>
+	<if test="dto.bizModule != null and dto.bizModule != ''">
+		and t1.BIZ_MODULE   =  #{dto.bizModule}
+	</if>
+	<if test="dto.startTime != null and dto.startTime != ''">
+		and t1.START_TIME =#{dto.startTime}
+	</if>
+	<if test="dto.endTime != null and dto.endTime != ''">
+		and t1.END_TIME =#{dto.endTime}
+	</if>
+	<if test="dto.state != null and dto.state != ''">
+		and t1.STATE =#{dto.state}
+	</if>
+	<if test="dto.threadId != null and dto.threadId != ''">
+		and t1.THREAD_ID =#{dto.threadId}
+	</if>
+	<if test="dto.result != null and dto.result != ''">
+		and t1.RESULT =#{dto.result}
+	</if>
+	order by t1.id desc
+</select>
+  
+  
+<!-- 新增对象 pt_sched_log -->
+<insert id="insertPtSchedLog" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+		select seq_pt_sched_log.nextval as id from dual
+	</selectKey>
+	insert into pt_sched_log
+	(   		
+		id        ,
+		job_name  ,
+		fire_time ,
+		biz_module,
+		start_time,
+		state     ,
+		thread_id                      
+	)
+	values(#{dto.id}
+		,#{dto.jobName,jdbcType=VARCHAR}
+		,#{dto.fireTime,jdbcType=TIMESTAMP}
+		,#{dto.bizModule,jdbcType=VARCHAR}
+		,#{dto.startTime,jdbcType=TIMESTAMP}
+		,#{dto.state,jdbcType=VARCHAR}
+		,#{dto.threadId,jdbcType=VARCHAR}
+	)
+</insert>
+    
+<!-- 更新对象 pt_sched_log -->
+<update id="updatePtSchedLog" parameterType="java.util.Map">
+    update pt_sched_log t1
+       set 
+         t1.end_time =#{dto.endTime,jdbcType=TIMESTAMP},
+         t1.state    =#{dto.state,jdbcType=VARCHAR},
+         t1.result   =#{dto.result,jdbcType=VARCHAR}
+    where t1.id = #{dto.id}
+</update>
+
+</mapper>
