@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.exceptions.JedisException;
+import redis.clients.util.Pool;
 
 import com.fintech.platform.api.msg.Msg;
-import com.fintech.platform.core.redis.JedisSentinelPool;
 
 /**
  * @Description: 缓存操作类
@@ -68,7 +68,7 @@ public class CacheUtil {
 	 * @param key
 	 * @return
 	 */
-	public static String get(JedisSentinelPool pool,String key) throws Exception {
+	public static String get(Pool<ShardedJedis> pool,String key) throws Exception {
 		String result = null;
 		ShardedJedis jedis = null;
 		try {
@@ -92,7 +92,7 @@ public class CacheUtil {
 	 * @param key
 	 * @return
 	 */
-	public static boolean isExistKey(JedisSentinelPool pool,String key) throws Exception {
+	public static boolean isExistKey(Pool<ShardedJedis> pool,String key) throws Exception {
 		boolean result = false;
 		ShardedJedis jedis = null;
 		try {
@@ -112,7 +112,7 @@ public class CacheUtil {
 	 * 存储到redis服务中
 	 * @param target
 	 */
-	public static void put(JedisSentinelPool pool,String key, String value)throws Exception {
+	public static void put(Pool<ShardedJedis> pool,String key, String value)throws Exception {
 
 		ShardedJedis jedis = null;
 		try {
@@ -133,7 +133,7 @@ public class CacheUtil {
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	public static String getKeyByCondition(JedisSentinelPool pool,String entityKey) throws Exception{
+	public static String getKeyByCondition(Pool<ShardedJedis> pool,String entityKey) throws Exception{
 		String result = null;
 		ShardedJedis jedis = null;
 		try {
@@ -161,7 +161,7 @@ public class CacheUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static void printRedisData(JedisSentinelPool pool,String entityKey) throws Exception{
+	public static void printRedisData(Pool<ShardedJedis> pool,String entityKey) throws Exception{
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
@@ -188,7 +188,7 @@ public class CacheUtil {
 	
 	
 	
-	public static void clear(JedisSentinelPool pool) throws Exception{
+	public static void clear(Pool<ShardedJedis> pool) throws Exception{
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();

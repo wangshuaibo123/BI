@@ -25,6 +25,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
+import redis.clients.util.Pool;
 import redis.clients.util.SafeEncoder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -39,7 +40,6 @@ import com.fintech.platform.core.message.QueryReqBean;
 import com.fintech.platform.core.message.QueryRespBean;
 import com.fintech.platform.core.message.ResponseMsg;
 import com.fintech.platform.core.message.ResponseStatus;
-import com.fintech.platform.core.redis.JedisSentinelPool;
 import com.fintech.platform.restclient.http.RestClient;
 import com.fintech.platform.restclient.http.RestClientConfig;
 import com.fintech.platform.restservice.exception.AbaboonException;
@@ -59,12 +59,12 @@ public class SysConfigController extends BaseController {
 	private String jyptURL = RestClientConfig.getServiceUrl(jyptAppId);// rest服务地址
 	
 	//@Resource(name="jedisSentinelPool")
-	private JedisSentinelPool sessionJedisPool;
+	private Pool<ShardedJedis> sessionJedisPool;
 	
 	//@Resource(name="businessJedisSentinelPool")
-	private JedisSentinelPool bizJedisPool;
+	private Pool<ShardedJedis> bizJedisPool;
 
-	public JedisSentinelPool getSessionJedisPool() {
+	public Pool<ShardedJedis> getSessionJedisPool() {
 		if(sessionJedisPool == null){
 			ApplicationContext context = null;
 			try{
@@ -74,7 +74,7 @@ public class SysConfigController extends BaseController {
 			}catch(Exception e){
 				context = SysConfigAPI.getApplicationContext();
 			}
-			JedisSentinelPool sessionJedisPool = (JedisSentinelPool) context.getBean("jedisSentinelPool");
+			Pool<ShardedJedis> sessionJedisPool = (Pool<ShardedJedis>) context.getBean("jedisSentinelPool");
 			
 			this.sessionJedisPool = sessionJedisPool;
 		}
@@ -83,7 +83,7 @@ public class SysConfigController extends BaseController {
 		return sessionJedisPool;
 	}
 
-	public JedisSentinelPool getbizJedisPool() {
+	public Pool<ShardedJedis> getbizJedisPool() {
 		if(bizJedisPool == null){
 			ApplicationContext context = null;
 			try{
@@ -93,7 +93,7 @@ public class SysConfigController extends BaseController {
 			}catch(Exception e){
 				context = SysConfigAPI.getApplicationContext();
 			}
-			JedisSentinelPool bizJedisPool = (JedisSentinelPool) context.getBean("businessJedisSentinelPool");
+			Pool<ShardedJedis> bizJedisPool = (Pool<ShardedJedis>) context.getBean("businessJedisSentinelPool");
 			
 			this.bizJedisPool = bizJedisPool;
 		}

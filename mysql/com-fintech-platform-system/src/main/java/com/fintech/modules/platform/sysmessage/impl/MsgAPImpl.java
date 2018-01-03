@@ -8,9 +8,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
 
+import redis.clients.jedis.ShardedJedis;
+import redis.clients.util.Pool;
+
 import com.fintech.platform.api.msg.Msg;
 import com.fintech.platform.api.msg.MsgAPI;
-import com.fintech.platform.core.redis.JedisSentinelPool;
 
 /**
  * @Description: 消息服务实现类,具体功能实现由子类实现
@@ -27,16 +29,16 @@ public abstract class MsgAPImpl implements MsgAPI {
 	protected static final String SPECIFIC_MSG = "1";//专有消息
 	
 	/*@Autowired
-	private JedisSentinelPool pool;*/
+	private Pool<ShardedJedis> pool;*/
 
-	protected static JedisSentinelPool pool;
+	protected static Pool<ShardedJedis> pool;
 	
 	static{
 		if (logger.isDebugEnabled()) {
 			logger.debug("load spring-redis.xml init redis pools.");
 		}
 		ApplicationContext context = new ClassPathXmlApplicationContext("spring-redis.xml");
-		pool = (JedisSentinelPool) context.getBean("jedisSentinelPool");
+		pool = (Pool<ShardedJedis>) context.getBean("jedisSentinelPool");
 	}
 	
 	/**

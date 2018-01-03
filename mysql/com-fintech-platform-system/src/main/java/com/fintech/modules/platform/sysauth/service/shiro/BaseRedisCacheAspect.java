@@ -10,16 +10,16 @@ import org.springframework.util.StringUtils;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
+import redis.clients.util.Pool;
 import redis.clients.util.SafeEncoder;
 
 import com.fintech.platform.core.common.SerializeUtil;
-import com.fintech.platform.core.redis.JedisSentinelPool;
 
 public class BaseRedisCacheAspect implements InitializingBean {
 
 	 protected final Logger log = LoggerFactory.getLogger(getClass());
 //	@Autowired
-	private JedisSentinelPool pool;
+	private Pool<ShardedJedis> pool;
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		// TODO Auto-generated method stub
@@ -42,11 +42,11 @@ public class BaseRedisCacheAspect implements InitializingBean {
 
 }
 
-	public JedisSentinelPool getPool() {
+	public Pool<ShardedJedis> getPool() {
 		return pool;
 	}
 
-	public void setPool(JedisSentinelPool pool) {
+	public void setPool(Pool<ShardedJedis> pool) {
 		this.pool = pool;
 	}
 	
