@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.bpmreport.dao.RoleBPMReportDao">
+	<resultMap id="dataBean" type="com.jy.modules.bpmreport.dto.DataBean">
+		<result property="name" column="roleName" jdbcType="VARCHAR" />
+		<result property="num" column="num" jdbcType="INTEGER" />
+	</resultMap>
+
+	<sql id="selectHead"> SELECT data.num,
+		data.roleName AS roleName
+		FROM(
+	</sql>
+	<sql id="selectEnd"> ) data WHERE ROWNUM &lt;= 10 </sql>
+	<sql id="orgLimted"> AND EXISTS (SELECT so.id
+		FROM sys_org so
+		WHERE so.id=ou.org_id
+		START WITH so.id=#{orgId}
+		CONNECT BY PRIOR so.org_code = so.parent_id )
+	</sql>
+	<!-- 积压最多TOP10 -->
+	<select id="getOverStockMostDataList" parameterType="java.util.Map"		resultMap="dataBean">
+
+		<include refid="selectHead" />
+		SELECT  COUNT(*) AS num,
+			    r.role_name AS roleName
+		<if test="isAdmin==true">
+			FROM jbpm4_task jt ,sys_role_user ru,sys_user u,sys_role r
+			WHERE jt.assignee_=u.user_no  
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ru.target_type='user' 
+			AND r.validate_state='1'
+			AND u.validate_state='1'
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_task jt ,sys_role_user ru,sys_org_user ou,sys_user u,sys_role r
+			WHERE jt.assignee_=u.user_no  
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND u.id=ou.user_id
+			AND ru.target_type='user' 
+			AND r.validate_state='1'
+			AND u.validate_state='1'
+			<include refid="orgLimted" />
+		</if>
+		
+		GROUP BY r.role_name 
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+
+
+	<!-- 已办最多TOP10 -->
+	<select id="getProcessedMostData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  COUNT(*) AS num,
+			    r.role_name AS roleName
+		<if test="isAdmin==true">
+			FROM jbpm4_hist_task ht ,sys_role_user ru,sys_user u,sys_role r
+			WHERE ht.assignee_=u.user_no   
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ht.state_='completed' 
+			AND ru.target_type='user' 
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_hist_task ht,sys_org_user ou ,sys_role_user ru,sys_user u,sys_role r
+			WHERE ht.assignee_=u.user_no   
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ht.state_='completed' 
+			AND ru.target_type='user' 
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		GROUP BY r.role_name 
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 发起最多TOP10 -->
+	<select id="getStartUpMostData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  COUNT(*) AS num,
+			    r.role_name AS roleName
+		<if test="isAdmin==true">
+			FROM jbpm4_biz_tab bt,sys_role_user ru,sys_user u,sys_role r 
+			WHERE bt.start_pro_userid=u.user_no 
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ru.target_type='user' 
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_biz_tab bt,sys_org_user ou,sys_role_user ru,sys_user u,sys_role r 
+			WHERE bt.start_pro_userid=u.user_no 
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ru.target_type='user' 
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		GROUP BY r.role_name 
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+
+	<!-- 平均速率最高TOP10 -->
+	<select id="getAvgEfficientHighestData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  AVG(ht.duration_) AS num,
+			    r.role_name AS roleName
+		<if test="isAdmin==true">
+			FROM jbpm4_hist_task ht,sys_role_user ru,sys_user u,sys_role r 
+			WHERE ht.assignee_=u.user_no  
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ht.state_='completed'  
+			AND ru.target_type='user' 
+			AND ht.DURATION_>=11500 
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_hist_task ht,sys_org_user ou,sys_role_user ru,sys_user u,sys_role r 
+			WHERE ht.assignee_=u.user_no  
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ht.state_='completed'  
+			AND ru.target_type='user' 
+			AND ht.DURATION_>=11500 
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		GROUP BY r.role_name 
+		ORDER BY AVG(ht.duration_) ASC
+		<include refid="selectEnd" />
+	</select>
+	<!-- 平均速率最低TOP10 -->
+	<select id="getAvgEfficientLowestData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  AVG(ht.duration_) AS num,
+			    r.role_name AS roleName
+		<if test="isAdmin==true">
+			FROM jbpm4_hist_task ht,sys_role_user ru,sys_user u,sys_role r 
+			WHERE ht.assignee_=u.user_no  
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ht.state_='completed'  
+			AND ru.target_type='user' 
+			AND ht.DURATION_>=11500 
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_hist_task ht,sys_org_user ou,sys_role_user ru,sys_user u,sys_role r 
+			WHERE ht.assignee_=u.user_no  
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ht.state_='completed'  
+			AND ru.target_type='user' 
+			AND ht.DURATION_>=11500 
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		GROUP BY r.role_name 
+		ORDER BY AVG(ht.duration_) DESC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 委托 最多TOP10 -->
+	<select id="getEntrustMostData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  COUNT(*) AS num,
+			    r.role_name AS roleName
+		<if test="isAdmin==true">
+			FROM jbpm4_consigned_task  ct,sys_role_user ru,sys_user u,sys_role r 
+			WHERE  ct.from_user_id=u.user_no   
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ru.target_type='user'
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_consigned_task  ct,sys_org_user ou,sys_role_user ru,sys_user u,sys_role r 
+			WHERE  ct.from_user_id=u.user_no   
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ru.target_type='user' 
+			AND u.id=ou.user_id
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+			<include refid="orgLimted" />
+		</if>
+		GROUP BY r.role_name 
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 乐于助人最多TOP10 -->
+	<select id="getSupportMostData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  COUNT(*) AS num,
+			    r.role_name AS roleName
+		<if test="isAdmin==true">
+			FROM jbpm4_consigned_task  ct,sys_role_user ru,sys_user u,sys_role r 
+			WHERE  ct.to_user_id=u.user_no  
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ru.target_type='user'
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_consigned_task  ct,sys_org_user ou,sys_role_user ru,sys_user u,sys_role r 
+			WHERE  ct.to_user_id=u.user_no  
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ru.target_type='user' 
+			AND u.id=ou.user_id
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+			<include refid="orgLimted" />
+		</if>
+		GROUP BY r.role_name 
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 委托概况 -->
+	<select id="getEntrustStateData" parameterType="java.util.Map"		resultMap="dataBean">
+		SELECT data.num,
+		data.roleName AS roleName
+		FROM(
+	
+		SELECT  COUNT(*) AS num,
+			    r.role_name AS roleName 
+		<if test="isAdmin==true">
+			FROM jbpm4_consigned_task  ct,sys_user u,sys_role r ,sys_role_user ru
+			WHERE  ct.from_user_id=u.user_no  
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ru.target_type='user' 
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_consigned_task  ct,sys_org_user ou,sys_user u,sys_role r ,sys_role_user ru
+			WHERE  ct.from_user_id=u.user_no  
+			AND ru.target_id=u.id  
+			AND ru.role_id=r.id
+			AND ru.target_type='user' 
+			AND u.id=ou.user_id
+			AND u.validate_state='1'
+			AND r.validate_state='1'
+			
+			<include refid="orgLimted" />
+		</if>
+		GROUP BY r.role_name  
+		ORDER BY COUNT(*) DESC
+		 ) data WHERE ROWNUM &lt;= 20
+	</select>
+
+</mapper>
