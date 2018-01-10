@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.platform.jbpm4.repository.Jbpm4BizTabDao">
+<resultMap id="Jbpm4BizTabDTO" type="com.fintech.platform.jbpm4.dto.Jbpm4BizTabDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="bizTabName" column="BIZ_TAB_NAME" jdbcType="VARCHAR" />
+				<result property="bizType" column="BIZ_TYPE" jdbcType="VARCHAR" />
+				<result property="bizInfId" column="BIZ_INF_ID" jdbcType="VARCHAR" />
+				<result property="bizInfName" column="BIZ_INF_NAME" jdbcType="VARCHAR" />
+				<result property="bizTaskType" column="BIZ_TASK_TYPE" jdbcType="VARCHAR" />
+				<result property="proInstanceId" column="PRO_INSTANCE_ID" jdbcType="VARCHAR" />
+				<result property="startProUserid" column="START_PRO_USERID" jdbcType="VARCHAR" />
+				<result property="proInstanceState" column="PRO_INSTANCE_STATE" jdbcType="VARCHAR" />
+				<result property="taskState" column="TASK_STATE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="ownerId" column="OWNER_ID" jdbcType="VARCHAR" />
+				<result property="orgId" column="ORG_ID" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="VARCHAR" />
+				<result property="modifyTime" column="MODIFY_TIME" jdbcType="VARCHAR" />
+				<result property="createBy" column="CREATE_BY" jdbcType="VARCHAR" />
+				<result property="modifyBy" column="MODIFY_BY" jdbcType="VARCHAR" />
+				<result property="remark" column="REMARK" jdbcType="VARCHAR" />
+				<result property="isHidden" column="IS_HIDDEN" jdbcType="VARCHAR" />
+				<result property="overTime" column="OVER_TIME" jdbcType="TIMESTAMP" />
+				<result column="remindTime" property="REMIND_TIME" jdbcType="TIMESTAMP" />
+</resultMap>
+				
+<!-- 分页查询 jbpm4_biz_tab -->	
+<select id="searchJbpm4BizTabByPaging" parameterType="java.util.Map" resultMap="Jbpm4BizTabDTO">
+    	 		select 
+						t1.id                             ,
+						t1.biz_tab_name                   ,
+						t1.biz_type                       ,
+						t1.biz_inf_id                     ,
+						t1.biz_inf_name                   ,
+						t1.biz_task_type                  ,
+						t1.pro_instance_id                ,
+						t1.start_pro_userid               ,
+						t1.pro_instance_state             ,
+						t1.task_state                     ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.modify_by                      ,
+						t1.remark                         ,
+						t1.is_hidden                      
+					
+				from jbpm4_biz_tab 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.bizTabName != null and dto.bizTabName != ''">
+						and t1.BIZ_TAB_NAME =#{dto.bizTabName}
+    			</if>
+    			<if test="dto.bizType != null and dto.bizType != ''">
+						and t1.BIZ_TYPE =#{dto.bizType}
+    			</if>
+    			<if test="dto.bizInfId != null and dto.bizInfId != ''">
+						and t1.BIZ_INF_ID =#{dto.bizInfId}
+    			</if>
+    			<if test="dto.bizInfName != null and dto.bizInfName != ''">
+						and t1.BIZ_INF_NAME =#{dto.bizInfName}
+    			</if>
+    			<if test="dto.bizTaskType != null and dto.bizTaskType != ''">
+						and t1.BIZ_TASK_TYPE =#{dto.bizTaskType}
+    			</if>
+    			<if test="dto.proInstanceId != null and dto.proInstanceId != ''">
+						and t1.PRO_INSTANCE_ID =#{dto.proInstanceId}
+    			</if>
+    			<if test="dto.startProUserid != null and dto.startProUserid != ''">
+						and t1.START_PRO_USERID =#{dto.startProUserid}
+    			</if>
+    			<if test="dto.proInstanceState != null and dto.proInstanceState != ''">
+						and t1.PRO_INSTANCE_STATE =#{dto.proInstanceState}
+    			</if>
+    			<if test="dto.taskState != null and dto.taskState != ''">
+						and t1.TASK_STATE =#{dto.taskState}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID =#{dto.ownerId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.modifyTime != null and dto.modifyTime != ''">
+						and t1.MODIFY_TIME =#{dto.modifyTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY =#{dto.createBy}
+    			</if>
+    			<if test="dto.modifyBy != null and dto.modifyBy != ''">
+						and t1.MODIFY_BY =#{dto.modifyBy}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK =#{dto.remark}
+    			</if>
+    			<if test="dto.isHidden != null and dto.isHidden != ''">
+						and t1.IS_HIDDEN =#{dto.isHidden}
+    			</if>
+				
+				order by t1.CREATE_TIME desc
+</select>
+  
+<!-- 查询列表 jbpm4_biz_tab  -->
+<select id="searchJbpm4BizTab" parameterType="java.util.Map" resultMap="Jbpm4BizTabDTO">
+    	     select 
+						t1.id                             ,
+						t1.biz_tab_name                   ,
+						t1.biz_type                       ,
+						t1.biz_inf_id                     ,
+						t1.biz_inf_name                   ,
+						t1.biz_task_type                  ,
+						t1.pro_instance_id                ,
+						t1.start_pro_userid               ,
+						t1.pro_instance_state             ,
+						t1.task_state                     ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.modify_by                      ,
+						t1.remark                         ,
+						t1.is_hidden                      
+				from jbpm4_biz_tab 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.bizTabName != null and dto.bizTabName != ''">
+						and t1.BIZ_TAB_NAME = #{dto.bizTabName}
+    			</if>
+    			<if test="dto.bizType != null and dto.bizType != ''">
+						and t1.BIZ_TYPE = #{dto.bizType}
+    			</if>
+    			<if test="dto.bizInfId != null and dto.bizInfId != ''">
+						and t1.BIZ_INF_ID = #{dto.bizInfId}
+    			</if>
+    			<if test="dto.bizInfName != null and dto.bizInfName != ''">
+						and t1.BIZ_INF_NAME = #{dto.bizInfName}
+    			</if>
+    			<if test="dto.bizTaskType != null and dto.bizTaskType != ''">
+						and t1.BIZ_TASK_TYPE = #{dto.bizTaskType}
+    			</if>
+    			<if test="dto.proInstanceId != null and dto.proInstanceId != ''">
+						and t1.PRO_INSTANCE_ID = #{dto.proInstanceId}
+    			</if>
+    			<if test="dto.startProUserid != null and dto.startProUserid != ''">
+						and t1.START_PRO_USERID = #{dto.startProUserid}
+    			</if>
+    			<if test="dto.proInstanceState != null and dto.proInstanceState != ''">
+						and t1.PRO_INSTANCE_STATE = #{dto.proInstanceState}
+    			</if>
+    			<if test="dto.taskState != null and dto.taskState != ''">
+						and t1.TASK_STATE = #{dto.taskState}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID = #{dto.ownerId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.modifyTime != null and dto.modifyTime != ''">
+						and t1.MODIFY_TIME = #{dto.modifyTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+    			<if test="dto.modifyBy != null and dto.modifyBy != ''">
+						and t1.MODIFY_BY = #{dto.modifyBy}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK = #{dto.remark}
+    			</if>
+    			<if test="dto.isHidden != null and dto.isHidden != ''">
+						and t1.IS_HIDDEN = #{dto.isHidden}
+    			</if>
+    			order by t1.id desc 
+</select>
+  
+<!-- 主键查询对象  jbpm4_biz_tab -->
+<select id="findJbpm4BizTabByPrimaryKey" parameterType="java.util.Map" resultMap="Jbpm4BizTabDTO">
+   	 		select 
+					t1.id                             ,
+					t1.biz_tab_name                   ,
+					t1.biz_type                       ,
+					t1.biz_inf_id                     ,
+					t1.biz_inf_name                   ,
+					t1.biz_task_type                  ,
+					t1.pro_instance_id                ,
+					t1.start_pro_userid               ,
+					t1.pro_instance_state             ,
+					t1.task_state                     ,
+					t1.validate_state                 ,
+					t1.owner_id                       ,
+					t1.org_id                         ,
+					t1.create_time                    ,
+					t1.modify_time                    ,
+					t1.create_by                      ,
+					t1.modify_by                      ,
+					t1.remark                         ,
+					t1.is_hidden                      
+			from jbpm4_biz_tab 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 jbpm4_biz_tab -->
+<insert id="insertJbpm4BizTab" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE  TABLE_NAME='jbpm4_biz_tab'
+	</selectKey>
+			insert into jbpm4_biz_tab
+			(   		
+					id                             ,
+					biz_tab_name                   ,
+					biz_type                       ,
+					biz_inf_id                     ,
+					biz_inf_name                   ,
+					biz_task_type                  ,
+					pro_instance_id                ,
+					start_pro_userid               ,
+					pro_instance_state             ,
+					task_state                     ,
+					validate_state                 ,
+					owner_id                       ,
+					org_id                         ,
+					create_time                    ,
+					create_by                      ,
+					remark                         ,
+					is_hidden                      
+			)
+			values(#{dto.id}
+					,#{dto.bizTabName,jdbcType=VARCHAR}
+					,#{dto.bizType,jdbcType=VARCHAR}
+					,#{dto.bizInfId,jdbcType=VARCHAR}
+					,#{dto.bizInfName,jdbcType=VARCHAR}
+					,#{dto.bizTaskType,jdbcType=VARCHAR}
+					,#{dto.proInstanceId,jdbcType=VARCHAR}
+					,#{dto.startProUserid,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.taskState,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.ownerId,jdbcType=VARCHAR}
+					,#{dto.orgId,jdbcType=VARCHAR}
+					,now()
+					,#{dto.createBy,jdbcType=VARCHAR}
+					,#{dto.remark,jdbcType=VARCHAR}
+					,#{dto.isHidden,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 jbpm4_biz_tab -->
+<update id="updateJbpm4BizTab" parameterType="java.util.Map">
+	     update jbpm4_biz_tab t1
+	           set 
+			           t1.biz_inf_name                   =#{dto.bizInfName,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1',
+			           t1.modify_time                    =now(),
+			           t1.modify_by                      =#{dto.modifyBy,jdbcType=VARCHAR},
+			           t1.remark                         =#{dto.remark,jdbcType=VARCHAR},
+			           t1.is_hidden                      =#{dto.isHidden,jdbcType=VARCHAR},
+			           t1.org_id							 =#{dto.orgId,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+
+<!-- 更新对象 jbpm4_biz_tab -->
+<update id="updateOvertimeAndRemindTime" parameterType="java.util.Map">
+	     update jbpm4_biz_tab t1
+	           set 			          
+			           t1.over_time                    =#{dto.overTime,jdbcType=TIMESTAMP},
+			           t1.remind_time                      =#{dto.remindTime,jdbcType=TIMESTAMP}			          
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 jbpm4_biz_tab -->
+<delete id="deleteJbpm4BizTabByID" parameterType="java.util.Map">
+    	delete from jbpm4_biz_tab t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 jbpm4_biz_tab -->
+<update id="deleteJbpm4BizTabByPrimaryKey" parameterType="java.util.Map">
+	     update jbpm4_biz_tab t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+<!-- 更改业务任务状态 -->
+<update id="updateBizTaskTypeById" parameterType="java.util.Map">
+		update jbpm4_biz_tab t 
+			   set t.biz_task_type=#{dto.bizTaskType,jdbcType=VARCHAR}
+			   where t.id=#{dto.id}
+</update>
+<!-- 通过流程实例ID查询 表 jbpm4_biz_tab  -->
+<select id="searchJbpm4BizTabByProInsId" parameterType="java.util.Map" resultMap="Jbpm4BizTabDTO">
+    	     select 
+						t1.id                             ,
+						t1.biz_tab_name                   ,
+						t1.biz_type                       ,
+						t1.biz_inf_id                     ,
+						t1.biz_inf_name                   ,
+						t1.biz_task_type                  ,
+						t1.pro_instance_id                ,
+						t1.start_pro_userid               ,
+						t1.pro_instance_state             ,
+						t1.task_state                     ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.modify_by                      ,
+						t1.remark                         ,
+						t1.is_hidden                      
+				from jbpm4_biz_tab 		t1
+				where 1=1
+				and t1.pro_instance_id =(select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=#{proInsId}
+				)
+</select>
+
+</mapper>

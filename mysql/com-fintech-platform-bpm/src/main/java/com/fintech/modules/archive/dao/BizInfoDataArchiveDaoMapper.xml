@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.archive.dao.BizInfoDataArchiveDao">
+<resultMap id="BizInfoPo" type="com.fintech.modules.archive.dto.BizInfoPo">
+				<result property="id" column="id" jdbcType="DECIMAL" />
+				<result property="bizTabId" column="fk_jbpm_biz_tab_id" jdbcType="VARCHAR" />
+				<result property="proInstanceId" column="pro_instance_id" jdbcType="VARCHAR" />
+				<result property="taskId" column="task_id" jdbcType="VARCHAR" />
+				<result property="activeName" column="active_name" jdbcType="VARCHAR" />
+				<result property="activeInfo" column="system_active_info" jdbcType="VARCHAR" />
+				<result property="optionRemark" column="option_remark" jdbcType="VARCHAR" />
+				<result property="validateState" column="validate_state" jdbcType="VARCHAR" />
+				<result property="ownerId" column="owner_id" jdbcType="VARCHAR" />
+				<result property="orgId" column="org_id" jdbcType="VARCHAR" />
+				<result property="createTime" column="create_time" jdbcType="TIMESTAMP" />
+				<result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP" />
+				<result property="createBy" column="create_by" jdbcType="VARCHAR" />
+				<result property="modifyBy" column="modify_by" jdbcType="VARCHAR" />
+				<result property="remark" column="remark" jdbcType="VARCHAR" />
+</resultMap>
+<!-- 查询 -->	
+<select id="getTabDataList" parameterType="java.lang.String" resultMap="BizInfoPo">
+    	 		SELECT 
+						t1.id,
+						t1.fk_jbpm_biz_tab_id,
+						t1.pro_instance_id,
+						t1.task_id,
+						t1.active_name,
+						t1.system_active_info,
+						t1.option_remark,
+						t1.validate_state,
+						t1.owner_id,
+						t1.org_id,
+						t1.create_time,
+						t1.modify_time,
+						t1.create_by,
+						t1.modify_by,
+						t1.remark
+					
+				FROM JBPM4_BIZ_OPTION_INFO 	t1
+				WHERE  t1.pro_instance_id=#{str}  
+    			
+</select>
+<!-- 查询数量 -->  
+<select id="getTableNum" resultType="int">
+select count(*) from tabs t where t.TABLE_NAME='JBPM4_BIZ_OPTION_INFO_OLD'
+</select>
+<!-- 保存数据  -->
+<insert id="insertData" parameterType="java.lang.String" >
+	insert into JBPM4_BIZ_OPTION_INFO_OLD
+			(   		
+						id,
+						fk_jbpm_biz_tab_id,
+						pro_instance_id,
+						task_id,
+						active_name,
+						system_active_info,
+						option_remark,
+						validate_state,
+						owner_id,
+						org_id,
+						create_time,
+						modify_time,
+						create_by,
+						modify_by,
+						remark
+					
+			)(
+      select 			bi.id,
+						bi.fk_jbpm_biz_tab_id,
+						bi.pro_instance_id,
+						bi.task_id,
+						bi.active_name,
+						bi.system_active_info,
+						bi.option_remark,
+						bi.validate_state,
+						bi.owner_id,
+						bi.org_id,
+						bi.create_time,
+						bi.modify_time,
+						bi.create_by,
+						bi.modify_by,
+						bi.remark 
+      from JBPM4_BIZ_OPTION_INFO bi,JBPM4_HIST_PROCINST hp 
+      where hp.ID_=bi.pro_instance_id  
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertTMPData" parameterType="java.lang.String" >
+	insert into JBPM4_BIZ_OPTION_INFO_TMP
+			(   		
+						id,
+						fk_jbpm_biz_tab_id,
+						pro_instance_id,
+						task_id,
+						active_name,
+						system_active_info,
+						option_remark,
+						validate_state,
+						owner_id,
+						org_id,
+						create_time,
+						modify_time,
+						create_by,
+						modify_by,
+						remark
+					
+			)(
+      select 			bi.id,
+						bi.fk_jbpm_biz_tab_id,
+						bi.pro_instance_id,
+						bi.task_id,
+						bi.active_name,
+						bi.system_active_info,
+						bi.option_remark,
+						bi.validate_state,
+						bi.owner_id,
+						bi.org_id,
+						bi.create_time,
+						bi.modify_time,
+						bi.create_by,
+						bi.modify_by,
+						bi.remark 
+      from JBPM4_BIZ_OPTION_INFO bi,JBPM4_HIST_PROCINST hp 
+      where hp.ID_=bi.pro_instance_id  
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertListData"   parameterType="java.lang.String" >
+	insert into JBPM4_BIZ_OPTION_INFO_OLD
+			(   		
+						id,
+						fk_jbpm_biz_tab_id,
+						pro_instance_id,
+						task_id,
+						active_name,
+						system_active_info,
+						option_remark,
+						validate_state,
+						owner_id,
+						org_id,
+						create_time,
+						modify_time,
+						create_by,
+						modify_by,
+						remark
+					
+			)(
+			SELECT 
+						t1.id,
+						t1.fk_jbpm_biz_tab_id,
+						t1.pro_instance_id,
+						t1.task_id,
+						t1.active_name,
+						t1.system_active_info,
+						t1.option_remark,
+						t1.validate_state,
+						t1.owner_id,
+						t1.org_id,
+						t1.create_time,
+						t1.modify_time,
+						t1.create_by,
+						t1.modify_by,
+						t1.remark
+					
+				FROM JBPM4_BIZ_OPTION_INFO 	t1
+				WHERE  t1.pro_instance_id=#{str}
+			)
+</insert>    
+<!-- 创建  -->
+<update id="createTable" >
+	     create table JBPM4_BIZ_OPTION_INFO_OLD as select * from JBPM4_BIZ_OPTION_INFO a where a.id=0
+</update>
+<!-- 创建  -->
+<update id="createTMPTable" >
+	       create table JBPM4_BIZ_OPTION_INFO_TMP as select * from JBPM4_BIZ_OPTION_INFO a where a.id=0
+</update>
+<!-- 删除  -->
+<delete id="deleteData" >
+    	delete from JBPM4_BIZ_OPTION_INFO t where exists (select temp.id from JBPM4_BIZ_OPTION_INFO_TMP temp where t.id=temp.id)
+</delete>
+<!-- 删除  -->
+<delete id="deleteTMPData" >
+    	delete from  JBPM4_BIZ_OPTION_INFO_TMP
+</delete>
+<!-- 删除  -->
+<delete id="deleteListData"   parameterType="java.lang.String" >
+    	delete FROM JBPM4_BIZ_OPTION_INFO 	t1
+				WHERE  t1.pro_instance_id=#{str}
+</delete>
+</mapper>

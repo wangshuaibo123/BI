@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.archive.dao.ProcessInstanceDataArchiveDao">
+<resultMap id="ProcessInstancePo" type="com.fintech.modules.archive.dto.ProcessInstancePo">
+				<result property="dbid" column="dbid_" jdbcType="DECIMAL" />
+				<result property="dbVersion" column="dbversion_" jdbcType="DECIMAL" />
+				<result property="id" column="id_" jdbcType="VARCHAR" />
+				<result property="procDefId" column="procdefid_" jdbcType="VARCHAR" />
+				<result property="key" column="key_" jdbcType="VARCHAR" />
+				<result property="startTime" column="start_" jdbcType="TIMESTAMP" />
+				<result property="endTime" column="end_" jdbcType="TIMESTAMP" />
+				<result property="duration" column="duration_" jdbcType="DECIMAL" />
+				<result property="state" column="state_" jdbcType="VARCHAR" />
+				<result property="endActivity" column="endactivity_" jdbcType="VARCHAR" />
+				<result property="nextId" column="nextidx_" jdbcType="DECIMAL" />
+				<result property="mainId" column="main_id_" jdbcType="VARCHAR" />
+</resultMap>
+<!-- 查询数据-->
+<select id="getDataList" parameterType="java.lang.String" resultMap="ProcessInstancePo">
+SELECT 					
+						t1.dbid_,
+						t1.dbversion_,
+						t1.id_,
+						t1.procdefid_,
+						t1.key_,
+						t1.start_,
+						t1.end_,
+						t1.duration_,
+						t1.state_,
+						t1.endactivity_,
+						t1.nextidx_,
+						t1.main_id_
+ from JBPM4_HIST_PROCINST t1 
+      where t1.id_=#{str}
+</select>
+<!-- 查询 -->	
+<select id="getTabDataList" parameterType="java.util.Map" resultMap="ProcessInstancePo">
+SELECT 					
+						t1.dbid_,
+						t1.dbversion_,
+						t1.id_,
+						t1.procdefid_,
+						t1.key_,
+						t1.start_,
+						t1.end_,
+						t1.duration_,
+						t1.state_,
+						t1.endactivity_,
+						t1.nextidx_,
+						t1.main_id_
+FROM ( 
+       SELECT A.*, ROWNUM RN 
+       FROM (
+    	 		SELECT   hp.* FROM JBPM4_HIST_PROCINST  hp   
+				<![CDATA[	WHERE    hp.state_!='active' and     hp.end_<=to_date(#{dateStr},'yyyy-MM-dd hh24:mi:ss')    ) A
+       WHERE ROWNUM <= #{maxNum} 
+) t1 WHERE t1.RN >= #{startNum} ]]>
+</select>
+<!-- 查询数量 -->  
+<select id="getTableNum" resultType="int">
+select count(*) from tabs t where t.TABLE_NAME='JBPM4_HIST_PROCINST_OLD'
+</select>
+<!-- 保存数据  -->
+<insert id="insertData" parameterType="java.lang.String" >
+	insert into JBPM4_HIST_PROCINST_OLD
+			(   		
+						dbid_,
+						dbversion_,
+						id_,
+						procdefid_,
+						key_,
+						start_,
+						end_,
+						duration_,
+						state_,
+						endactivity_,
+						nextidx_,
+						main_id_
+					
+			)(
+      select 			hp.dbid_,
+						hp.dbversion_,
+						hp.id_,
+						hp.procdefid_,
+						hp.key_,
+						hp.start_,
+						hp.end_,
+						hp.duration_,
+						hp.state_,
+						hp.endactivity_,
+						hp.nextidx_,
+						hp.main_id_ 
+      from JBPM4_HIST_PROCINST hp 
+     <![CDATA[ where  hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertTMPData" parameterType="java.lang.String" >
+	insert into JBPM4_HIST_PROCINST_TMP
+			(   		
+						dbid_,
+						dbversion_,
+						id_,
+						procdefid_,
+						key_,
+						start_,
+						end_,
+						duration_,
+						state_,
+						endactivity_,
+						nextidx_,
+						main_id_
+					
+			)(
+      select 			hp.dbid_,
+						hp.dbversion_,
+						hp.id_,
+						hp.procdefid_,
+						hp.key_,
+						hp.start_,
+						hp.end_,
+						hp.duration_,
+						hp.state_,
+						hp.endactivity_,
+						hp.nextidx_,
+						hp.main_id_ 
+      from JBPM4_HIST_PROCINST hp 
+     <![CDATA[ where  hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 创建  -->
+<update id="createTable" >
+	     create table JBPM4_HIST_PROCINST_OLD as select * from JBPM4_HIST_PROCINST a where a.dbid_=0
+</update>
+<!-- 创建  -->
+<update id="createTMPTable" >
+	    create table JBPM4_HIST_PROCINST_TMP as select * from JBPM4_HIST_PROCINST a where a.dbid_=0
+</update>
+<!-- 保存 -->
+<insert id="insertListData"  parameterType="java.lang.String" >
+	insert into JBPM4_HIST_PROCINST_OLD
+			(   		
+						dbid_,
+						dbversion_,
+						id_,
+						procdefid_,
+						key_,
+						start_,
+						end_,
+						duration_,
+						state_,
+						endactivity_,
+						nextidx_,
+						main_id_
+					
+			)(
+			select 			hp.dbid_,
+						hp.dbversion_,
+						hp.id_,
+						hp.procdefid_,
+						hp.key_,
+						hp.start_,
+						hp.end_,
+						hp.duration_,
+						hp.state_,
+						hp.endactivity_,
+						hp.nextidx_,
+						hp.main_id_ 
+      from JBPM4_HIST_PROCINST hp 
+      where hp.id_=#{str}
+			)
+</insert>
+<!-- 删除  -->
+<delete id="deleteData" >
+    	delete from JBPM4_HIST_PROCINST t where exists (select temp.dbid_ from JBPM4_HIST_PROCINST_TMP temp where t.dbid_=temp.dbid_)
+</delete>
+<!-- 删除  -->
+<delete id="deleteTMPData" >
+    	delete from  JBPM4_HIST_PROCINST_TMP
+</delete>
+<!-- 删除  -->
+<delete id="deleteListData"  parameterType="java.lang.String" >
+    	delete  from JBPM4_HIST_PROCINST hp 
+      where hp.id_=#{str}
+</delete>
+</mapper>

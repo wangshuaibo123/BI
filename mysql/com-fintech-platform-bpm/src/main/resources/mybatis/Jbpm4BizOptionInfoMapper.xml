@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.platform.jbpm4.repository.Jbpm4BizOptionInfoDao">
+<resultMap id="Jbpm4BizOptionInfoDTO" type="com.fintech.platform.jbpm4.dto.Jbpm4BizOptionInfoDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="fkJbpmBizTabId" column="FK_JBPM_BIZ_TAB_ID" jdbcType="VARCHAR" />
+				<result property="proInstanceId" column="PRO_INSTANCE_ID" jdbcType="VARCHAR" />
+				<result property="taskId" column="TASK_ID" jdbcType="VARCHAR" />
+				<result property="activeName" column="ACTIVE_NAME" jdbcType="VARCHAR" />
+				<result property="systemActiveInfo" column="SYSTEM_ACTIVE_INFO" jdbcType="VARCHAR" />
+				<result property="optionRemark" column="OPTION_REMARK" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="ownerId" column="OWNER_ID" jdbcType="VARCHAR" />
+				<result property="orgId" column="ORG_ID" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="modifyTime" column="MODIFY_TIME" jdbcType="TIMESTAMP" />
+				<result property="createBy" column="CREATE_BY" jdbcType="VARCHAR" />
+				<result property="modifyBy" column="MODIFY_BY" jdbcType="VARCHAR" />
+				<result property="remark" column="REMARK" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 jbpm4_biz_option_info -->	
+<select id="searchJbpm4BizOptionInfoByPaging" parameterType="java.util.Map" resultMap="Jbpm4BizOptionInfoDTO">
+    	 		select 
+						t1.id                             ,
+						t1.fk_jbpm_biz_tab_id             ,
+						t1.pro_instance_id                ,
+						t1.task_id                        ,
+						t1.active_name                    ,
+						t1.system_active_info             ,
+						t1.option_remark                  ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.modify_by                      ,
+						t1.remark                         
+					
+				from jbpm4_biz_option_info 	t1
+				where 1=1
+				and t1.validate_state='1'
+				and t1.option_remark is not null
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.fkJbpmBizTabId != null and dto.fkJbpmBizTabId != ''">
+						and t1.FK_JBPM_BIZ_TAB_ID =#{dto.fkJbpmBizTabId}
+    			</if>
+    			<if test="dto.proInstanceId != null and dto.proInstanceId != ''">
+						and t1.PRO_INSTANCE_ID =#{dto.proInstanceId}
+    			</if>
+    			<if test="dto.taskId != null and dto.taskId != ''">
+						and t1.TASK_ID =#{dto.taskId}
+    			</if>
+    			<if test="dto.activeName != null and dto.activeName != ''">
+						and t1.ACTIVE_NAME =#{dto.activeName}
+    			</if>
+    			<if test="dto.systemActiveInfo != null and dto.systemActiveInfo != ''">
+						and t1.SYSTEM_ACTIVE_INFO =#{dto.systemActiveInfo}
+    			</if>
+    			<if test="dto.optionRemark != null and dto.optionRemark != ''">
+						and t1.OPTION_REMARK =#{dto.optionRemark}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID =#{dto.ownerId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.modifyTime != null and dto.modifyTime != ''">
+						and t1.MODIFY_TIME =#{dto.modifyTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY =#{dto.createBy}
+    			</if>
+    			<if test="dto.modifyBy != null and dto.modifyBy != ''">
+						and t1.MODIFY_BY =#{dto.modifyBy}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK =#{dto.remark}
+    			</if>
+    			<if test="actNameLike != null and actNameLike != ''">
+						and t1.active_name like concat(${actNameLike},'%')
+    			</if>
+    			<if test="MY_SQL != null and MY_SQL != ''">
+						and t1.fk_jbpm_biz_tab_id in(${MY_SQL}) 
+    			</if>
+    			
+				
+				order by t1.id desc
+</select>
+ 
+<select id="searchJbpm4BizOptionInfoByPage" parameterType="java.util.Map" resultMap="Jbpm4BizOptionInfoDTO">
+    	 		select 
+						t1.id                             ,
+						t1.fk_jbpm_biz_tab_id             ,
+						t1.pro_instance_id                ,
+						t1.task_id                        ,
+						t1.active_name                    ,
+						t1.system_active_info             ,
+						t1.option_remark                  ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.modify_by                      ,
+						t1.remark                         
+					
+				from jbpm4_biz_option_info 	t1
+				where 1=1
+				and t1.validate_state='1'
+				and t1.option_remark is not null
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.fkJbpmBizTabId != null and dto.fkJbpmBizTabId != ''">
+						and t1.FK_JBPM_BIZ_TAB_ID =#{dto.fkJbpmBizTabId}
+    			</if>
+    			<if test="dto.proInstanceId != null and dto.proInstanceId != ''">
+						and t1.PRO_INSTANCE_ID =#{dto.proInstanceId}
+    			</if>
+    			<if test="dto.taskId != null and dto.taskId != ''">
+						and t1.TASK_ID =#{dto.taskId}
+    			</if>
+    			<if test="dto.activeName != null and dto.activeName != ''">
+						and t1.ACTIVE_NAME =#{dto.activeName}
+    			</if>
+    			<if test="dto.systemActiveInfo != null and dto.systemActiveInfo != ''">
+						and t1.SYSTEM_ACTIVE_INFO =#{dto.systemActiveInfo}
+    			</if>
+    			<if test="dto.optionRemark != null and dto.optionRemark != ''">
+						and t1.OPTION_REMARK =#{dto.optionRemark}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID =#{dto.ownerId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID =#{dto.orgId}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.modifyTime != null and dto.modifyTime != ''">
+						and t1.MODIFY_TIME =#{dto.modifyTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY =#{dto.createBy}
+    			</if>
+    			<if test="dto.modifyBy != null and dto.modifyBy != ''">
+						and t1.MODIFY_BY =#{dto.modifyBy}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK =#{dto.remark}
+    			</if>
+    			<if test="actNameLike != null and actNameLike != ''">
+						and t1.active_name like concat(${actNameLike},'%')
+    			</if>
+    			<if test="MY_SQL != null and MY_SQL != ''">
+						and t1.fk_jbpm_biz_tab_id in(${MY_SQL}) 
+    			</if>
+    			
+				
+				order by t1.create_time desc
+				
+	    <if test="page != null" >    
+	            <![CDATA[ limit ${beginrow}, ${endrow} ]]>
+         </if>
+</select> 
+<!-- 查询列表 jbpm4_biz_option_info  -->
+<select id="searchJbpm4BizOptionInfo" parameterType="java.util.Map" resultMap="Jbpm4BizOptionInfoDTO">
+    	     select 
+						t1.id                             ,
+						t1.fk_jbpm_biz_tab_id             ,
+						t1.pro_instance_id                ,
+						t1.task_id                        ,
+						t1.active_name                    ,
+						t1.system_active_info             ,
+						t1.option_remark                  ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.modify_by                      ,
+						t1.remark                         
+				from jbpm4_biz_option_info 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.fkJbpmBizTabId != null and dto.fkJbpmBizTabId != ''">
+						and t1.FK_JBPM_BIZ_TAB_ID = #{dto.fkJbpmBizTabId}
+    			</if>
+    			<if test="dto.proInstanceId != null and dto.proInstanceId != ''">
+						and t1.PRO_INSTANCE_ID = #{dto.proInstanceId}
+    			</if>
+    			<if test="dto.taskId != null and dto.taskId != ''">
+						and t1.TASK_ID = #{dto.taskId}
+    			</if>
+    			<if test="dto.activeName != null and dto.activeName != ''">
+						and t1.ACTIVE_NAME = #{dto.activeName}
+    			</if>
+    			<if test="dto.systemActiveInfo != null and dto.systemActiveInfo != ''">
+						and t1.SYSTEM_ACTIVE_INFO = #{dto.systemActiveInfo}
+    			</if>
+    			<if test="dto.optionRemark != null and dto.optionRemark != ''">
+						and t1.OPTION_REMARK = #{dto.optionRemark}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE = #{dto.validateState}
+    			</if>
+    			<if test="dto.ownerId != null and dto.ownerId != ''">
+						and t1.OWNER_ID = #{dto.ownerId}
+    			</if>
+    			<if test="dto.orgId != null and dto.orgId != ''">
+						and t1.ORG_ID = #{dto.orgId}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME = #{dto.createTime}
+    			</if>
+    			<if test="dto.modifyTime != null and dto.modifyTime != ''">
+						and t1.MODIFY_TIME = #{dto.modifyTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY = #{dto.createBy}
+    			</if>
+    			<if test="dto.modifyBy != null and dto.modifyBy != ''">
+						and t1.MODIFY_BY = #{dto.modifyBy}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK = #{dto.remark}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  jbpm4_biz_option_info -->
+<select id="findJbpm4BizOptionInfoByPrimaryKey" parameterType="java.util.Map" resultMap="Jbpm4BizOptionInfoDTO">
+   	 		select 
+					t1.id                             ,
+					t1.fk_jbpm_biz_tab_id             ,
+					t1.pro_instance_id                ,
+					t1.task_id                        ,
+					t1.active_name                    ,
+					t1.system_active_info             ,
+					t1.option_remark                  ,
+					t1.validate_state                 ,
+					t1.owner_id                       ,
+					t1.org_id                         ,
+					t1.create_time                    ,
+					t1.modify_time                    ,
+					t1.create_by                      ,
+					t1.modify_by                      ,
+					t1.remark                         
+			from jbpm4_biz_option_info 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 jbpm4_biz_option_info -->
+<insert id="insertJbpm4BizOptionInfo" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE  TABLE_NAME='jbpm4_biz_option_info'
+	</selectKey>
+			insert into jbpm4_biz_option_info
+			(   		
+					id                             ,
+					fk_jbpm_biz_tab_id             ,
+					pro_instance_id                ,
+					task_id                        ,
+					active_name                    ,
+					system_active_info             ,
+					option_remark                  ,
+					validate_state                 ,
+					owner_id                       ,
+					org_id                         ,
+					create_time                    ,
+					create_by                      ,
+					remark                         
+			)
+			values(#{dto.id}
+					,#{dto.fkJbpmBizTabId,jdbcType=VARCHAR}
+					,#{dto.proInstanceId,jdbcType=VARCHAR}
+					,#{dto.taskId,jdbcType=VARCHAR}
+					,#{dto.activeName,jdbcType=VARCHAR}
+					,#{dto.systemActiveInfo,jdbcType=VARCHAR}
+					,#{dto.optionRemark,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.ownerId,jdbcType=VARCHAR}
+					,#{dto.orgId,jdbcType=VARCHAR}
+					,now()
+					,#{dto.createBy,jdbcType=VARCHAR}
+					,#{dto.remark,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 jbpm4_biz_option_info -->
+<update id="updateJbpm4BizOptionInfo" parameterType="java.util.Map">
+	     update jbpm4_biz_option_info t1
+	           set 
+			           t1.fk_jbpm_biz_tab_id             =#{dto.fkJbpmBizTabId,jdbcType=VARCHAR},
+			           t1.pro_instance_id                =#{dto.proInstanceId,jdbcType=VARCHAR},
+			           t1.task_id                        =#{dto.taskId,jdbcType=VARCHAR},
+			           t1.active_name                    =#{dto.activeName,jdbcType=VARCHAR},
+			           t1.system_active_info             =#{dto.systemActiveInfo,jdbcType=VARCHAR},
+			           t1.option_remark                  =#{dto.optionRemark,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1',
+			           t1.modify_time                    =now(),
+			           t1.modify_by                      =#{dto.modifyBy,jdbcType=VARCHAR},
+			           t1.remark                         =#{dto.remark,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 jbpm4_biz_option_info -->
+<delete id="deleteJbpm4BizOptionInfoByID" parameterType="java.util.Map">
+    	delete t1 from jbpm4_biz_option_info t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 jbpm4_biz_option_info -->
+<update id="deleteJbpm4BizOptionInfoByPrimaryKey" parameterType="java.util.Map">
+	     update jbpm4_biz_option_info t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+<!-- 删除用户在同一流程同一节点下的多次意见备注信息 -->
+<update id="deleteOldSomeBizOptionInf" parameterType="java.util.Map">
+    	update jbpm4_biz_option_info t1 
+				set t1.validate_state='0'
+				,t1.modify_time=now()
+				,t1.modify_by='${curUserId}'
+		where t1.validate_state='1'
+		and t1.fk_jbpm_biz_tab_id='${bizTabId}'
+		and t1.pro_instance_id='${proInstanceId}'
+		and t1.active_name='${acitityName}'
+		<if test="curOrgId != null and curOrgId != ''">
+		and t1.org_id='${curOrgId}'
+		</if>
+		<if test="systemActiveInfo != null and systemActiveInfo != ''">
+		and t1.system_active_info='${systemActiveInfo}'
+		</if>
+		
+</update>
+
+
+</mapper>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.platform.jbpm4.repository.ConsignTaskMapper" >
+<resultMap id="BaseResultMap" type="com.fintech.platform.jbpm4.dto.ConsignTask">
+		<id column="ID" property="id" jdbcType="DECIMAL" />
+		<result column="FROM_USER_ID" property="fromUserId" jdbcType="VARCHAR" />
+		<result column="TO_USER_ID" property="toUserId" jdbcType="VARCHAR" />
+		<result column="TASK_ID" property="taskId" jdbcType="VARCHAR" />
+		<result column="TASK_TYPE" property="taskType" jdbcType="VARCHAR" />
+		<result column="ORG_ID" property="orgId" jdbcType="VARCHAR" />
+		<result column="PRO_DEF_KEY" property="proDefKey" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		<result column="REASON" property="reason" jdbcType="VARCHAR" />
+		<result column="START_TIME" property="startTime" jdbcType="TIMESTAMP" />
+		<result column="END_TIME" property="endTime" jdbcType="TIMESTAMP" />
+		<result column="VALIDATE_STATE" property="valiDateState" jdbcType="VARCHAR" />
+		<result column="CREATED_BY" property="createdBy" jdbcType="VARCHAR" />
+		<result column="CREATED" property="created" jdbcType="TIMESTAMP" />
+		<result column="LAST_UPD_BY" property="lastUpdBy" jdbcType="VARCHAR" />
+		<result column="LAST_UPD" property="lastUpd" jdbcType="TIMESTAMP" />
+		<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+		
+	</resultMap>
+  <select id="getConsignTaskByPage" parameterType="java.util.Map" resultType="java.util.Map" >
+         select * from (select 
+         t.ID
+        ,t.FROM_USER_ID
+        ,t.TO_USER_ID
+        ,t.TASK_ID
+        ,t.TASK_TYPE
+        ,t.ORG_ID
+        ,t.PRO_DEF_KEY
+        ,t.TYPE
+        ,t.REASON
+        ,date_format(t.START_TIME,'%Y-%m-%d %H:%i:%s') START_TIME
+        ,date_format(t.END_TIME,'%Y-%m-%d %H:%i:%s') END_TIME
+        ,t.VALIDATE_STATE
+        ,t.CREATED_BY
+        ,date_format(t.CREATED,'%Y-%m-%d %H:%i:%s') CREATED
+        ,t.LAST_UPD_BY
+        ,date_format(t.LAST_UPD,'%Y-%m-%d %H:%i:%s') LAST_UPD
+        ,t.REMARK
+		,ROW_NUMBER () OVER (ORDER BY t.LAST_UPD desc) RWN 
+     	from JBPM4_CONSIGNED_TASK t 
+    	where t.VALIDATE_STATE = '1' 
+ 	    <if test="reason != null and reason != ''">
+       		and t.REASON like concat('%',#{REASON},'%')
+	 	</if>
+ 	    <if test="remark != null and remark != ''">
+       		and t.REMARK like concat('%',#{remark},'%')
+	 	</if>
+	 	<if test="fromUserId != null and fromUserId != ''">
+       		and t.FROM_USER_ID = #{fromUserId}
+	 	</if>
+	 	<if test="toUserId != null and toUserId != ''">
+       		and t.TO_USER_ID = #{toUserId}
+	 	</if>
+	 	<if test="createdBy != null and createdBy != ''">
+       		and t.CREATED_BY = #{createdBy}
+	 	</if>
+	 	<if test="proDefKey != null and proDefKey != ''">
+       		and t.PRO_DEF_KEY = #{proDefKey} 
+	 	</if>
+		<if test="startTime != null and startTime != ''" >    
+            and  <![CDATA[  t.start_time >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null and endTime != ''" >    
+            and  <![CDATA[  t.end_time <=  #{endTime} ]]>
+        </if>
+
+    	) res where res.RWN <![CDATA[>=]]> #{startIndex}  and res.RWN <![CDATA[<]]> #{endIndex} 
+  </select>
+  
+  <select id="queryConsignInfo" parameterType="java.util.Map" resultType="java.util.Map" >
+         select 
+				(SELECT u.USER_NAME from sys_user u where u.id= t1.from_user_id) FROM_USER_NAME
+				,(SELECT u.USER_NAME from sys_user u where u.id= t1.TO_USER_ID) TO_USER_NAME
+				,t1.*
+				from jbpm4_consigned_task t1 where 1=1
+				and t1.TASK_ID =#{taskId}
+				
+				order by t1.TASK_ID,t1.CREATED asc
+  </select>
+   <insert id="addConsignTask" parameterType="java.util.Map" useGeneratedKeys="true">
+   		<selectKey resultType="Long" keyProperty="id" order="BEFORE">
+			SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.`TABLES` WHERE  TABLE_NAME='JBPM4_CONSIGNED_TASK'
+		</selectKey>
+		insert into JBPM4_CONSIGNED_TASK (ID, TASK_ID,TASK_TYPE,ORG_ID,FROM_USER_ID, TO_USER_ID,
+		PRO_DEF_KEY, TYPE, REASON,
+		START_TIME, END_TIME, VALIDATE_STATE,
+		CREATED, CREATED_BY, LAST_UPD_BY,
+		LAST_UPD, REMARK) 
+		values (#{id,jdbcType=DECIMAL}, #{model.fromUserId,jdbcType=VARCHAR},
+		#{model.taskId,jdbcType=VARCHAR},
+		#{model.taskType,jdbcType=VARCHAR},
+		#{model.orgId,jdbcType=VARCHAR},
+		#{model.toUserId,jdbcType=VARCHAR},
+		#{model.proDefKey,jdbcType=VARCHAR}, #{model.type,jdbcType=VARCHAR}, #{model.reason,jdbcType=VARCHAR},
+		STR_TO_DATE(#{model.startTimeStr},'%Y-%m-%d %H:%i:%s'), STR_TO_DATE(#{model.endTimeStr},'%Y-%m-%d %H:%i:%s'),
+		#{model.valiDateState,jdbcType=VARCHAR},
+		STR_TO_DATE(#{model.createdStr},'%Y-%m-%d %H:%i:%s'), #{model.createdBy,jdbcType=VARCHAR},
+		#{model.lastUpdBy,jdbcType=VARCHAR}, STR_TO_DATE(#{model.lastUpdStr},'%Y-%m-%d %H:%i:%s'),
+		#{model.remark,jdbcType=VARCHAR}
+		)
+   
+   </insert>
+   
+   
+     <update id="updateConsignTask" parameterType="java.util.Map" >
+	    update JBPM4_CONSIGNED_TASK t
+	    set 
+	         t.FROM_USER_ID = #{model.fromUserId,jdbcType=VARCHAR}
+	        ,t.TASK_ID = #{model.taskId,jdbcType=VARCHAR}
+	        ,t.TASK_TYPE = #{model.taskType,jdbcType=VARCHAR}
+	        ,t.ORG_ID = #{model.orgId,jdbcType=VARCHAR}
+	        ,t.TO_USER_ID = #{model.toUserId,jdbcType=VARCHAR}
+	        ,t.PRO_DEF_KEY= #{model.proDefKey,jdbcType=VARCHAR}
+	        ,t.TYPE= #{model.type,jdbcType=VARCHAR}
+	        ,t.REASON= #{model.reason,jdbcType=VARCHAR}
+	        ,t.START_TIME=STR_TO_DATE(#{model.startTimeStr},'%Y-%m-%d %H:%i:%s')
+	        ,t.END_TIME= STR_TO_DATE(#{model.endTimeStr},'%Y-%m-%d %H:%i:%s')
+	        ,t.VALIDATE_STATE=#{model.valiDateState,jdbcType=VARCHAR}
+	        ,t.CREATED_BY= #{model.createdBy,jdbcType=VARCHAR}
+	        ,t.CREATED=STR_TO_DATE(#{model.createdStr},'%Y-%m-%d %H:%i:%s')
+	        ,t.LAST_UPD_BY=#{model.lastUpdBy,jdbcType=VARCHAR}
+	        ,t.LAST_UPD=STR_TO_DATE(#{model.lastUpdStr},'%Y-%m-%d %H:%i:%s')
+	        ,t.REMARK=#{model.remark,jdbcType=VARCHAR}
+	    where ID = ${model.id}
+  	</update>
+  
+    <select id="findAllConsignTaskCount" resultType="int" parameterType="java.util.Map">
+        select count(1) from JBPM4_CONSIGNED_TASK t where t.VALIDATE_STATE = '1' 
+       <if test="reason != null and reason != ''">
+       		and t.REASON like concat('%',#{REASON},'%')
+	 	</if>
+ 	    <if test="remark != null and remark != ''">
+       		and t.REMARK like concat('%',#{remark},'%')
+	 	</if>
+	 	<if test="fromUserId != null and fromUserId != ''">
+       		and t.FROM_USER_ID = #{fromUserId}
+	 	</if>
+	 	<if test="toUserId != null and toUserId != ''">
+       		and t.TO_USER_ID = #{toUserId}
+	 	</if>
+	 	<if test="createdBy != null and createdBy != ''">
+       		and t.CREATED_BY = #{createdBy}
+	 	</if>
+	 	<if test="proDefKey != null and proDefKey != ''">
+       		and t.PRO_DEF_KEY = #{proDefKey}
+	 	</if>
+		<if test="startTime != null and startTime != ''" >    
+            and  <![CDATA[  t.start_time >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null and endTime != ''" >    
+            and  <![CDATA[  t.end_time <=  #{endTime} ]]>
+        </if>
+    </select>
+    
+	  <select id="getById" resultMap="BaseResultMap" parameterType="int" >
+	   	  select * from JBPM4_CONSIGNED_TASK where ID = #{id,jdbcType=DECIMAL}
+	  </select>
+	  
+  	
+	  
+  	  <update id="delById" parameterType="int" >
+		  update jbpm4_consigned_task set VALIDATE_STATE = '0'
+		  where ID = #{id}
+	  </update>
+	  
+	  
+	 <update id="updateValidateState" parameterType="java.util.Map" >
+	    update jbpm4_consigned_task t
+	    set t.VALIDATE_STATE='0'
+	    where 1=1 
+	     and ( <![CDATA[  t.LAST_UPD <= now() ]]> and t.LAST_UPD is not null) 
+  	</update>
+
+  
+</mapper>

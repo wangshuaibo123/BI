@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<set>
+<!--	请检查“user-worktime.xml”文件的正确性，您需要确定可能有以下几项：
+		1.日期、月份、星期、小时、分钟等各种属性的值是否为数值！为非数值的话将会引起时间计算异常。
+		2.是否有重复的值，这会造成输出结果不正确。
+		3.设定小时时请使用24小时格式，如下午3点请设为15点。
+		4.月份全部从1开始，如设定1为1月份，2为2月份，依此类推。
+		5.日期全部从1开始，如设定1为1号，2为2号，依此类推。");
+		6.月份与日期之间用“/”隔开。");
+		7.星期全部从1开始，如设定1为星期一，2为星期二，依此类推。
+		8.请按照范例填写各个属性值。");
+		9.各个值的范例是否在规定范围内，月份不能大于12,星期不能大于7,小时不能大于24,分钟不能大于等于60等等！
+-->
+
+	<workday>
+		<day_of_week day="1" worktime_minute="480">
+			<work_time_am minute="30">8</work_time_am>
+			<rest_time_am minute="00">12</rest_time_am>
+			<work_time_pm minute="00">13</work_time_pm>
+			<rest_time_pm minute="30">17</rest_time_pm>
+		</day_of_week>
+		<day_of_week day="2" worktime_minute="480">
+			<work_time_am minute="30">8</work_time_am>
+			<rest_time_am minute="00">12</rest_time_am>
+			<work_time_pm minute="00">13</work_time_pm>
+			<rest_time_pm minute="30">17</rest_time_pm>
+		</day_of_week>
+		<day_of_week day="3" worktime_minute="480">
+			<work_time_am minute="30">8</work_time_am>
+			<rest_time_am minute="00">12</rest_time_am>
+			<work_time_pm minute="00">13</work_time_pm>
+			<rest_time_pm minute="30">17</rest_time_pm>
+		</day_of_week>
+		<day_of_week day="4" worktime_minute="480">
+			<work_time_am minute="30">8</work_time_am>
+			<rest_time_am minute="00">12</rest_time_am>
+			<work_time_pm minute="00">13</work_time_pm>
+			<rest_time_pm minute="30">17</rest_time_pm>
+		</day_of_week>
+		<day_of_week day="5" worktime_minute="480">
+			<work_time_am minute="30">8</work_time_am>
+			<rest_time_am minute="00">12</rest_time_am>
+			<work_time_pm minute="00">13</work_time_pm>
+			<rest_time_pm minute="30">17</rest_time_pm>
+		</day_of_week>
+	
+	</workday>
+	
+	<holiday> 
+		<day_of_month date="5/1" name="劳动节"/>
+		<day_of_month date="5/2" name="劳动节"/>
+		<day_of_month date="5/3" name="劳动节"/>
+		<day_of_month date="5/4" name="劳动节"/>
+		<day_of_month date="5/5" name="劳动节"/>
+		<day_of_month date="5/6" name="劳动节"/>
+		<day_of_month date="5/7" name="劳动节"/>
+		<day_of_month date="10/1" name="国庆节"/>
+		<day_of_month date="10/2" name="国庆节"/>
+		<day_of_month date="10/3" name="国庆节"/>
+		<day_of_month date="10/4" name="国庆节"/>
+		<day_of_month date="10/5" name="国庆节"/>
+		<day_of_month date="10/6" name="国庆节"/>
+		<day_of_month date="10/7" name="国庆节"/>
+	</holiday>
+</set>

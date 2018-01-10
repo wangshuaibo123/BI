@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.archive.dao.TabDataArchiveDao">
+<resultMap id="Jbpm4BizTabDTO" type="com.fintech.modules.archive.dto.JBPM4BizTabPo">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="bizTabName" column="BIZ_TAB_NAME" jdbcType="VARCHAR" />
+				<result property="bizType" column="BIZ_TYPE" jdbcType="VARCHAR" />
+				<result property="bizInfId" column="BIZ_INF_ID" jdbcType="VARCHAR" />
+				<result property="bizInfName" column="BIZ_INF_NAME" jdbcType="VARCHAR" />
+				<result property="bizTaskType" column="BIZ_TASK_TYPE" jdbcType="VARCHAR" />
+				<result property="proInstanceId" column="PRO_INSTANCE_ID" jdbcType="VARCHAR" />
+				<result property="startProUserid" column="START_PRO_USERID" jdbcType="VARCHAR" />
+				<result property="proInstanceState" column="PRO_INSTANCE_STATE" jdbcType="VARCHAR" />
+				<result property="taskState" column="TASK_STATE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="ownerId" column="OWNER_ID" jdbcType="VARCHAR" />
+				<result property="orgId" column="ORG_ID" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="modifyTime" column="MODIFY_TIME" jdbcType="TIMESTAMP" />
+				<result property="createBy" column="CREATE_BY" jdbcType="VARCHAR" />
+				<result property="modifyBy" column="MODIFY_BY" jdbcType="VARCHAR" />
+				<result property="remark" column="REMARK" jdbcType="VARCHAR" />
+				<result property="isHidden" column="IS_HIDDEN" jdbcType="VARCHAR" />
+				<result property="bizInfNo" column="BIZ_INF_NO" jdbcType="VARCHAR" />
+				<result property="overTime" column="OVER_TIME" jdbcType="TIMESTAMP" />
+				<result column="remindTime" property="REMIND_TIME" jdbcType="TIMESTAMP" />
+</resultMap>
+<!-- 查询 jbpm4_biz_tab -->	
+<select id="getTabDataList" parameterType="java.util.Map" resultMap="Jbpm4BizTabDTO">
+SELECT 					t1.id                             ,
+						t1.biz_tab_name                   ,
+						t1.biz_type                       ,
+						t1.biz_inf_id                     ,
+						t1.biz_inf_name                   ,
+						t1.biz_task_type                  ,
+						t1.pro_instance_id                ,
+						t1.start_pro_userid               ,
+						t1.pro_instance_state             ,
+						t1.task_state                     ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.modify_by                      ,
+						t1.remark                         ,
+						t1.is_hidden                      ,
+						t1.MODIFY_BY					   ,
+						t1.BIZ_INF_NO					   ,
+						t1.OVER_TIME                      ,
+						t1.REMIND_TIME 
+FROM ( 
+       SELECT A.*, ROWNUM RN 
+       FROM (
+    	 		SELECT   tt.* FROM jbpm4_biz_tab tt ,JBPM4_HIST_PROCINST hp   
+          	  
+				<![CDATA[	WHERE    hp.state_!='active' and      create_time <=TO_DATE(#{dateStr},'yyyy-MM-dd hh24:mi:ss')    ) A
+       WHERE ROWNUM <= #{maxNum} 
+) t1 WHERE t1.RN >= #{startNum} ]]>
+</select>
+<!-- 查询 jbpm4_biz_tab -->	
+<select id="getTabData100List" parameterType="java.lang.String" resultMap="Jbpm4BizTabDTO">
+SELECT 					t1.id                             ,
+						t1.biz_tab_name                   ,
+						t1.biz_type                       ,
+						t1.biz_inf_id                     ,
+						t1.biz_inf_name                   ,
+						t1.biz_task_type                  ,
+						t1.pro_instance_id                ,
+						t1.start_pro_userid               ,
+						t1.pro_instance_state             ,
+						t1.task_state                     ,
+						t1.validate_state                 ,
+						t1.owner_id                       ,
+						t1.org_id                         ,
+						t1.create_time                    ,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.modify_by                      ,
+						t1.remark                         ,
+						t1.is_hidden                      ,
+						t1.MODIFY_BY					   ,
+						t1.BIZ_INF_NO					   ,
+						t1.OVER_TIME                      ,
+						t1.REMIND_TIME 
+FROM   jbpm4_biz_tab t1 ,JBPM4_HIST_PROCINST hp  
+<![CDATA[	WHERE   hp.ID_=t1.pro_instance_id  and  hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active'
+       and ROWNUM <= 500]]>
+</select>
+
+<select id="queryValueByCode" parameterType="java.lang.String" resultType="java.util.Map">
+   	 		select 
+					t1.config_value VALUE
+			from sys_config 		t1
+			where  t1.validate_state='1' and
+				t1.config_code = #{code}
+</select>
+
+
+
+<!-- 查询  -->
+<select id="getTabData100Total" parameterType="java.lang.String" resultType="int">
+SELECT 					count(*)
+FROM   jbpm4_biz_tab t1 ,JBPM4_HIST_PROCINST hp   
+<![CDATA[	WHERE   hp.ID_=t1.pro_instance_id  and  hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active'
+ ]]>
+</select>
+<!-- 查询数量 -->  
+<select id="getTableNum" resultType="int">
+select count(*) from tabs t where t.TABLE_NAME='JBPM4_BIZ_TAB_OLD'
+</select>
+  <!-- 查询数量 -->  
+<select id="hasNotEndNum" resultType="int" parameterType="java.lang.String">
+select count(*) from  JBPM4_HIST_PROCINST hp where hp.id_=#{proInstanceId}  and hp.state_='active'
+</select>
+<!-- 创建表 jbpm4_biz_tab_old -->
+<insert id="insertData" parameterType="java.lang.String" >
+	insert into JBPM4_BIZ_TAB_OLD
+			(   		
+					id                             ,
+					biz_tab_name                   ,
+					biz_type                       ,
+					biz_inf_id                     ,
+					biz_inf_name                   ,
+					biz_task_type                  ,
+					pro_instance_id                ,
+					start_pro_userid               ,
+					pro_instance_state             ,
+					task_state                     ,
+					validate_state                 ,
+					owner_id                       ,
+					org_id                         ,
+					create_time                    ,
+					MODIFY_TIME                    ,
+					create_by                      ,
+					remark                         ,
+					is_hidden                      ,
+					MODIFY_BY					   ,
+					BIZ_INF_NO					   ,
+					OVER_TIME                      ,
+					REMIND_TIME
+					
+			)(
+      select 		bt.id                             ,
+					bt.biz_tab_name                   ,
+					bt.biz_type                       ,
+					bt.biz_inf_id                     ,
+					bt.biz_inf_name                   ,
+					bt.biz_task_type                  ,
+					bt.pro_instance_id                ,
+					bt.start_pro_userid               ,
+					bt.pro_instance_state             ,
+					bt.task_state                     ,
+					bt.validate_state                 ,
+					bt.owner_id                       ,
+					bt.org_id                         ,
+					bt.create_time                    ,
+					bt.MODIFY_TIME                    ,
+					bt.create_by                      ,
+					bt.remark                         ,
+					bt.is_hidden                      ,
+					bt.MODIFY_BY					   ,
+					bt.BIZ_INF_NO					   ,
+					bt.OVER_TIME                      ,
+					bt.REMIND_TIME 
+      from JBPM4_BIZ_TAB bt,JBPM4_HIST_PROCINST hp 
+      where hp.ID_=bt.pro_instance_id  
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+    <!-- 插入  -->
+    <insert id="insertTMPData" parameterType="java.lang.String" >
+	insert into JBPM4_BIZ_TAB_TMP
+			(   		
+					id                             ,
+					biz_tab_name                   ,
+					biz_type                       ,
+					biz_inf_id                     ,
+					biz_inf_name                   ,
+					biz_task_type                  ,
+					pro_instance_id                ,
+					start_pro_userid               ,
+					pro_instance_state             ,
+					task_state                     ,
+					validate_state                 ,
+					owner_id                       ,
+					org_id                         ,
+					create_time                    ,
+					MODIFY_TIME                    ,
+					create_by                      ,
+					remark                         ,
+					is_hidden                      ,
+					MODIFY_BY					   ,
+					BIZ_INF_NO					   ,
+					OVER_TIME                      ,
+					REMIND_TIME
+					
+			)(
+      select 		bt.id                             ,
+					bt.biz_tab_name                   ,
+					bt.biz_type                       ,
+					bt.biz_inf_id                     ,
+					bt.biz_inf_name                   ,
+					bt.biz_task_type                  ,
+					bt.pro_instance_id                ,
+					bt.start_pro_userid               ,
+					bt.pro_instance_state             ,
+					bt.task_state                     ,
+					bt.validate_state                 ,
+					bt.owner_id                       ,
+					bt.org_id                         ,
+					bt.create_time                    ,
+					bt.MODIFY_TIME                    ,
+					bt.create_by                      ,
+					bt.remark                         ,
+					bt.is_hidden                      ,
+					bt.MODIFY_BY					   ,
+					bt.BIZ_INF_NO					   ,
+					bt.OVER_TIME                      ,
+					bt.REMIND_TIME 
+      from JBPM4_BIZ_TAB bt,JBPM4_HIST_PROCINST hp 
+      where hp.ID_=bt.pro_instance_id  
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 创建表 jbpm4_biz_tab_old -->
+<insert id="insertListData" parameterType="java.util.List" >
+	insert into JBPM4_BIZ_TAB_OLD
+			(   		
+					id                             ,
+					biz_tab_name                   ,
+					biz_type                       ,
+					biz_inf_id                     ,
+					biz_inf_name                   ,
+					biz_task_type                  ,
+					pro_instance_id                ,
+					start_pro_userid               ,
+					pro_instance_state             ,
+					task_state                     ,
+					validate_state                 ,
+					owner_id                       ,
+					org_id                         ,
+					create_time                    ,
+					MODIFY_TIME                    ,
+					create_by                      ,
+					remark                         ,
+					is_hidden                      ,
+					MODIFY_BY					   ,
+					BIZ_INF_NO					   ,
+					OVER_TIME                      ,
+					REMIND_TIME
+			)
+			<foreach collection="list" item="item" index="index"  separator="UNION ALL" open="(" close=")">
+				 SELECT 
+				 #{item.id, jdbcType=DECIMAL}, 
+				 #{item.bizTabName, jdbcType=VARCHAR}, 
+				 #{item.bizType, jdbcType=VARCHAR}, 
+				 #{item.bizInfId, jdbcType=VARCHAR}, 
+				 #{item.bizInfName, jdbcType=VARCHAR}, 
+				 #{item.bizTaskType, jdbcType=VARCHAR}, 
+				 #{item.proInstanceId, jdbcType=VARCHAR}, 
+				 #{item.startProUserid, jdbcType=VARCHAR}, 
+				 #{item.proInstanceState, jdbcType=VARCHAR}, 
+				 #{item.taskState, jdbcType=VARCHAR}, 
+				 #{item.validateState, jdbcType=VARCHAR}, 
+				 #{item.ownerId, jdbcType=VARCHAR}, 
+				 #{item.orgId, jdbcType=VARCHAR}, 
+				 #{item.createTime, jdbcType=TIMESTAMP}, 
+				 #{item.modifyTime, jdbcType=TIMESTAMP}, 
+				 #{item.createBy, jdbcType=VARCHAR}, 
+				 #{item.remark, jdbcType=VARCHAR}, 
+				 #{item.isHidden, jdbcType=VARCHAR},
+				 #{item.modifyBy, jdbcType=VARCHAR},
+				 #{item.bizInfNo, jdbcType=VARCHAR},
+				 #{item.overTime, jdbcType=TIMESTAMP}, 
+				 #{item.remindTime, jdbcType=TIMESTAMP} 
+				 from dual 
+			</foreach>
+</insert>
+<!-- 创建 jbpm4_biz_tab_old -->
+<update id="createTable" >
+	      create table JBPM4_BIZ_TAB_OLD as select * from jbpm4_biz_tab a where a.id=0
+</update>
+<!-- 创建-->
+<update id="createTMPTable" >
+	      create table JBPM4_BIZ_TAB_TMP as select * from jbpm4_biz_tab a where a.id=0
+</update>
+<!-- 主键删除 jbpm4_biz_tab   -->
+<delete id="deleteData" >
+    	delete from JBPM4_BIZ_TAB t where exists (select temp.id from JBPM4_BIZ_TAB_TMP temp where t.id=temp.id)
+</delete>
+<!-- 删除  -->
+<delete id="deleteTMPData" >
+    	delete from JBPM4_BIZ_TAB_TMP 
+</delete>
+<!-- 主键删除 jbpm4_biz_tab   -->
+<delete id="deleteListData" parameterType="java.util.List">
+    	delete from JBPM4_BIZ_TAB bt where bt.id in 
+     <foreach collection="list" item="item" index="index"  separator="," open="(" close=")">
+		#{item.id, jdbcType=DECIMAL}
+	</foreach>
+</delete>
+</mapper>

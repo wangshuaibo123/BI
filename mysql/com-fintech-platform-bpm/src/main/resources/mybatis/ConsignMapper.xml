@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.platform.jbpm4.repository.ConsignMapper" >
+<resultMap id="BaseResultMap" type="com.fintech.platform.jbpm4.dto.Consign">
+		<id column="ID" property="id" jdbcType="DECIMAL" />
+		<result column="FROM_USER_ID" property="fromUserId" jdbcType="VARCHAR" />
+		<result column="TO_USER_ID" property="toUserId" jdbcType="VARCHAR" />
+		<result column="PRO_DEF_KEY" property="proDefKey" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		<result column="REASON" property="reason" jdbcType="VARCHAR" />
+		<result column="START_TIME" property="startTime" jdbcType="TIMESTAMP" />
+		<result column="END_TIME" property="endTime" jdbcType="TIMESTAMP" />
+		<result column="VALIDATE_STATE" property="valiDateState" jdbcType="VARCHAR" />
+		<result column="CREATED_BY" property="createdBy" jdbcType="VARCHAR" />
+		<result column="CREATED" property="created" jdbcType="TIMESTAMP" />
+		<result column="LAST_UPD_BY" property="lastUpdBy" jdbcType="VARCHAR" />
+		<result column="LAST_UPD" property="lastUpd" jdbcType="TIMESTAMP" />
+		<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+		
+	</resultMap>
+  <select id="getConsignByPage" parameterType="java.util.Map" resultType="java.util.Map" >
+		select 
+				         t.ID
+				        ,t.FROM_USER_ID
+				        ,t.TO_USER_ID
+				        ,t.PRO_DEF_KEY
+				        ,t.TYPE
+				        ,t.REASON
+				        ,date_format(t.START_TIME,'%Y-%m-%d %H:%i:%s') START_TIME
+				        ,date_format(t.END_TIME,'%Y-%m-%d %H:%i:%s') END_TIME
+				        ,t.VALIDATE_STATE
+				        ,t.CREATED_BY
+				        ,date_format(t.CREATED,'%Y-%m-%d %H:%i:%s') CREATED
+				        ,t.LAST_UPD_BY
+				        ,date_format(t.LAST_UPD,'%Y-%m-%d %H:%i:%s') LAST_UPD
+				        ,t.REMARK
+					 
+		     	from JBPM4_CONSIGN_PERSON t 
+		    	where t.VALIDATE_STATE = '1' 
+		order by T.ID 	desc
+		<if test="page != null" >    
+	            <![CDATA[ limit #{beginrow}, #{endrow} ]]>
+         </if>
+  </select>
+  
+   <insert id="addConsign" parameterType="java.util.Map" useGeneratedKeys="true">
+   		<selectKey resultType="Long" keyProperty="id" order="BEFORE">
+			select auto_increment as id from information_schema.tables where  table_name='jbpm4_consign_person'
+		</selectKey>
+		insert into JBPM4_CONSIGN_PERSON (ID, FROM_USER_ID, TO_USER_ID,
+		PRO_DEF_KEY, TYPE, REASON,
+		START_TIME, END_TIME, VALIDATE_STATE,
+		CREATED, CREATED_BY, LAST_UPD_BY,
+		LAST_UPD, REMARK) 
+		values (#{id,jdbcType=DECIMAL}, 
+		#{model.fromUserId,jdbcType=VARCHAR},
+		#{model.toUserId,jdbcType=VARCHAR},
+		#{model.proDefKey,jdbcType=VARCHAR}, 
+		#{model.type,jdbcType=VARCHAR}, 
+		#{model.reason,jdbcType=VARCHAR},
+		str_to_date(#{model.startTimeStr},'%Y-%m-%d %T'), 
+		str_to_date(#{model.endTimeStr},'%Y-%m-%d %T'),
+		#{model.valiDateState,jdbcType=VARCHAR},
+		str_to_date(#{model.createdStr},'%Y-%m-%d %T'), 
+		#{model.createdBy,jdbcType=VARCHAR},
+		#{model.lastUpdBy,jdbcType=VARCHAR}, 
+		str_to_date(#{model.lastUpdStr},'%Y-%m-%d %T'),
+		#{model.remark,jdbcType=VARCHAR}
+		)
+   
+   </insert>
+   <!-- 通过定时任务 更改失效的任务委托 数据 -->
+     <update id="updateConsignValidateState" parameterType="java.util.Map" >
+	    update JBPM4_CONSIGN_PERSON t
+	    set 
+	         t.VALIDATE_STATE='0'
+	        ,t.LAST_UPD_BY='1'
+	        ,t.LAST_UPD=now()
+	    where t.end_time <![CDATA[ <= ]]> now()
+	    	  and t.VALIDATE_STATE='1'
+  	</update>
+  
+    <select id="findAllConsignCount" resultType="int" parameterType="java.util.Map">
+        select count(1) from JBPM4_CONSIGN_PERSON t where t.VALIDATE_STATE = '1' 
+       <if test="reason != null and reason != ''">
+       		and t.REASON like concat('%',#{REASON},'%')
+	 	</if>
+ 	    <if test="remark != null and remark != ''">
+       		and t.REMARK like concat('%',#{remark},'%')
+	 	</if>
+	 	<if test="fromUserId != null and fromUserId != ''">
+       		and t.FROM_USER_ID = #{fromUserId}
+	 	</if>
+	 	<if test="toUserId != null and toUserId != ''">
+       		and t.TO_USER_ID = #{toUserId}
+	 	</if>	 	
+	 	<if test="createdBy != null and createdBy != ''">
+       		and t.CREATED_BY = #{createdBy}
+	 	</if>
+	 	<if test="proDefKey != null and proDefKey != ''">
+       		and t.PRO_DEF_KEY = #{proDefKey}
+	 	</if>
+		<if test="startTime != null and startTime != ''" >    
+            and  <![CDATA[  t.start_time >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null and endTime != ''" >    
+            and  <![CDATA[  t.end_time <=  #{endTime} ]]>
+        </if>
+        <if test="isAdmin != 1">
+        	and (t.FROM_USER_ID = #{loginUserId} or t.CREATED_BY = #{loginUserId})
+        </if>
+        
+    </select>
+    
+	  <select id="getById" resultMap="BaseResultMap" parameterType="int" >
+	   	  select * from JBPM4_CONSIGN_PERSON where ID = #{id,jdbcType=DECIMAL}
+	  </select>
+	  
+  	     <select id="consignToOther" resultType="int" parameterType="java.util.Map">
+	   	  select count(1) 
+	   	  from JBPM4_CONSIGN_PERSON t 
+	   	  where t.VALIDATE_STATE = '1' 
+	   	  <if test="startTime != null and startTime != ''" >    
+          	and ( <![CDATA[  t.end_time >= #{startTime} ]]> or t.end_time is null) 
+          </if>
+          <if test="endTime != null and endTime != ''" >    
+          and ( <![CDATA[  t.start_time <=  #{endTime} ]]> or t.start_time is null) 
+          </if>
+          
+          <if test="toUserId != null and toUserId != ''" >
+          	and t.from_user_id = #{toUserId} 
+          </if>
+          
+          <if test="id != null and id != ''" >
+          	and t.ID != #{id} 
+          </if>
+	  </select>
+	  
+    <select id="repeatConsign" resultType="int" parameterType="java.util.Map">
+	   	  select count(1) from JBPM4_CONSIGN_PERSON t where t.VALIDATE_STATE = '1'  
+	   	  
+          and ( <![CDATA[  t.end_time >= #{startTime} ]]> or t.end_time is null) 
+        
+          and ( <![CDATA[  t.start_time <=  #{endTime} ]]> or t.start_time is null) 
+          
+          <if test="fromUserId != null and fromUserId != ''" >
+          	and t.from_user_id = #{fromUserId} 
+          </if>
+          <if test="id != null and id != ''" >
+          	and t.ID != #{id} 
+          </if>
+	  </select>
+	  
+  	  <update id="delById" parameterType="int" >
+  	  	call delConsignedInfoById('${id}','${curUserId}')
+	  </update>
+	  <select id="findQuartzJobByName" parameterType="java.util.Map" resultType="java.util.Map" >
+        select 
+        Q2.JOB_CLASS_NAME
+        ,Q2.JOB_NAME 
+        from 
+        QRTZ_JOB_DETAILS q2 
+        INNER JOIN QRTZ_TRIGGERS q3 
+        on Q3.JOB_NAME=Q2.JOB_NAME
+         where Q3.TRIGGER_NAME = #{triggerName}
+  	 </select>
+  	 
+  	  <select id="getConsignTask"  parameterType="java.util.Map" resultMap="BaseResultMap" >
+	 
+	   	  select * from JBPM4_CONSIGN_PERSON t where t.VALIDATE_STATE = '1' 
+	   	  
+          and ( <![CDATA[  t.end_time >= now() ]]> or t.end_time is null) 
+        
+          and ( <![CDATA[  t.start_time <=  now() ]]> or t.start_time is null) order by t.from_user_id asc 
+          
+	  </select>
+	  
+  
+</mapper>
