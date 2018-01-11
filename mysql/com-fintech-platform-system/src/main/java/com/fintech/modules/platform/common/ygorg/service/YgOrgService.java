@@ -27,7 +27,6 @@ import com.fintech.modules.platform.common.dto.HrOrgDTO;
 import com.fintech.modules.platform.common.dto.YGorgDTO;
 import com.fintech.modules.platform.common.dto.YGorgDTO2;
 import com.fintech.modules.platform.common.dto.YGorgJSONDTO;
-import com.fintech.modules.platform.common.yghr.dao.YgHrDao;
 import com.fintech.modules.platform.common.ygorg.dao.YgOrgDao;
 import com.fintech.platform.api.sysconfig.SysConfigAPI;
 import com.fintech.platform.core.common.BaseDTO;

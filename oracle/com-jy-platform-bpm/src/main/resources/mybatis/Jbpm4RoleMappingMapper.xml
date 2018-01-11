@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.platform.jbpm4.repository.Jbpm4RoleMappingDao">
+<resultMap id="Jbpm4RoleMappingDTO" type="com.jy.platform.jbpm4.dto.Jbpm4RoleMappingDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="roleCode" column="ROLE_CODE" jdbcType="VARCHAR" />
+				<result property="mappingRoleCode" column="MAPPING_ROLE_CODE" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 jbpm4_role_mapping -->	
+<select id="searchJbpm4RoleMappingByPaging" parameterType="java.util.Map" resultMap="Jbpm4RoleMappingDTO">
+    	 		select 
+						t1.id                             ,
+						t1.role_code                      ,
+						t1.mapping_role_code              ,
+						t1.validate_state                 
+					
+				from jbpm4_role_mapping 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.roleCode != null and dto.roleCode != ''">
+						and t1.ROLE_CODE =#{dto.roleCode}
+    			</if>
+    			<if test="dto.mappingRoleCode != null and dto.mappingRoleCode != ''">
+						and t1.MAPPING_ROLE_CODE =#{dto.mappingRoleCode}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 jbpm4_role_mapping  -->
+<select id="searchJbpm4RoleMapping" parameterType="java.util.Map" resultMap="Jbpm4RoleMappingDTO">
+    	     select 
+						t1.id                             ,
+						t1.role_code                      ,
+						t1.mapping_role_code              ,
+						t1.validate_state                 
+				from jbpm4_role_mapping 		t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID = #{dto.id}
+    			</if>
+    			<if test="dto.roleCode != null and dto.roleCode != ''">
+						and t1.ROLE_CODE = #{dto.roleCode}
+    			</if>
+    			<if test="dto.roleCodes != null and dto.roleCodes != ''">
+						and t1.ROLE_CODE in (${dto.roleCodes})
+    			</if>
+    			<if test="dto.mappingRoleCode != null and dto.mappingRoleCode != ''">
+						and t1.MAPPING_ROLE_CODE = #{dto.mappingRoleCode}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  jbpm4_role_mapping -->
+<select id="findJbpm4RoleMappingByPrimaryKey" parameterType="java.util.Map" resultMap="Jbpm4RoleMappingDTO">
+   	 		select 
+					t1.id                             ,
+					t1.role_code                      ,
+					t1.mapping_role_code              ,
+					t1.validate_state                 
+			from jbpm4_role_mapping 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 jbpm4_role_mapping -->
+<insert id="insertJbpm4RoleMapping" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_jbpm4_role_mapping.nextval as id from dual
+	</selectKey>
+			insert into jbpm4_role_mapping
+			(   		
+					id                             ,
+					role_code                      ,
+					mapping_role_code              ,
+					validate_state                 
+			)
+			values(#{dto.id}
+					,#{dto.roleCode,jdbcType=VARCHAR}
+					,#{dto.mappingRoleCode,jdbcType=VARCHAR}
+					,'1'
+			)
+</insert>
+    
+<!-- 更新对象 jbpm4_role_mapping -->
+<update id="updateJbpm4RoleMapping" parameterType="java.util.Map">
+	     update jbpm4_role_mapping t1
+	           set 
+			           t1.role_code                      =#{dto.roleCode,jdbcType=VARCHAR},
+			           t1.mapping_role_code              =#{dto.mappingRoleCode,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1'
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 jbpm4_role_mapping -->
+<delete id="deleteJbpm4RoleMappingByID" parameterType="java.util.Map">
+    	delete from jbpm4_role_mapping t1 where t1.ID in (${ids} )
+</delete>
+<!-- 主键假删除 jbpm4_role_mapping -->
+<update id="deleteJbpm4RoleMappingByPrimaryKey" parameterType="java.util.Map">
+	     update jbpm4_role_mapping t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

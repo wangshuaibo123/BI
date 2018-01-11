@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.bpmreport.dao.UserBPMReportDao">
+	<resultMap id="dataBean" type="com.fintech.modules.bpmreport.dto.DataBean">
+		<result property="name" column="userName" jdbcType="VARCHAR" />
+		<result property="num" column="num" jdbcType="INTEGER" />
+	</resultMap>
+
+	
+
+	<sql id="selectHead"> SELECT data.num,
+		data.userName AS userName
+		FROM(
+	</sql>
+	<sql id="selectEnd"> ) data limit 1,10 </sql>
+	<sql id="orgLimted"> 
+		and ou.org_id in (${orgIds})
+	</sql>
+	<!-- 积压最多TOP10 -->
+	<select id="getOverStockMostDataList" parameterType="java.util.Map"		resultMap="dataBean">
+
+		<include refid="selectHead" />
+		SELECT  COUNT(*) AS num,
+			    u.user_name AS userName
+		<if test="isAdmin==true">
+			FROM  jbpm4_task t ,sys_user u
+			WHERE t.assignee_=u.user_no
+		</if>
+		<if test="isAdmin==false">
+			FROM  jbpm4_task t ,sys_org_user ou, sys_user u
+			WHERE t.assignee_=u.user_no  
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		AND u.validate_state='1'
+		GROUP BY u.user_name  
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+
+
+	<!-- 已办最多TOP10 -->
+	<select id="getProcessedMostData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  COUNT(*) AS num,
+			    u.user_name AS userName
+		<if test="isAdmin==true">
+			FROM  jbpm4_hist_task ht ,sys_user u
+			WHERE ht.assignee_=u.user_no
+		</if>
+		<if test="isAdmin==false">
+			FROM  jbpm4_hist_task ht ,sys_user u,sys_org_user ou
+			WHERE ht.assignee_=u.user_no    
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		AND  ht.state_='completed'
+		AND u.validate_state='1'
+		GROUP BY u.user_name  
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 发起最多TOP10 -->
+	<select id="getStartUpMostData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  COUNT(*) AS num,
+			    u.user_name AS userName
+		<if test="isAdmin==true">
+			FROM jbpm4_biz_tab bt,sys_user u
+			WHERE bt.start_pro_userid=u.user_no
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_biz_tab bt,sys_user u,sys_org_user ou
+			WHERE bt.start_pro_userid=u.user_no  
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		AND u.validate_state='1'
+		GROUP BY u.user_name  
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+
+	<!-- 平均速率最高TOP10 -->
+	<select id="getAvgEfficientHighestData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  AVG(ht.duration_) AS num,
+				u.user_name AS userName
+		<if test="isAdmin==true">
+			FROM  jbpm4_hist_task ht ,sys_user u
+			WHERE ht.assignee_=u.user_no 
+		</if>
+		<if test="isAdmin==false">
+			FROM  jbpm4_hist_task ht ,sys_user u,sys_org_user ou
+			WHERE ht.assignee_=u.user_no   
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		AND HT.DURATION_>=11500
+		AND  ht.state_='completed'
+		AND u.validate_state='1'
+		GROUP BY u.user_name  
+		ORDER BY AVG(ht.duration_) ASC
+		<include refid="selectEnd" />
+	</select>
+	<!-- 平均速率最低TOP10 -->
+	<select id="getAvgEfficientLowestData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  AVG(ht.duration_) AS num,
+				u.user_name AS userName
+		<if test="isAdmin==true">
+			FROM  jbpm4_hist_task ht ,sys_user u
+			WHERE ht.assignee_=u.user_no 
+		</if>
+		<if test="isAdmin==false">
+			FROM  jbpm4_hist_task ht ,sys_user u,sys_org_user ou
+			WHERE ht.assignee_=u.user_no   
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		AND HT.DURATION_>=11500
+		AND  ht.state_='completed'
+		AND u.validate_state='1'
+		GROUP BY u.user_name  
+		ORDER BY AVG(ht.duration_) DESC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 委托 最多TOP10 -->
+	<select id="getEntrustMostData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  COUNT(*) AS num,
+			    u.user_name AS userName
+		<if test="isAdmin==true">
+			FROM jbpm4_consigned_task  ct,sys_user u
+			WHERE  ct.from_user_id=u.user_no
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_consigned_task  ct,sys_user u,sys_org_user ou
+			WHERE  ct.from_user_id=u.user_no  
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		AND u.validate_state='1'
+		GROUP BY u.user_name  
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 乐于助人最多TOP10 -->
+	<select id="getSupportMostData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT  COUNT(*) AS num,
+			    u.user_name AS userName
+		<if test="isAdmin==true">
+			FROM jbpm4_consigned_task  ct,sys_user u
+			WHERE  ct.to_user_id=u.user_no
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_consigned_task  ct,sys_user u,sys_org_user ou
+			WHERE  ct.to_user_id=u.user_no 
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		AND u.validate_state='1'
+		GROUP BY u.user_name  
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 委托概况 -->
+	<select id="getEntrustStateData" parameterType="java.util.Map"		resultMap="dataBean">
+		SELECT data.num,
+		data.userName AS userName
+		FROM(
+		SELECT  COUNT(*) AS num,
+			    u.user_name AS userName 
+		<if test="isAdmin==true">
+			FROM jbpm4_consigned_task  ct,sys_user u
+			WHERE  ct.from_user_id=u.user_no
+		</if>
+		<if test="isAdmin==false">
+			FROM jbpm4_consigned_task  ct,sys_user u,sys_org_user ou
+			WHERE  ct.from_user_id=u.user_no
+			AND u.id=ou.user_id
+			<include refid="orgLimted" />
+		</if>
+		AND u.validate_state='1'
+		GROUP BY u.user_name 
+		ORDER BY  COUNT(*) DESC
+		 ) data WHERE ROWNUM &lt;= 20
+	</select>
+
+</mapper>

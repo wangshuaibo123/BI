@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.bpmreport.dao.EntrustBPMReportDao">
+	<resultMap id="dataBean" type="com.jy.modules.bpmreport.dto.DataBean">
+		<result property="name" column="type" jdbcType="VARCHAR" />
+		<result property="num" column="num" jdbcType="INTEGER" />
+	</resultMap>
+
+	
+	<sql id="orgLimted"> AND EXISTS (
+		SELECT so.id 
+		FROM  sys_org so  
+		WHERE so.id=ou.org_id
+		START WITH so.id=#{orgId}
+		CONNECT BY PRIOR so.org_code = so.parent_id )
+	</sql>
+
+
+	<!-- 委托概况 -->
+	<select id="getEntrustStateData" parameterType="java.util.Map"		resultMap="dataBean">
+		
+	    SELECT COUNT(*) AS num,cp.type AS type
+	    
+	    <if test="isAdmin==true">
+			 from  JBPM4_CONSIGN_PERSON cp 
+		</if>
+		<if test="isAdmin==false">
+		    from  JBPM4_CONSIGN_PERSON cp ,sys_user u,sys_org_user ou
+		    WHERE  cp.from_user_id=u.user_no 
+		    AND ou.user_id=u.id 
+			<include refid="orgLimted" />
+		</if>
+		GROUP BY cp.type
+		
+	</select>
+
+</mapper>

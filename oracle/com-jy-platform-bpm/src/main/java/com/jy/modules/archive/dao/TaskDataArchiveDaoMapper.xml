@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.archive.dao.TaskDataArchiveDao">
+<resultMap id="TaskPo" type="com.jy.modules.archive.dto.TaskPo">
+				<result property="dbid" column="dbid_" jdbcType="DECIMAL" />
+				<result property="dbVersion" column="dbversion_" jdbcType="DECIMAL" />
+				<result property="execution" column="execution_" jdbcType="VARCHAR" />
+				<result property="outcome" column="outcome_" jdbcType="VARCHAR" />
+				<result property="assignee" column="assignee_" jdbcType="VARCHAR" />
+				<result property="priority" column="priority_" jdbcType="DECIMAL" />
+				<result property="state" column="state_" jdbcType="VARCHAR" />
+				<result property="createTime" column="create_" jdbcType="TIMESTAMP" />
+				<result property="endTime" column="end_" jdbcType="TIMESTAMP" />
+				<result property="duration" column="duration_" jdbcType="DECIMAL" />
+				<result property="nextId" column="nextidx_" jdbcType="DECIMAL" />
+				<result property="superTask" column="supertask_" jdbcType="DECIMAL" />
+</resultMap>	
+<!-- 查询 -->	
+<select id="getTabDataList" parameterType="java.lang.String" resultMap="TaskPo">
+    	 		SELECT 
+						t1.dbid_,
+						t1.dbversion_,
+						t1.execution_,
+						t1.outcome_,
+						t1.assignee_,
+						t1.priority_,
+						t1.state_,
+						t1.create_,
+						t1.end_,
+						t1.duration_,
+						t1.nextidx_,
+						t1.supertask_
+				FROM JBPM4_HIST_TASK 	t1
+				WHERE  t1.dbid_=#{str}
+</select>
+<!-- 查询数量 -->  
+<select id="getTableNum" resultType="int">
+select count(*) from tabs t where t.TABLE_NAME='JBPM4_HIST_TASK_OLD'
+</select>
+<!-- 保存数据  -->
+<insert id="insertData"  parameterType="java.lang.String" >
+	insert into JBPM4_HIST_TASK_OLD
+			(   		
+						dbid_,
+						dbversion_,
+						execution_,
+						outcome_,
+						assignee_,
+						priority_,
+						state_,
+						create_,
+						end_,
+						duration_,
+						nextidx_,
+						supertask_
+			) 
+     (
+      select 			ht.dbid_,
+						ht.dbversion_,
+						ht.execution_,
+						ht.outcome_,
+						ht.assignee_,
+						ht.priority_,
+						ht.state_,
+						ht.create_,
+						ht.end_,
+						ht.duration_,
+						ht.nextidx_,
+						ht.supertask_
+      from jbpm4_hist_task ht,jbpm4_hist_actinst ha, JBPM4_HIST_PROCINST hp 
+      where hp.dbid_=ha.hproci_  and ha.htask_=ht.dbid_
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertTMPData"  parameterType="java.lang.String" >
+	insert into JBPM4_HIST_TASK_TMP
+			(   		
+						dbid_,
+						dbversion_,
+						execution_,
+						outcome_,
+						assignee_,
+						priority_,
+						state_,
+						create_,
+						end_,
+						duration_,
+						nextidx_,
+						supertask_
+			) 
+     (
+      select 			ht.dbid_,
+						ht.dbversion_,
+						ht.execution_,
+						ht.outcome_,
+						ht.assignee_,
+						ht.priority_,
+						ht.state_,
+						ht.create_,
+						ht.end_,
+						ht.duration_,
+						ht.nextidx_,
+						ht.supertask_
+      from jbpm4_hist_task ht,jbpm4_hist_actinst ha, JBPM4_HIST_PROCINST hp 
+      where hp.dbid_=ha.hproci_  and ha.htask_=ht.dbid_
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 保存-->
+<insert id="insertListData" parameterType="java.lang.String" >
+	insert into JBPM4_HIST_TASK_OLD
+			(   		
+						dbid_,
+						dbversion_,
+						execution_,
+						outcome_,
+						assignee_,
+						priority_,
+						state_,
+						create_,
+						end_,
+						duration_,
+						nextidx_,
+						supertask_
+			)(
+			SELECT 
+						t1.dbid_,
+						t1.dbversion_,
+						t1.execution_,
+						t1.outcome_,
+						t1.assignee_,
+						t1.priority_,
+						t1.state_,
+						t1.create_,
+						t1.end_,
+						t1.duration_,
+						t1.nextidx_,
+						t1.supertask_
+				FROM JBPM4_HIST_TASK 	t1,jbpm4_hist_actinst ha, JBPM4_HIST_PROCINST hp  
+       where hp.dbid_=ha.hproci_  and ha.htask_=t1.dbid_   and      hp.id_=#{str}
+			)
+</insert>
+<!-- 创建  -->
+<update id="createTable" >
+	     create table JBPM4_HIST_TASK_OLD as select * from JBPM4_HIST_TASK a where a.dbid_=0
+</update>
+<!-- 创建  -->
+<update id="createTMPTable" >
+	     create table JBPM4_HIST_TASK_TMP as select * from JBPM4_HIST_TASK a where a.dbid_=0
+</update>
+<!-- 删除  -->
+<delete id="deleteData" >
+	delete  from jbpm4_hist_task t where exists (select temp.dbid_ from JBPM4_HIST_TASK_TMP temp where t.dbid_=temp.dbid_)
+</delete>
+<!-- 删除  -->
+<delete id="deleteTMPData" >
+    	delete from  JBPM4_HIST_TASK_TMP
+</delete>
+<!-- 删除  -->
+<delete id="deleteListData"  parameterType="java.lang.String">
+    	delete FROM JBPM4_HIST_TASK 	t1
+				WHERE  t1.dbid_=#{str}
+</delete>
+<!-- 删除  -->
+<delete id="deleteDataById"  parameterType="java.lang.Long" >
+    	delete FROM JBPM4_HIST_TASK 	t1
+				WHERE  t1.dbid_=#{id} 
+</delete>
+</mapper>

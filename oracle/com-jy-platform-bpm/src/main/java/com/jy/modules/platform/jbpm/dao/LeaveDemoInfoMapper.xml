@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.platform.jbpm.dao.LeaveDemoInfoDao">
+<resultMap id="LeaveDemoInfoDTO" type="com.jy.modules.platform.jbpm.dto.LeaveDemoInfoDTO">
+				<result property="id" column="ID" jdbcType="DECIMAL" />
+				<result property="appName" column="APP_NAME" jdbcType="VARCHAR" />
+				<result property="appReason" column="APP_REASON" jdbcType="VARCHAR" />
+				<result property="appDay" column="APP_DAY" jdbcType="VARCHAR" />
+				<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR" />
+				<result property="appState" column="APP_STATE" jdbcType="VARCHAR" />
+				<result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP" />
+				<result property="createTimeStr" column="create_timestr" jdbcType="VARCHAR"/>
+				<result property="modifyTime" column="MODIFY_TIME" jdbcType="TIMESTAMP" />
+				<result property="createBy" column="CREATE_BY" jdbcType="VARCHAR" />
+				<result property="modifyBy" column="MODIFY_BY" jdbcType="VARCHAR" />
+				<result property="remark" column="REMARK" jdbcType="VARCHAR" />
+</resultMap>
+				
+<!-- 分页查询 leave_demo_info -->	
+<select id="searchLeaveDemoInfoByPaging" parameterType="java.util.Map" resultMap="LeaveDemoInfoDTO">
+    	 		select 
+						t1.id                             ,
+						t1.app_name                       ,
+						t1.app_reason                     ,
+						t1.app_day                        ,
+						t1.validate_state                 ,
+						(case t1.app_state when '1' then '是' when '0' then '否' end)app_state,
+						t1.create_time                    ,
+						to_char(t1.create_time ,'YYYY-MM-DD HH24:MI:SS') create_timestr,
+						t1.modify_time                    ,
+						t1.create_by                      ,
+						t1.modify_by                      ,
+						t1.remark                         
+					
+				from leave_demo_info 	t1
+				where 1=1
+				and t1.validate_state='1'
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.ID =#{dto.id}
+    			</if>
+    			<if test="dto.appName != null and dto.appName != ''">
+						and t1.APP_NAME =#{dto.appName}
+    			</if>
+    			<if test="dto.appReason != null and dto.appReason != ''">
+						and t1.APP_REASON =#{dto.appReason}
+    			</if>
+    			<if test="dto.appDay != null and dto.appDay != ''">
+						and t1.APP_DAY =#{dto.appDay}
+    			</if>
+    			<if test="dto.validateState != null and dto.validateState != ''">
+						and t1.VALIDATE_STATE =#{dto.validateState}
+    			</if>
+    			<if test="dto.appState != null and dto.appState != ''">
+						and t1.APP_STATE =#{dto.appState}
+    			</if>
+    			<if test="dto.createTime != null and dto.createTime != ''">
+						and t1.CREATE_TIME =#{dto.createTime}
+    			</if>
+    			<if test="dto.modifyTime != null and dto.modifyTime != ''">
+						and t1.MODIFY_TIME =#{dto.modifyTime}
+    			</if>
+    			<if test="dto.createBy != null and dto.createBy != ''">
+						and t1.CREATE_BY =#{dto.createBy}
+    			</if>
+    			<if test="dto.modifyBy != null and dto.modifyBy != ''">
+						and t1.MODIFY_BY =#{dto.modifyBy}
+    			</if>
+    			<if test="dto.remark != null and dto.remark != ''">
+						and t1.REMARK =#{dto.remark}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+  
+<!-- 主键查询对象  leave_demo_info -->
+<select id="findLeaveDemoInfoByPrimaryKey" parameterType="java.util.Map" resultMap="LeaveDemoInfoDTO">
+   	 		select 
+					t1.id                             ,
+					t1.app_name                       ,
+					t1.app_reason                     ,
+					t1.app_day                        ,
+					t1.validate_state                 ,
+					t1.app_state                      ,
+					t1.create_time                    ,
+					t1.modify_time                    ,
+					t1.create_by                      ,
+					t1.modify_by                      ,
+					t1.remark                         
+			from leave_demo_info 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 leave_demo_info -->
+<insert id="insertLeaveDemoInfo" parameterType="java.util.Map" useGeneratedKeys="true">
+	<selectKey resultType="java.lang.Long" keyProperty="dto.id" order="BEFORE">
+				select seq_leave_demo_info.nextval as id from dual
+	</selectKey>
+			insert into leave_demo_info
+			(   		
+					id                             ,
+					app_name                       ,
+					app_reason                     ,
+					app_day                        ,
+					validate_state                 ,
+					app_state                      ,
+					create_time                    ,
+					create_by                      ,
+					remark                         
+			)
+			values(#{dto.id}
+					,#{dto.appName,jdbcType=VARCHAR}
+					,#{dto.appReason,jdbcType=VARCHAR}
+					,#{dto.appDay,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.appState,jdbcType=VARCHAR}
+					,systimestamp
+					,#{dto.createBy,jdbcType=VARCHAR}
+					,#{dto.remark,jdbcType=VARCHAR}
+			)
+</insert>
+    
+<!-- 更新对象 leave_demo_info -->
+<update id="updateLeaveDemoInfo" parameterType="java.util.Map">
+	     update leave_demo_info t1
+	           set 
+			           t1.app_name                       =#{dto.appName,jdbcType=VARCHAR},
+			           t1.app_reason                     =#{dto.appReason,jdbcType=VARCHAR},
+			           t1.app_day                        =#{dto.appDay,jdbcType=VARCHAR},
+			           t1.validate_state                 ='1',
+			           t1.app_state                      =#{dto.appState,jdbcType=VARCHAR},
+			           t1.modify_time                    =systimestamp,
+			           t1.modify_by                      =#{dto.modifyBy,jdbcType=VARCHAR},
+			           t1.remark                         =#{dto.remark,jdbcType=VARCHAR}
+	     where t1.id = #{dto.id}
+</update>
+
+<!-- 更新对象 leave_demo_info -->
+<update id="updateLeaveState" parameterType="java.util.Map">
+	     update leave_demo_info t1
+	           set 
+			           t1.app_state                      =#{dto.appState,jdbcType=VARCHAR},
+			           t1.modify_time                    =systimestamp
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键假删除 leave_demo_info -->
+<update id="deleteLeaveDemoInfoByPrimaryKey" parameterType="java.util.Map">
+	     update leave_demo_info t1
+	           set   t1.validate_state='0'	
+	     where t1.id in( ${ids})
+</update>
+</mapper>

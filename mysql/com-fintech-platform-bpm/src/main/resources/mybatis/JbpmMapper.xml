@@ -1,0 +1,2692 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.platform.jbpm4.repository.JbpmMapper" >
+  <resultMap id="Jbpm4FormInfoDTO" type="com.fintech.platform.jbpm4.jbpm4FormInfo.dto.Jbpm4FormInfoDTO">
+		<result property="id" column="ID" jdbcType="DECIMAL"/>
+		<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR"/>
+		<result property="createTime" column="CREATE_TIME"/>
+		<result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+		<result property="ext1" column="EXT1" jdbcType="VARCHAR"/>
+		<result property="ext2" column="EXT2" jdbcType="VARCHAR"/>
+		<result property="ext3" column="EXT3" jdbcType="VARCHAR"/>
+		<result property="proDefKey" column="PRO_DEF_KEY" jdbcType="VARCHAR"/>
+		<result property="proActivityName" column="PRO_ACTIVITY_NAME" jdbcType="VARCHAR"/>
+		<result property="proActivityForm" column="PRO_ACTIVITY_FORM" jdbcType="VARCHAR"/>
+		<result property="participatorType" column="PARTICIPATOR_TYPE" jdbcType="VARCHAR"/>
+		<result property="partType" column="PART_TYPE" jdbcType="VARCHAR"/>
+		<result property="otherParams" column="OTHER_PARAMS" jdbcType="VARCHAR"/>
+		<result property="ruleInfo" column="RULE_INFO" jdbcType="VARCHAR"/>
+		<result property="proLevel" column="PRO_LEVEL" jdbcType="VARCHAR"/>
+  </resultMap>
+  
+  <resultMap id="TemporaryJbpm4InfoDTO" type="com.fintech.platform.jbpm4.temporaryJbpm4Info.dto.TemporaryJbpm4InfoDTO">
+		<result property="id" column="ID" jdbcType="DECIMAL"/>
+		<result property="validateState" column="VALIDATE_STATE" jdbcType="VARCHAR"/>
+		<result property="lastUpdBy" column="LAST_UPD_BY" jdbcType="VARCHAR"/>
+		<result property="lastUpd" column="LAST_UPD" />
+		<result property="createdBy" column="CREATED_BY" jdbcType="VARCHAR"/>
+		<result property="created" column="CREATED"/>
+		<result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+		<result property="ext1" column="EXT1" jdbcType="VARCHAR"/>
+		<result property="procVersion" column="PROC_VERSION" jdbcType="VARCHAR"/>
+		<result property="procCode" column="PROC_CODE" jdbcType="VARCHAR"/>
+		<result property="procName" column="PROC_NAME" jdbcType="VARCHAR"/>
+		<result property="bizFile" column="BIZ_FILE" jdbcType="VARCHAR"/>
+		<result property="totalRecordNum" column="TOTALRECORDNUM"/>
+		<result property="num" column="NUM"/>
+		<result property="xmlContent" column="XML_CONTENT" jdbcType="CLOB"  />
+  </resultMap>
+  <!-- 通过流程实例ID 获取流程定义信息 -->
+  <select id="queryProDefindInfo" parameterType="java.util.Map" resultType="java.util.Map">
+	  select  
+	  		t1.OBJNAME_     PRO_NAME	/*流程名称*/
+	       ,t1.DEPLOYMENT_  DEPLOYMENT	/*流程部署ID*/
+	       ,t2.stringval_   PRO_KEY		/*流程定义key*/
+	       ,t3.longval_    	VERSION		/*流程版本号*/
+	       ,t1.stringval_  	PRO_DEF_ID  /*流程定义ID*/
+	       ,(select tt1.name_ from jbpm4_lob tt1 where tt1.deployment_ = t1.deployment_) RESOURCE_NAME /*流程资源名称*/
+	  from JBPM4_DEPLOYMENT t,
+	       JBPM4_DEPLOYPROP t1,
+	       JBPM4_DEPLOYPROP t2,
+	       JBPM4_DEPLOYPROP t3
+	 where t1.KEY_ = 'pdid'
+	   and t1.DEPLOYMENT_ = t.DBID_
+	   and t2.KEY_ = 'pdkey'
+	   and t2.OBJNAME_ = t1.OBJNAME_
+	   and t2.DEPLOYMENT_ = t.DBID_
+	   and t3.KEY_ = 'pdversion'
+	   and t3.OBJNAME_ = t1.OBJNAME_
+	   and t3.DEPLOYMENT_ = t.DBID_
+	   and t1.STRINGVAL_ = (select hp.procdefid_ from jbpm4_hist_procinst hp where hp.id_='${proInsId}')
+   </select>
+   <!-- 查询某个人的待办任务数量 -->
+   <select id="getTaskCunOfPseron" parameterType="java.util.Map" resultType="java.util.Map">
+   select temp.*
+		    ,(select date_format(t3.create_ ,'%Y-%m-%d %H:%i:%s') from jbpm4_task t3 
+		   			 where t3.dbid_ = (select max(t2.dbid_) from jbpm4_task t2 where t2.assignee_ ='${userId}')
+		   	 )CREATE_TIME
+   	from (
+   			select  
+   			cast(count(t1.dbid_) as char)			TASK_CUNT
+	        from jbpm4_task            t1 
+	        where 1 = 1 
+	        and t1.state_  is not null
+	        <!-- 流程实例是活动的 -->
+	        and exists (select * from jbpm4_execution t2 where t2.id_ = t1.execution_id_ )
+	         <!-- 后续可以添加业务中间表 jbpm4_biz_tab 有 活动的 主流程 -->
+	        and (exists( select p.* from jbpm4_hist_procinst p  where p.state_ = 'active' and p.id_ = t1.execution_id_ 	<!-- 找主流程下所有子流程 包括并发流程/会签  -->
+	          			)
+	          	<!-- 只有主流程，没有子流程 -->	
+	            or exists (select p1.*  from jbpm4_hist_procinst  p1  where p1.state_ = 'active' and p1.main_id_ is null 
+				              and instr(t1.execution_id_,p1.id_) >0 /*支持非主子流程的 会签 */ )
+	        )
+	        and t1.assignee_ ='${userId}'
+   	)temp
+   		
+   </select>
+ <!-- 查询某个人的当天分配的任务数量（包括待办、已办、已结） -->
+ <select id="getTaskCunOfPseronToday" parameterType="java.util.Map" resultType="java.util.Map">
+  	select  cast(count(t1.dbid_) as char) TASK_CUNT
+  	,date_format(max(t1.create_),'%Y-%m-%d %H:%i:%s') CREATE_TIME
+    from jbpm4_hist_task t1 
+    where t1.assignee_ = #{userId}
+            and DATE_FORMAT(t1.create_,'%Y-%m-%d')=DATE_FORMAT(now(),'%Y-%m-%d')            		
+ </select>
+<!-- jbpm4.4 自定义 待办任务查询 todo 主流程待办任务 支持主子流程、会签流程 -->
+<select id="queryTasksByMySql_1" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT TEMP.* FROM (
+    select  ROWNUM NUM,
+    T.*,
+    count(1) over() totalRecordNum
+    	from(
+		        select 
+		        t1.dbid_				taskId
+		        ,t1.ACTIVITY_NAME_		cur_act_name
+		        ,t1.EXECUTION_ID_		cur_exe_id
+		        ,t1.lock_state
+		        ,t1.ASSIGNEE_ 			cur_owner
+		        ,date_format(t1.create_,'%Y-%m-%d %H:%i:%s') start_time
+		        ,(select t3.id_ from jbpm4_execution t2,jbpm4_execution t3 where 1=1 and t3.dbid_ = t2.superexec_ and t2.id_ = t1.execution_id_) main_id
+		        
+		        <!-- 如果是自定义sql则展示 -->
+		        <if test="dto.customSQL != null and dto.customSQL != '' " >    
+	            ,(select b.biz_task_type from jbpm4_biz_tab b where b.pro_instance_id = t1.execution_id_) biz_task_type
+	            ,(select case when b.task_state is null then '0' else b.task_state end from jbpm4_biz_tab b where b.pro_instance_id = t1.execution_id_) task_state
+		        </if>
+		        
+		        from jbpm4_task            t1 
+		        where 1 = 1 
+		        and t1.state_  is not null
+		        <!-- 流程实例是活动的 -->
+		        and exists (select * from jbpm4_execution t2 where t2.id_ = t1.execution_id_ )
+		         <!-- 后续可以添加业务中间表 jbpm4_biz_tab 有 活动的 主流程 -->
+		        and (exists( select p.* from jbpm4_hist_procinst p  where p.state_ = 'active' and p.id_ = t1.execution_id_ 	<!-- 找主流程下所有子流程 包括并发流程/会签  -->
+		          			)
+		          	<!-- 只有主流程，没有子流程 -->	
+		            or exists (select p1.*  from jbpm4_hist_procinst  p1  where p1.state_ = 'active' and p1.main_id_ is null 
+					              and instr(t1.execution_id_,p1.id_) >0 /*支持非主子流程的 会签 */ )
+		        )
+
+		 		<if test="dto.paramUserId != null and dto.paramUserId != '' " >    
+		            and t1.assignee_ ='${dto.paramUserId}'
+		        </if>
+		        <if test="dto.processParticipationName != null and dto.processParticipationName != ''" >    
+		            and t1.assignee_  in (${dto.processParticipationName})
+		        </if>
+		        <if test="dto.acitityName != null and dto.acitityName != '' and (eqActName == null or eqActName !=1) " >    
+		            and t1.activity_name_ like concat('%',#{dto.acitityName},'%')
+		        </if>
+		        <if test="dto.acitityName != null and dto.acitityName != '' and eqActName == 1 " >    
+		            and t1.activity_name_ =#{dto.acitityName}
+		        </if>
+		         <if test="dto.processInsId != null and dto.processInsId != ''" >    
+		            and t1.execution_id_ like concat('%',#{dto.processInsId},'%')
+		        </if>
+				<if test="dto.processStartDate != null and dto.processStartDate != ''" >    
+		            and   <![CDATA[t1.create_ > #{dto.processStartDate}]]>
+		        </if>
+				<if test="dto.processEndDate != null and dto.processEndDate != ''" >    
+		            and   <![CDATA[t1.create_ < #{dto.processEndDate}]]>
+		        </if>
+				<if test="dto.taskId != null and dto.taskId != ''" >    
+		            and  t1.dbid_ = #{dto.taskId} 
+		        </if>
+				 <if test="dto.startTime != null and dto.startTime != ''" >    
+		            and  <![CDATA[  t1.create_ >= #{dto.startTime} ]]>
+		        </if>
+		         <if test="dto.endTime != null and dto.endTime != ''" >    
+		            and  <![CDATA[  t1.create_ <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+		        </if>
+		        <if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.id_=t1.execution_id_
+						)
+		            )
+		        </if>
+		        <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.id_=t1.execution_id_
+						)
+		            )
+		        </if>
+		        <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_task_type =#{dto.bizTaskType}
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.id_=t1.execution_id_
+						)
+		            )
+		        </if>
+		        <if test="dto.remark != null and dto.remark != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.remark like concat('%',#{dto.remark},'%')
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.id_=t1.execution_id_
+						)
+		            )
+		        </if>
+		        <!-- 2014-11-8 13:56:31 chj add 查询 任务类型  -->
+		        <if test="dto.bizType != null and dto.bizType != ''">
+		        	and exists (select * from jbpm4_biz_tab bt where bt.biz_type =#{dto.bizType}
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.id_=t1.execution_id_
+						)
+					)
+		        </if>
+		        <if test="dto.proStartTime != null and dto.proStartTime != ''">
+		        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+		        				where hp.id_ = t1.execution_id_
+								and hp.start_  >= #{dto.proStartTime}
+					)
+		        </if>
+		        <if test="dto.proEndTime != null and dto.proEndTime != ''">
+		        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+		        				 where hp.id_ = t1.execution_id_
+								 and hp.start_  <![CDATA[ <= ]]> date_add(#{dto.proEndTime}, INTERVAL 1 day)
+					)
+		        </if>
+		        /*自定义业务表与工作流表关联的sql条件控制*/
+		        <if test="myExtSQL != null and myExtSQL != ''">
+		        	${myExtSQL}
+		        </if>
+		        /*自定义工作流 数据权限控制*/
+		        <if test="dataCSQL != null and dataCSQL != ''">
+		        	${dataCSQL}
+		        </if>
+		        
+		        <if test="dto.customSQL != null and dto.customSQL != '' " >
+				order by task_state desc ,biz_task_type,t1.create_ asc
+				</if>
+				<if test="dto.customSQL == null or dto.customSQL == '' " >
+        		order by t1.create_ 	asc
+        		</if>
+        
+        
+		) T
+		) TEMP
+		
+			<if test="page != null" >    
+	            <![CDATA[WHERE TEMP.NUM > #{page.startIndex} and TEMP.NUM <= (#{page.startIndex} + #{page.pageSize})]]>
+	        </if>
+	</select>
+<!-- 查询待办任务 不 支持主子流程、会签流程 -->
+<select id="queryTasksByMySql" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT TEMP.* FROM (
+   select T.*
+    	from(
+		        select 
+		        t1.dbid_				TASKID
+		        ,t1.ACTIVITY_NAME_		CUR_ACT_NAME
+		        ,t1.EXECUTION_ID_		CUR_EXE_ID
+		        ,t1.LOCK_STATE
+		        ,t1.ASSIGNEE_ 			CUR_OWNER
+		        ,date_format(t1.create_,'%Y-%m-%d %H:%i:%s') START_TIME
+		        ,(select p.main_id_ from jbpm4_hist_procinst p where p.dbid_ = t1.procinst_ ) MAIN_ID
+		        
+		        <!-- 如果是自定义sql则展示 -->
+		        <if test="dto.customSQL != null and dto.customSQL != '' " >    
+	            ,(select b.biz_task_type from jbpm4_biz_tab b where b.pro_instance_id = t1.execution_id_) BIZ_TASK_TYPE
+	            ,(select case when b.task_state is null then '0' else b.task_state end from jbpm4_biz_tab b where b.pro_instance_id = t1.execution_id_) TASK_STATE
+		        </if>
+		        
+		        from jbpm4_task            t1 
+		        where 1 = 1 
+		        and t1.state_  is not null
+		        
+		 		<if test="dto.paramUserId != null and dto.paramUserId != '' " >    
+		            and t1.assignee_ ='${dto.paramUserId}'
+		        </if>
+		        <if test="dto.paramUserIds != null and dto.paramUserIds != '' " >    
+		            and t1.assignee_ in ${dto.paramUserIds}
+		        </if>
+		        <if test="dto.processParticipationName != null and dto.processParticipationName != ''" >    
+		            and t1.assignee_  in (${dto.processParticipationName})
+		        </if>
+		        <if test="dto.acitityName != null and dto.acitityName != '' and (eqActName == null or eqActName !=1) " >    
+		            and t1.activity_name_ like concat('%',#{dto.acitityName},'%')
+		        </if>
+		        <if test="dto.acitityName != null and dto.acitityName != '' and eqActName == 1 " >    
+		            and t1.activity_name_ =#{dto.acitityName}
+		        </if>
+		         <if test="dto.processInsId != null and dto.processInsId != ''" >    
+		            and t1.execution_id_ like concat('%',#{dto.processInsId},'%')
+		        </if>
+				<if test="dto.processStartDate != null and dto.processStartDate != ''" >    
+		            and   <![CDATA[t1.create_ > #{dto.processStartDate}]]>
+		        </if>
+				<if test="dto.processEndDate != null and dto.processEndDate != ''" >    
+		            and   <![CDATA[t1.create_ < #{dto.processEndDate}]]>
+		        </if>
+				<if test="dto.taskId != null and dto.taskId != ''" >    
+		            and  t1.dbid_ = #{dto.taskId} 
+		        </if>
+				 <if test="dto.startTime != null and dto.startTime != ''" >    
+		            and  <![CDATA[  t1.create_ >= #{dto.startTime} ]]>
+		        </if>
+		         <if test="dto.endTime != null and dto.endTime != ''" >    
+		            and  <![CDATA[  t1.create_ <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+		        </if>
+		        <if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+		            )
+		        </if>
+		        <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+		            )
+		        </if>
+		        <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_task_type =#{dto.bizTaskType}
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+		            )
+		        </if>
+		        <if test="dto.remark != null and dto.remark != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.remark like concat('%',#{dto.remark},'%')
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+		            )
+		        </if>
+		        <!-- 2014-11-8 13:56:31 chj add 查询 任务类型  -->
+		        <if test="dto.bizType != null and dto.bizType != ''">
+		        	and exists (select * from jbpm4_biz_tab bt where bt.biz_type =#{dto.bizType}
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+					)
+		        </if>
+		        <if test="dto.proStartTime != null and dto.proStartTime != ''">
+		        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+		        				where hp.id_ = t1.execution_id_
+								and hp.start_  >= #{dto.proStartTime}
+					)
+		        </if>
+		        <if test="dto.proEndTime != null and dto.proEndTime != ''">
+		        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+		        				 where hp.id_ = t1.execution_id_
+								 and hp.start_  <![CDATA[ <= ]]> date_add(#{dto.proEndTime}, INTERVAL 1 day)
+					)
+		        </if>
+			 <!-- 2015-5-14 查询组织机构 -->
+		        <if test="dto.orgId != null and dto.orgId != ''">
+		        	and exists (select * from jbpm4_biz_tab bt where bt.org_id =#{dto.orgId}
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+					)
+		        </if>
+		        /*自定义业务表与工作流表关联的sql条件控制*/
+		        <if test="myExtSQL != null and myExtSQL != ''">
+		        	${myExtSQL}
+		        </if>
+		        /*自定义工作流 数据权限控制*/
+		        <if test="dataCSQL != null and dataCSQL != ''">
+		        	${dataCSQL}
+		        </if>
+		        /*角色映射权限控制*/
+		        <if test="dto.roleMappingSql != null and dto.roleMappingSql != ''">
+		        	${dto.roleMappingSql}
+		        </if>
+			
+		        <if test="dto.customSQL != null and dto.customSQL != '' " >
+					order by task_state desc ,biz_task_type,t1.create_ asc
+				</if>
+				<if test="dto.customSQL == null or dto.customSQL == '' " >
+					<if test="dto.sortName==null or dto.sortName==''">
+        			  order by t1.create_ 	asc
+        			</if>
+        		 	<if test="dto.sortName != null and dto.sortName != ''">
+		       		  order by ${dto.sortName} ${dto.sortType}
+            		</if>
+				</if>
+		    
+		   
+        
+        
+		) T
+		) TEMP
+		
+			<if test="page != null" >    
+	            <![CDATA[WHERE 1= 1 limit  #{page.startIndex},#{page.pageSize}]]>
+	        </if>
+	</select>
+	<!-- 通过平台公共分页 查询待办任务 不 支持主子流程、会签流程 -->
+	<select id="queryTasksByMySqlByPaging" parameterType="java.util.Map" resultType="java.util.Map">
+		        select 
+		        t1.dbid_				TASKID
+		        ,t1.ACTIVITY_NAME_		CUR_ACT_NAME
+		        ,t1.EXECUTION_ID_		CUR_EXE_ID
+		        ,t1.LOCK_STATE
+		        ,t1.ASSIGNEE_ 			CUR_OWNER
+		        ,DATE_FORMAT(t1.create_,'%Y-%m-%d %H:%i:%s') START_TIME
+		        ,(select p.main_id_ from jbpm4_hist_procinst p where p.dbid_ = t1.procinst_ ) MAIN_ID
+		        
+		        <!-- 如果是自定义sql则展示 -->
+		        <if test="dto.customSQL != null and dto.customSQL != '' " >    
+	            ,(select b.biz_task_type from jbpm4_biz_tab b where b.pro_instance_id = t1.execution_id_) BIZ_TASK_TYPE
+	            ,(select case when b.task_state is null then '0' else b.task_state end from jbpm4_biz_tab b where b.pro_instance_id = t1.execution_id_) TASK_STATE
+		        </if>
+		        
+		        from jbpm4_task            t1 
+		        where 1 = 1 
+		        and t1.state_  is not null
+		        
+		 		<if test="dto.paramUserId != null and dto.paramUserId != '' " >    
+		            and t1.assignee_ ='${dto.paramUserId}'
+		        </if>
+		        <if test="dto.paramUserIds != null and dto.paramUserIds != '' " >    
+		            and t1.assignee_ in ${dto.paramUserIds}
+		        </if>
+		        <if test="dto.processParticipationName != null and dto.processParticipationName != ''" >    
+		            and t1.assignee_  in (${dto.processParticipationName})
+		        </if>
+		        <if test="dto.acitityName != null and dto.acitityName != '' and (eqActName == null or eqActName !=1) " >    
+		            and t1.activity_name_ like concat('%',#{dto.acitityName},'%')
+		        </if>
+		        <if test="dto.acitityName != null and dto.acitityName != '' and eqActName == 1 " >    
+		            and t1.activity_name_ =#{dto.acitityName}
+		        </if>
+		         <if test="dto.processInsId != null and dto.processInsId != ''" >    
+		            and t1.execution_id_ like concat('%',#{dto.processInsId},'%')
+		        </if>
+				<if test="dto.processStartDate != null and dto.processStartDate != ''" >    
+		            and   <![CDATA[t1.create_ > #{dto.processStartDate}]]>
+		        </if>
+				<if test="dto.processEndDate != null and dto.processEndDate != ''" >    
+		            and   <![CDATA[t1.create_ < #{dto.processEndDate}]]>
+		        </if>
+				<if test="dto.taskId != null and dto.taskId != ''" >    
+		            and  t1.dbid_ = #{dto.taskId} 
+		        </if>
+				 <if test="dto.startTime != null and dto.startTime != ''" >    
+		            and  <![CDATA[  t1.create_ >= #{dto.startTime} ]]>
+		        </if>
+		         <if test="dto.endTime != null and dto.endTime != ''" >    
+		            and  <![CDATA[  t1.create_ <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+		        </if>
+		        <if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+		            )
+		        </if>
+		        <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+		            )
+		        </if>
+		        <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_task_type =#{dto.bizTaskType}
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+		            )
+		        </if>
+		        <if test="dto.remark != null and dto.remark != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.remark like concat('%',#{dto.remark},'%')
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+		            )
+		        </if>
+		        <!-- 2014-11-8 13:56:31 chj add 查询 任务类型  -->
+		        <if test="dto.bizType != null and dto.bizType != ''">
+		        	and exists (select * from jbpm4_biz_tab bt where bt.biz_type =#{dto.bizType}
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+					)
+		        </if>
+		        <if test="dto.proStartTime != null and dto.proStartTime != ''">
+		        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+		        				where hp.id_ = t1.execution_id_
+								and hp.start_  >= #{dto.proStartTime}
+					)
+		        </if>
+		        <if test="dto.proEndTime != null and dto.proEndTime != ''">
+		        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+		        				 where hp.id_ = t1.execution_id_
+								 and hp.start_  <![CDATA[ <= ]]> date_add(#{dto.proEndTime}, INTERVAL 1 day)
+					)
+		        </if>
+			 <!-- 2015-5-14 查询组织机构 -->
+		        <if test="dto.orgId != null and dto.orgId != ''">
+		        	and exists (select * from jbpm4_biz_tab bt where bt.org_id =#{dto.orgId}
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.dbid_=t1.procinst_
+						)
+					)
+		        </if>
+		        /*自定义业务表与工作流表关联的sql条件控制*/
+		        <if test="myExtSQL != null and myExtSQL != ''">
+		        	${myExtSQL}
+		        </if>
+		        /*自定义工作流 数据权限控制*/
+		        <if test="dataCSQL != null and dataCSQL != ''">
+		        	${dataCSQL}
+		        </if>
+		        /*角色映射权限控制*/
+		        <if test="dto.roleMappingSql != null and dto.roleMappingSql != ''">
+		        	${dto.roleMappingSql}
+		        </if>
+			
+		        <if test="dto.customSQL != null and dto.customSQL != '' " >
+					order by task_state desc ,biz_task_type desc,t1.create_ asc
+				</if>
+				<if test="dto.customSQL == null or dto.customSQL == '' " >
+					<if test="dto.sortName==null or dto.sortName==''">
+        			  order by t1.create_ 	asc
+        			</if>
+        		 	<if test="dto.sortName != null and dto.sortName != ''">
+		       		  order by ${dto.sortName} ${dto.sortType}
+            		</if>
+				</if>
+	</select>
+	
+	<!-- 获取 上一节点的处理人信息 -->
+  <select id="getUpTaskDealPersonInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+	select 
+			ht1.assignee_  UP_USER_ID
+	from jbpm4_hist_task ht1
+		where 1 = 1
+		and ht1.dbid_= (select max(ht.dbid_) 
+		  from jbpm4_hist_task ht 
+		  where 1 = 1
+		  and ht.state_='completed'
+		  
+		<if test="executionId != null and executionId !='' " >    
+	      and ht.execution_=#{executionId}
+        </if>
+		<if test="mainProInsId != null and mainProInsId !='' " >    
+	      and ht.execution_=#{mainProInsId}
+        </if>
+		)
+  </select>
+  
+  <!-- 获取 任务的业务关联表信息 -->
+  <select id="obtainBizTabInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+			select
+				BT.ID	BIZ_TAB_ID 
+			   ,BT.BIZ_TAB_NAME
+		       ,BT.BIZ_INF_ID
+		       ,BT.BIZ_INF_NO
+		       ,BT.BIZ_INF_NAME
+		       ,BT.BIZ_TASK_TYPE
+		       ,BT.BIZ_TYPE
+		       ,BT.TASK_STATE
+		       ,BT.PRO_INSTANCE_STATE
+		       ,BT.PRO_INSTANCE_ID
+		       ,BT.START_PRO_USERID
+		       ,DATE_FORMAT(bt.create_time,'%Y-%m-%d %H:%i:%s') START_PRO_TIME
+		       ,bt.REMARK					PRO_REMARK
+		       ,(select DATE_FORMAT(hp.start_,'%Y-%m-%d %H:%i:%s')  from jbpm4_hist_procinst hp where hp.id_= bt.pro_instance_id ) START_INS_TIME
+		       
+		from jbpm4_biz_tab bt 
+		where bt.validate_state = '1'
+		and bt.pro_instance_id=#{mainProInsId}
+  </select>
+  
+  <!-- 获取 表单配置信息 -->
+  <select id="obtainJbpm4FormInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+			select 
+			      F.PRO_ACTIVITY_FORM
+			      ,F.PARTICIPATOR_TYPE		PARTICIPANT_TYPE
+			      ,F.RULE_INFO				PARTICIPANT_RULE
+			      ,F.OTHER_PARAMS			OTHER_PARAMS
+			      , CAST(F.ID AS CHAR)			FORM_ID
+			      ,F.PART_TYPE				PART_TYPE
+			      ,F.PRO_ACTIVITY_NAME		PRO_ACTIVITY_NAME
+			from jbpm4_form_info f
+			where f.validate_state='1'
+			and f.pro_def_key=#{proDefKey}
+			and f.pro_level=#{proDefVersion}
+			and f.pro_activity_name=#{proActName}
+  </select>
+  <!-- 通过主键ID 获取 表单配置信息  -->
+  <select id="obtainJbpm4FormInfoById" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+			select 
+			      F.PRO_ACTIVITY_FORM
+			      ,F.PARTICIPATOR_TYPE		PARTICIPANT_TYPE
+			      ,F.RULE_INFO				PARTICIPANT_RULE
+			      ,F.OTHER_PARAMS			OTHER_PARAMS
+			      ,CAST(F.ID AS CHAR)			FORM_ID
+			      ,F.PART_TYPE				PART_TYPE
+			      ,F.PRO_ACTIVITY_NAME		PRO_ACTIVITY_NAME
+			from jbpm4_form_info f
+			where f.validate_state='1'
+			and f.id=#{formId}
+  </select>
+	<!--jbpm4.4 自定义 已经处理的任务 查询 修改后可以查询 主流程下 所有子流程 信息 2 temp-->
+<select id="queryCompletedTasksByMySql2Temp" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	SELECT TEMP.* FROM (
+    select  ROWNUM NUM,
+    T.*,
+    count(1) over() TOTALRECORDNUM
+    	from(
+		select 
+		       	T2.DBID_
+				,T1.MAIN_ID_
+				,T2.DBVERSION_
+				,T2.EXECUTION_
+				,T2.OUTCOME_
+				,T2.ASSIGNEE_
+				,'REALNAMEOFTASK' 								REALNAMEOFTASK
+				,T1.DBID_               						PRO_INS_ID
+				,date_format(t3.start_ ,'%Y-%m-%d %H:%i:%s')  	START_
+				,date_format(t3.end_ ,'%Y-%m-%d %H:%i:%s')    	END_
+				,T3.ACTIVITY_NAME_           											
+				,T4.ACTIVITY_NAME_       						CURRENT_AC_NAME
+				,T4.ASSIGNEE_									TASKASSIGNEE
+				,'REALNAMEOFCURTASK' 							REALNAMEOFCURTASK
+				,T4.DBID_              							TASKID
+				,T5.BIZ_TAB_NAME          
+				,T5.BIZ_INF_ID            
+				,T5.BIZ_INF_NAME          
+				,T5.PRO_INSTANCE_ID       
+				,T5.TASK_STATE            
+				,T5.PRO_INSTANCE_STATE		
+				,T5.BIZ_TYPE		  
+		         from 
+		             jbpm4_hist_procinst      t1,
+		             jbpm4_hist_task          t2,
+		             jbpm4_hist_actinst       t3,
+		             jbpm4_task               t4,
+		             jbpm4_biz_tab       	  t5
+		             
+				where t1.state_='active'
+				and t2.state_ is null
+				and t1.id_ = t2.execution_
+				and t2.dbid_ = t3.htask_
+				and t1.main_id_ in (select t1.main_id_ from jbpm4_hist_procinst t1 where t1.main_id_ like '%${dto.mainProInsId}%')
+				and t2.execution_ = t4.execution_id_(+)
+				and (t2.outcome_ is null or t2.outcome_ not like 'regect%')
+				and t5.pro_instance_id='${dto.mainProInsId}'
+    
+   		<if test="dto.paramUserId != null" >    
+   				and substr(t1.main_id_ ,0,length(t5.pro_instance_id)) in 
+                ( select substr(t10.main_id_,0,length(t5.pro_instance_id)) main_id_ 
+                		from jbpm4_hist_procinst t10 
+                		where t10.main_id_ is not null
+                 		and  t10.id_ in(select distinct t9.execution_ from jbpm4_hist_task t9 where t9.assignee_= #{dto.paramUserId})
+                )
+               
+                and t2.end_ is null
+   		</if>
+   		
+        	order by t2.end_ desc
+		) T
+		) TEMP
+		
+		<if test="page != null" >    
+            <![CDATA[
+            WHERE TEMP.NUM >  #{page.startIndex} AND TEMP.NUM <= #{page.startIndex} + #{page.pageSize}
+            ]]>
+        </if>
+</select>
+<!-- 查询个人已办任务信息 -->
+<select id="queryCompletedTasksByMySql_1" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	SELECT TEMP.* FROM (
+    select  ROWNUM NUM,
+    T.*,
+    count(1) over() TOTALRECORDNUM
+    	from(
+			select 
+			     t.dbid_			TASKID
+			    ,case when (select hp1.main_id_ from jbpm4_hist_procinst hp1 where hp1.id_ = t.execution_)  is not null 
+                 then (select hp2.id_ from jbpm4_hist_procinst hp2 
+                       where hp2.dbid_ = (select max(hp.dbid_) from jbpm4_hist_procinst hp where hp.main_id_=(select hp1.main_id_ from jbpm4_hist_procinst hp1 where hp1.id_ = t.execution_)
+                                         )
+                       )
+                 else   t.EXECUTION_   
+                 end 	CUR_EXE_ID
+			    ,t.assignee_		CUR_OWNER
+			    ,date_format(t.create_ ,'%Y-%m-%d %H:%i:%s')			CREATE_TIME
+			    ,date_format(t.end_ ,'%Y-%m-%d %H:%i:%s')				END_TIME
+			    ,(select t2.activity_name_ from jbpm4_task t2 where t2.execution_id_=t.execution_)	CUR_ACT_NAME
+			    ,(select P1.main_id_ from jbpm4_hist_procinst p1 where p1.id_=t.execution_)			MAIN_ID
+			    ,(select a.activity_name_  from jbpm4_hist_actinst a   where a.htask_=t.dbid_)		HIS_ACT_NAME
+			from jbpm4_hist_task t
+			where t.state_='completed'
+			/*过滤主动收回任务*/
+			and (instr(t.OUTCOME_, 'regect') = 0 or t.OUTCOME_ is null)
+			<if test="dto.paramUserId != null and dto.paramUserId != '' " >
+			and t.assignee_='${dto.paramUserId}'
+			</if>
+			/*主子流程时 已办任务流程实例ID 需判断 最大*/
+			 and exists (select hp.* from jbpm4_hist_procinst hp where  hp.id_ = t.execution_
+                         and hp.dbid_ in ( select max(tt.dbid_) from (select  hp.dbid_ ,hp.id_ ,case when hp.main_id_ is not null then hp.main_id_  else hp.id_ end  main_id
+                                          from jbpm4_hist_procinst hp where hp.state_='active')tt group by tt.main_id
+                         				  ) 
+           	 			)
+           	 			
+			and (
+			/*其流程实例 或会签流程 是活动的*/
+			exists ( select p.id_ from jbpm4_hist_procinst p  where p.end_ is null   and p.state_='active' and instr(t.execution_,p.id_)> 0) 
+			/*或者 其主流程实例 是活动的*/
+			or exists (select P1.* from jbpm4_hist_procinst p1 where p1.end_ is null and p1.state_='active' 
+			and p1.id_ = (select p.main_id_ from jbpm4_hist_procinst p  where p.end_ is null   and p.state_='active' and p.id_ = t.execution_)
+			           )
+			)
+			<if test="dto.processInsId!=null and dto.processInsId!=''">
+				and t.execution_=#{dto.processInsId}
+			</if>
+			<if test="dto.startTime != null and dto.startTime != ''" >    
+		        and  <![CDATA[  t.end_ >= #{dto.startTime} ]]>
+	        </if>
+	        <if test="dto.endTime != null and dto.endTime != ''" >    
+	            and  <![CDATA[  t.end_ <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+	        </if>
+			<if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.id_=t.execution_
+						)
+		            )
+	        </if>
+	        <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+	            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_
+					)
+	            )
+	        </if>
+	        <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+	            and exists (select * from jbpm4_biz_tab bt where bt.biz_task_type =#{dto.bizTaskType}
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_
+					)
+	            )
+	        </if>
+	        <if test="dto.remark != null and dto.remark != '' " >    
+	            and exists (select * from jbpm4_biz_tab bt where bt.remark like concat('%',#{dto.remark},'%')
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_
+					)
+	            )
+	        </if>
+	        <!-- 2014-11-8 13:56:31 chj add 查询 任务类型  -->
+	        <if test="dto.bizType != null and dto.bizType != ''">
+	        	and exists (select * from jbpm4_biz_tab bt where bt.biz_type =#{dto.bizType}
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_)
+				)
+	        </if>
+	        <if test="dto.proStartTime != null and dto.proStartTime != ''">
+		        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+		        				where hp.id_ = t.execution_
+								and hp.start_  >= #{dto.proStartTime}
+					)
+	        </if>
+	        <if test="dto.proEndTime != null and dto.proEndTime != ''">
+	        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+	        				 where hp.id_ = t.execution_
+							 and hp.start_  <![CDATA[ <= ]]> date_add(#{dto.proEndTime}, INTERVAL 1 day)
+				)
+	        </if>
+	        /*自定义工作流 数据权限控制*/
+	        <if test="dataCSQL != null and dataCSQL != ''">
+	        	${dataCSQL}
+	        </if>
+			order by t.end_ desc
+		) T
+		) TEMP
+		
+		<if test="page != null" >    
+            <![CDATA[
+            WHERE TEMP.NUM >  #{page.startIndex} AND TEMP.NUM <= #{page.startIndex} + #{page.pageSize}
+            ]]>
+        </if>
+</select>
+<!-- 查询个人已办任务信息 支持会签流程 -->
+<select id="queryCompletedTasksByMySql_hq" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	SELECT TEMP.* FROM (
+    select  ROWNUM NUM,
+    T.*,
+    count(1) over() TOTALRECORDNUM
+    	from(
+			select 
+           t.dbid_      TASKID
+          ,(select p.id_ from jbpm4_hist_procinst p where instr(t.execution_,p.id_)>0) CUR_EXE_ID
+          ,t.assignee_    CUR_OWNER
+          ,date_format(t.create_ ,'%Y-%m-%d %H:%i:%s')      CREATE_TIME
+          ,date_format(t.end_ ,'%Y-%m-%d %H:%i:%s')        END_TIME
+          ,(select max(t2.activity_name_) from jbpm4_task t2,jbpm4_execution e where t2.procinst_=e.instance_ and e.id_=t.execution_) 
+           ||
+           (select t2.activity_name_ from jbpm4_task t2 where t2.execution_id_ = (select p1.main_id_
+                          from jbpm4_hist_procinst p1
+                         where instr(t.execution_, p1.id_) > 0))CUR_ACT_NAME
+          ,(select p1.main_id_ from jbpm4_hist_procinst p1 where instr(t.execution_,p1.id_)>0)  MAIN_ID
+          ,(select a.activity_name_  from jbpm4_hist_actinst a   where a.htask_=t.dbid_)    HIS_ACT_NAME
+	      from jbpm4_hist_task t
+	      where t.end_ is not null
+	      /*过滤主动收回任务*/
+	      and (instr(t.OUTCOME_, 'regect') = 0 or t.OUTCOME_ is null)
+	      <if test="dto.paramUserId != null and dto.paramUserId != '' " >
+	      	  and t.assignee_='${dto.paramUserId}'
+	      </if>
+	      <if test="dto.processParticipationName != null and dto.processParticipationName != ''" >    
+	          and t.assignee_  in (${dto.processParticipationName})
+	      </if>
+	       /*其流程实例  是活动的*/      
+	        and  (exists (select p.id_ from jbpm4_hist_procinst p where instr(t.execution_,p.id_)>0 and p.end_ is null)
+	         or exists (select p1.id_ from jbpm4_hist_procinst p1 where p1.id_ in (select p.main_id_ from jbpm4_hist_procinst p where instr(t.execution_,p.id_)>0) and p1.end_ is null)
+	        )
+	      <if test="dto.processInsId!=null and dto.processInsId!=''">
+	        and t.execution_=#{dto.processInsId}
+	      </if>
+	      <if test="dto.startTime != null and dto.startTime != ''" >    
+	         and  <![CDATA[  t.end_ >= #{dto.startTime} ]]>
+	      </if>
+          <if test="dto.endTime != null and dto.endTime != ''" >    
+              and  <![CDATA[  t.end_ <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+          </if>
+	      <if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+               and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+                 and bt.validate_state='1' 
+                 and bt.pro_instance_id in(
+	            select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+	            from jbpm4_hist_procinst hp where instr(t.execution_,hp.id_)>0
+	            )
+               )
+          </if>
+          <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+              and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+	              and bt.validate_state='1' 
+	              and bt.pro_instance_id in(
+			          select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+			          from jbpm4_hist_procinst hp where instr(t.execution_,hp.id_)>0
+	          		)
+	              )
+	      </if>
+          <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+              and exists (select * from jbpm4_biz_tab bt where bt.biz_task_type =#{dto.bizTaskType}
+                and bt.validate_state='1' 
+                and bt.pro_instance_id in(
+		          select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+		          from jbpm4_hist_procinst hp where instr(t.execution_,hp.id_)>0
+		          )
+              )
+          </if>
+          <if test="dto.remark != null and dto.remark != '' " >    
+              and exists (select * from jbpm4_biz_tab bt where bt.remark like concat('%',#{dto.remark},'%')
+                and bt.validate_state='1' 
+                and bt.pro_instance_id in(
+		          select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+		          from jbpm4_hist_procinst hp where instr(t.execution_,hp.id_)>0
+		          )
+              )
+          </if>
+          <!-- 2014-11-8 13:56:31 chj add 查询 任务类型  -->
+          <if test="dto.bizType != null and dto.bizType != ''">
+	            and exists (select * from jbpm4_biz_tab bt where bt.biz_type =#{dto.bizType}
+	                and bt.validate_state='1' 
+	                and bt.pro_instance_id in(
+			          select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+			          from jbpm4_hist_procinst hp where instr(t.execution_,hp.id_)>0)
+			        )
+	      </if>
+          <if test="dto.proStartTime != null and dto.proStartTime != ''">
+              and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+                    where instr(t.execution_,hp.id_)>0
+                and hp.start_  >= #{dto.proStartTime}
+          		)
+          </if>
+	      <if test="dto.proEndTime != null and dto.proEndTime != ''">
+	            and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+	                   where instr(t.execution_,hp.id_)>0
+	               and hp.start_  <![CDATA[ <= ]]> date_add(#{dto.proEndTime}, INTERVAL 1 day)
+	        )
+          </if>
+          <if test="dto.acitityName != null and dto.acitityName != '' and (eqActName == null or eqActName !=1) " >    
+                and (exists 
+                 	 (select 1  from jbpm4_task t2, jbpm4_execution e
+                      where t2.procinst_ = e.instance_
+                           and e.id_ = t.execution_
+                           and t2.activity_name_ like concat('%',#{dto.acitityName},'%')                     
+                           )
+                     or exists
+                       (select 1
+                          from jbpm4_task t2
+                         where t2.execution_id_ =
+                               (select p1.main_id_
+                                  from jbpm4_hist_procinst p1
+                                 where instr(t.execution_, p1.id_) > 0) and t2.activity_name_ likeconcat('%',#{dto.acitityName},'%')
+                           )
+                     )  
+          </if>
+          <if test="dto.acitityName != null and dto.acitityName != '' and eqActName == 1 " > 
+              and (exists 
+          	 (select 1  from jbpm4_task t2, jbpm4_execution e
+               where t2.procinst_ = e.instance_
+                    and e.id_ = t.execution_
+                    and t2.activity_name_ =#{dto.acitityName}                 
+                    )
+              or exists
+                (select 1
+                   from jbpm4_task t2
+                  where t2.execution_id_ =
+                        (select p1.main_id_
+                           from jbpm4_hist_procinst p1
+                          where instr(t.execution_, p1.id_) > 0) and t2.activity_name_ =#{dto.acitityName}
+                    )
+              )  
+          </if>
+          /*自定义工作流 数据权限控制*/
+          <if test="dataCSQL != null and dataCSQL != ''">
+            	${dataCSQL}
+          </if>
+          /*角色映射权限控制*/
+          <if test="dto.roleMappingSql != null and dto.roleMappingSql != ''">
+           	 	${dto.roleMappingSql}
+          </if>
+	      order by t.end_ desc
+		) T
+		) TEMP
+		
+		<if test="page != null" >    
+            <![CDATA[
+            WHERE TEMP.NUM >  #{page.startIndex} AND TEMP.NUM <= #{page.startIndex} + #{page.pageSize}
+            ]]>
+        </if>
+</select>
+
+<!-- 查询个人已办任务信息 不支持 主子流程 会签流程 -->
+<select id="queryCompletedTasksByMySql" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	SELECT TEMP.* FROM (
+    select  ROWNUM NUM,
+    T.*,
+    count(1) over() TOTALRECORDNUM
+    	from(
+			select 
+			     t.dbid_			TASKID
+			    ,case when (select hp1.main_id_ from jbpm4_hist_procinst hp1 where hp1.id_ = t.execution_)  is not null 
+                 then (select hp2.id_ from jbpm4_hist_procinst hp2 
+                       where hp2.dbid_ = (select max(hp.dbid_) from jbpm4_hist_procinst hp where hp.main_id_=(select hp1.main_id_ from jbpm4_hist_procinst hp1 where hp1.id_ = t.execution_)
+                                         )
+                       )
+                 else   t.EXECUTION_   
+                 end 	CUR_EXE_ID
+			    ,t.assignee_		CUR_OWNER
+			    ,date_format(t.create_ ,'%Y-%m-%d %H:%i:%s')			CREATE_TIME
+			    ,date_format(t.end_ ,'%Y-%m-%d %H:%i:%s')				END_TIME
+			    ,(select t2.activity_name_ from jbpm4_task t2 where t2.execution_id_=t.execution_)	CUR_ACT_NAME
+			    ,(select P1.main_id_ from jbpm4_hist_procinst p1 where p1.id_=t.execution_)			MAIN_ID
+			    ,(select a.activity_name_  from jbpm4_hist_actinst a   where a.htask_=t.dbid_)		HIS_ACT_NAME
+			from jbpm4_hist_task t
+			where t.end_ is not null
+			/*过滤主动收回任务*/
+			and (instr(t.OUTCOME_, 'regect') = 0 or t.OUTCOME_ is null)
+			<if test="dto.paramUserId != null and dto.paramUserId != '' " >
+			and t.assignee_='${dto.paramUserId}'
+			</if>
+		 	<if test="dto.processParticipationName != null and dto.processParticipationName != ''" >    
+	            and t.assignee_  in (${dto.processParticipationName})
+	        </if>
+           	 /*其流程实例  是活动的*/			
+			and  exists ( select p.id_ from jbpm4_hist_procinst p  where p.end_ is null  and p.id_ = t.execution_ ) 
+			<if test="dto.processInsId!=null and dto.processInsId!=''">
+				and t.execution_=#{dto.processInsId}
+			</if>
+			<if test="dto.startTime != null and dto.startTime != ''" >    
+		        and  <![CDATA[  t.end_ >= #{dto.startTime} ]]>
+	        </if>
+	        <if test="dto.endTime != null and dto.endTime != ''" >    
+	            and  <![CDATA[  t.end_ <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+	        </if>
+			<if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.id_=t.execution_
+						)
+		            )
+	        </if>
+	        <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+	            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_
+					)
+	            )
+	        </if>
+	        <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+	            and exists (select * from jbpm4_biz_tab bt where bt.biz_task_type =#{dto.bizTaskType}
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_
+					)
+	            )
+	        </if>
+	        <if test="dto.remark != null and dto.remark != '' " >    
+	            and exists (select * from jbpm4_biz_tab bt where bt.remark like concat('%',#{dto.remark},'%')
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_
+					)
+	            )
+	        </if>
+	        <!-- 2014-11-8 13:56:31 chj add 查询 任务类型  -->
+	        <if test="dto.bizType != null and dto.bizType != ''">
+	        	and exists (select * from jbpm4_biz_tab bt where bt.biz_type =#{dto.bizType}
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_)
+				)
+	        </if>
+	        <if test="dto.proStartTime != null and dto.proStartTime != ''">
+		        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+		        				where hp.id_ = t.execution_
+								and hp.start_  >= #{dto.proStartTime}
+					)
+	        </if>
+	        <if test="dto.proEndTime != null and dto.proEndTime != ''">
+	        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+	        				 where hp.id_ = t.execution_
+							 and hp.start_  <![CDATA[ <= ]]> date_add(#{dto.proEndTime}, INTERVAL 1 day)
+				)
+	        </if>
+	        <if test="dto.acitityName != null and dto.acitityName != '' and (eqActName == null or eqActName !=1) " >    
+		           and exists (select 1
+					          from jbpm4_task t2
+						      where t2.execution_id_ = t.execution_
+						           and t2.activity_name_ like concat('%',#{dto.acitityName},'%')
+					           )
+	        </if>
+	        <if test="dto.acitityName != null and dto.acitityName != '' and eqActName == 1 " >    
+	            and exists (select 1
+					          from jbpm4_task t2
+						      where t2.execution_id_ = t.execution_
+						           and t2.activity_name_ =#{dto.acitityName}
+					           )
+	        </if>
+	        /*自定义工作流 数据权限控制*/
+	        <if test="dataCSQL != null and dataCSQL != ''">
+	        	${dataCSQL}
+	        </if>
+	        /*角色映射权限控制*/
+	        <if test="dto.roleMappingSql != null and dto.roleMappingSql != ''">
+	        	${dto.roleMappingSql}
+	        </if>
+			order by t.end_ desc
+		) T
+		) TEMP
+		
+		<if test="page != null" >    
+            <![CDATA[
+            WHERE TEMP.NUM >  #{page.startIndex} AND TEMP.NUM <= #{page.startIndex} + #{page.pageSize}
+            ]]>
+        </if>
+</select>
+<!-- 通过平台公共分页 查询个人已办任务信息 不支持 主子流程 会签流程 -->
+<select id="queryCompletedTasksByMySqlByPaging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+			select 
+			     t.dbid_			TASKID
+			    ,case when (select hp1.main_id_ from jbpm4_hist_procinst hp1 where hp1.id_ = t.execution_)  is not null 
+                 then (select hp2.id_ from jbpm4_hist_procinst hp2 
+                       where hp2.dbid_ = (select max(hp.dbid_) from jbpm4_hist_procinst hp where hp.main_id_=(select hp1.main_id_ from jbpm4_hist_procinst hp1 where hp1.id_ = t.execution_)
+                                         )
+                       )
+                 else   t.EXECUTION_   
+                 end 	CUR_EXE_ID
+			    ,t.assignee_		CUR_OWNER
+			    ,date_format(t.create_ ,'%Y-%m-%d %H:%i:%s')			CREATE_TIME
+			    ,date_format(t.end_ ,'%Y-%m-%d %H:%i:%s')				END_TIME
+			    ,(select t2.activity_name_ from jbpm4_task t2 where t2.execution_id_=t.execution_)	CUR_ACT_NAME
+			    ,(select P1.main_id_ from jbpm4_hist_procinst p1 where p1.id_=t.execution_)			MAIN_ID
+			    ,(select a.activity_name_  from jbpm4_hist_actinst a   where a.htask_=t.dbid_)		HIS_ACT_NAME
+			from jbpm4_hist_task t
+			where t.end_ is not null
+			/*过滤主动收回任务*/
+			and (instr(t.OUTCOME_, 'regect') = 0 or t.OUTCOME_ is null)
+			<if test="dto.paramUserId != null and dto.paramUserId != '' " >
+			and t.assignee_='${dto.paramUserId}'
+			</if>
+		 	<if test="dto.processParticipationName != null and dto.processParticipationName != ''" >    
+	            and t.assignee_  in (${dto.processParticipationName})
+	        </if>
+           	 /*其流程实例  是活动的*/			
+			and  exists ( select p.id_ from jbpm4_hist_procinst p  where p.end_ is null  and p.id_ = t.execution_ ) 
+			<if test="dto.processInsId!=null and dto.processInsId!=''">
+				and t.execution_=#{dto.processInsId}
+			</if>
+			<if test="dto.startTime != null and dto.startTime != ''" >    
+		        and  <![CDATA[  t.end_ >= #{dto.startTime} ]]>
+	        </if>
+	        <if test="dto.endTime != null and dto.endTime != ''" >    
+	            and  <![CDATA[  t.end_ <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+	        </if>
+			<if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+		            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+		            	and bt.validate_state='1' 
+		            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+						from jbpm4_hist_procinst hp where hp.id_=t.execution_
+						)
+		            )
+	        </if>
+	        <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+	            and exists (select * from jbpm4_biz_tab bt where bt.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_
+					)
+	            )
+	        </if>
+	        <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+	            and exists (select * from jbpm4_biz_tab bt where bt.biz_task_type =#{dto.bizTaskType}
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_
+					)
+	            )
+	        </if>
+	        <if test="dto.remark != null and dto.remark != '' " >    
+	            and exists (select * from jbpm4_biz_tab bt where bt.remark like concat('%',#{dto.remark},'%')
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_
+					)
+	            )
+	        </if>
+	        <!-- 2014-11-8 13:56:31 chj add 查询 任务类型  -->
+	        <if test="dto.bizType != null and dto.bizType != ''">
+	        	and exists (select * from jbpm4_biz_tab bt where bt.biz_type =#{dto.bizType}
+	            	and bt.validate_state='1' 
+	            	and bt.pro_instance_id in(
+					select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					from jbpm4_hist_procinst hp where hp.id_=t.execution_)
+				)
+	        </if>
+	        <if test="dto.proStartTime != null and dto.proStartTime != ''">
+		        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+		        				where hp.id_ = t.execution_
+								and hp.start_  >= #{dto.proStartTime}
+					)
+	        </if>
+	        <if test="dto.proEndTime != null and dto.proEndTime != ''">
+	        	and exists ( select hp.id_ from jbpm4_hist_procinst hp 
+	        				 where hp.id_ = t.execution_
+							 and hp.start_  <![CDATA[ <= ]]> date_add(#{dto.proEndTime}, INTERVAL 1 day)
+				)
+	        </if>
+	        <if test="dto.acitityName != null and dto.acitityName != '' and (eqActName == null or eqActName !=1) " >    
+		           and exists (select 1
+					          from jbpm4_task t2
+						      where t2.execution_id_ = t.execution_
+						           and t2.activity_name_ like concat('%',#{dto.acitityName},'%')
+					           )
+	        </if>
+	        <if test="dto.acitityName != null and dto.acitityName != '' and eqActName == 1 " >    
+	            and exists (select 1
+					          from jbpm4_task t2
+						      where t2.execution_id_ = t.execution_
+						           and t2.activity_name_ =#{dto.acitityName}
+					           )
+	        </if>
+	        /*自定义工作流 数据权限控制*/
+	        <if test="dataCSQL != null and dataCSQL != ''">
+	        	${dataCSQL}
+	        </if>
+	        /*角色映射权限控制*/
+	        <if test="dto.roleMappingSql != null and dto.roleMappingSql != ''">
+	        	${dto.roleMappingSql}
+	        </if>
+			order by t.end_ desc
+</select>
+
+<!-- 查询 个人的已经办结的任务 历史信息-->
+<select id="queryPersonalEndTaskInfo_1" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	SELECT TEMP.* FROM (
+    select  ROWNUM NUM,
+    T.*,
+    count(1) over() TOTALRECORDNUM
+    	from(
+	        select 
+				 T1.ID
+				,T1.ID				BIZ_TAB_ID
+				,T1.BIZ_TAB_NAME
+				,T1.BIZ_TYPE
+				,T1.BIZ_INF_ID
+				,T1.BIZ_INF_NAME
+				,T1.BIZ_TASK_TYPE
+				,T1.PRO_INSTANCE_ID
+				,T1.PRO_INSTANCE_ID CUR_EXE_ID
+				,T1.START_PRO_USERID
+				,T1.PRO_INSTANCE_STATE
+				,T1.TASK_STATE
+				,T1.OWNER_ID
+				,T1.ORG_ID
+				,date_format(t1.CREATE_TIME ,'%Y-%m-%d %H:%i:%s') CREATE_TIME
+				,(select date_format(h1.end_ ,'%Y-%m-%d %H:%i:%s') from jbpm4_hist_procinst h1 where h1.id_=t1.pro_instance_id ) PRO_END_TIME
+				,t1.REMARK
+				,t1.IS_HIDDEN
+				
+				from jbpm4_biz_tab t1
+				where t1.validate_state='1'
+				/*考虑一条业务数据多次审核*/
+				and t1.id in (select max(t2.id) from jbpm4_biz_tab t2 where t2.validate_state='1' group by t2.biz_tab_name,t2.biz_inf_id,t2.biz_type)
+				
+				/*判断流程是否 已经办结*/
+				and exists (select hp.* from jbpm4_hist_procinst hp where hp.end_ is not null and instr(hp.state_,'active')=0 and hp.id_=t1.pro_instance_id )
+               <if test="dto.paramUserId != null" > 
+					and (exists (select ht.* from jbpm4_hist_task ht where ht.assignee_ ='${dto.paramUserId}'  and instr(ht.execution_,t1.pro_instance_id) >0)
+					    or exists (
+					    select ht.* from jbpm4_hist_task ht where ht.assignee_ ='${dto.paramUserId}'  
+					           and exists(select hp.id_ from jbpm4_hist_procinst hp where hp.id_ = ht.execution_ and instr(hp.main_id_ ,t1.pro_instance_id) >0) 
+					    )
+					)
+			    </if>
+			    <if test="dto.processInsId !=null and dto.processInsId!=''">
+			    	and t1.pro_instance_id=#{dto.processInsId}
+			    </if>
+			    <if test="dto.startTime != null and dto.startTime != ''" >    
+		            and  <![CDATA[  t1.create_time >= #{dto.startTime} ]]>
+		        </if>
+		        <if test="dto.endTime != null and dto.endTime != ''" >    
+		            and  <![CDATA[  t1.create_time <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+		        </if>
+				<if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+		            and t1.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+		        </if>
+		        <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+		            and t1.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+		        </if>
+		        <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+		            and t1.biz_task_type =#{dto.bizTaskType}
+		        </if>
+		        <if test="dto.remark != null and dto.remark != '' " >    
+		            and t1.remark like concat('%',#{dto.remark},'%')
+		        </if>
+		        <!-- 2014-11-8 14:19:15 chj 新增 任务类型 -->
+		        <if test="dto.bizType != null and dto.bizType != ''">
+		        	and t1.biz_type = #{dto.bizType}
+		        </if>
+			     /*自定义工作流 数据权限控制*/
+		        <if test="dataCSQL != null and dataCSQL != ''">
+		        	${dataCSQL}
+		        </if>
+		        
+			order by t1.id desc 
+		) T 
+		) TEMP
+		
+			<if test="page != null" >    
+	            <![CDATA[
+	            WHERE TEMP.NUM >  #{page.startIndex} AND TEMP.NUM <= #{page.startIndex} + #{page.pageSize}
+	            ]]>
+	        </if>
+</select>
+
+<!-- 查询 个人的已结的任务 流程实例是结束的 不支持 主子流程 会签流程-->
+<select id="queryPersonalEndTaskInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	SELECT TEMP.* FROM (
+    select  ROWNUM NUM,
+    T.*,
+    count(1) over() TOTALRECORDNUM
+    	from(
+	        select 
+				 t1.ID
+				,t1.ID				BIZ_TAB_ID
+				,t1.BIZ_TAB_NAME
+				,t1.BIZ_TYPE
+				,t1.BIZ_INF_ID
+				,t1.BIZ_INF_NAME
+				,t1.BIZ_TASK_TYPE
+				,t1.PRO_INSTANCE_ID
+				,t1.PRO_INSTANCE_ID CUR_EXE_ID
+				,t1.START_PRO_USERID
+				,t1.PRO_INSTANCE_STATE
+				,t1.TASK_STATE
+				,t1.OWNER_ID
+				,t1.ORG_ID
+				,date_format(t1.CREATE_TIME ,'%Y-%m-%d %H:%i:%s') CREATE_TIME
+				,(select date_format(h1.end_ ,'%Y-%m-%d %H:%i:%s') from jbpm4_hist_procinst h1 where h1.id_=t1.pro_instance_id ) PRO_END_TIME
+				,t1.REMARK
+				,t1.IS_HIDDEN
+				
+				from jbpm4_biz_tab t1
+				where t1.validate_state='1'
+				/*考虑一条业务数据多次审核*/
+				and t1.id in (select max(t2.id) from jbpm4_biz_tab t2 where t2.validate_state='1' group by t2.biz_tab_name,t2.biz_inf_id,t2.biz_type)
+				
+				/*判断流程是否 已经办结*/
+				and exists (select hp.* from jbpm4_hist_procinst hp where hp.end_ is not null  and hp.id_=t1.pro_instance_id )
+               <if test="dto.paramUserId != null" > 
+				and exists (select ht.execution_ from jbpm4_hist_task ht where ht.assignee_ ='${dto.paramUserId}'  and  ht.execution_  = t1.pro_instance_id )
+			    </if>
+			    <if test="dto.processParticipationName != null and dto.processParticipationName != ''" >    
+	            and exists (select ht.execution_ from jbpm4_hist_task ht where ht.assignee_ in (${dto.processParticipationName})  and  ht.execution_  = t1.pro_instance_id )
+	        	</if>
+			    <if test="dto.processInsId !=null and dto.processInsId!=''">
+			    	and t1.pro_instance_id=#{dto.processInsId}
+			    </if>
+			    <if test="dto.startTime != null and dto.startTime != ''" >    
+		            and  <![CDATA[  t1.create_time >= #{dto.startTime} ]]>
+		        </if>
+		        <if test="dto.endTime != null and dto.endTime != ''" >    
+		            and  <![CDATA[  t1.create_time <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+		        </if>
+				<if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+		            and t1.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+		        </if>
+		        <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+		            and t1.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+		        </if>
+		        <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+		            and t1.biz_task_type =#{dto.bizTaskType}
+		        </if>
+		        <if test="dto.remark != null and dto.remark != '' " >    
+		            and t1.remark like concat('%',#{dto.remark},'%')
+		        </if>
+		        <!-- 2014-11-8 14:19:15 chj 新增 任务类型 -->
+		        <if test="dto.bizType != null and dto.bizType != ''">
+		        	and t1.biz_type = #{dto.bizType}
+		        </if>
+		        /*自定义业务表与工作流表关联的sql条件控制*/
+		        <if test="myExtSQL != null and myExtSQL != ''">
+		        	${myExtSQL}
+		        </if>
+			     /*自定义工作流 数据权限控制*/
+		        <if test="dataCSQL != null and dataCSQL != ''">
+		        	${dataCSQL}
+		        </if>
+		        /*角色映射权限控制*/
+		        <if test="dto.roleMappingSql != null and dto.roleMappingSql != ''">
+		        	${dto.roleMappingSql}
+		        </if>
+		        
+			order by t1.id desc 
+		) T 
+		) TEMP
+		
+			<if test="page != null" >    
+	            <![CDATA[
+	            WHERE TEMP.NUM >  #{page.startIndex} AND TEMP.NUM <= #{page.startIndex} + #{page.pageSize}
+	            ]]>
+	        </if>
+</select>
+<!-- 通过平台公共分页查询 个人的已结的任务 流程实例是结束的 不支持 主子流程 会签流程-->
+<select id="queryPersonalEndTaskInfoByPaging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	        select 
+				 t1.ID
+				,t1.ID				BIZ_TAB_ID
+				,t1.BIZ_TAB_NAME
+				,t1.BIZ_TYPE
+				,t1.BIZ_INF_ID
+				,t1.BIZ_INF_NAME
+				,t1.BIZ_TASK_TYPE
+				,t1.PRO_INSTANCE_ID
+				,t1.PRO_INSTANCE_ID CUR_EXE_ID
+				,t1.START_PRO_USERID
+				,t1.PRO_INSTANCE_STATE
+				,t1.TASK_STATE
+				,t1.OWNER_ID
+				,t1.ORG_ID
+				,date_format(t1.CREATE_TIME ,'%Y-%m-%d %H:%i:%s') CREATE_TIME
+				,(select date_format(h1.end_ ,'%Y-%m-%d %H:%i:%s') from jbpm4_hist_procinst h1 where h1.id_=t1.pro_instance_id ) PRO_END_TIME
+				,t1.REMARK
+				,t1.IS_HIDDEN
+				
+				from jbpm4_biz_tab t1
+				where t1.validate_state='1'
+				/*考虑一条业务数据多次审核*/
+				and t1.id in (select max(t2.id) from jbpm4_biz_tab t2 where t2.validate_state='1'
+				/*判断流程是否 已经办结*/
+				and exists (select hp.* from jbpm4_hist_procinst hp where hp.end_ is not null  and hp.id_=t2.pro_instance_id )
+               <if test="dto.paramUserId != null" > 
+				and exists (select ht.execution_ from jbpm4_hist_task ht where ht.assignee_ ='${dto.paramUserId}'  and  ht.execution_  = t2.pro_instance_id )
+			    </if>
+			    <if test="dto.processParticipationName != null and dto.processParticipationName != ''" >    
+	            and exists (select ht.execution_ from jbpm4_hist_task ht where ht.assignee_ in (${dto.processParticipationName})  and  ht.execution_  = t2.pro_instance_id )
+	        	</if>
+			    <if test="dto.processInsId !=null and dto.processInsId!=''">
+			    	and t2.pro_instance_id=#{dto.processInsId}
+			    </if>
+			    <if test="dto.startTime != null and dto.startTime != ''" >    
+		            and  <![CDATA[  t2.create_time >= #{dto.startTime} ]]>
+		        </if>
+		        <if test="dto.endTime != null and dto.endTime != ''" >    
+		            and  <![CDATA[  t2.create_time <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+		        </if>
+				<if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+		            and t2.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+		        </if>
+		        <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+		            and t2.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+		        </if>
+		        <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+		            and t2.biz_task_type =#{dto.bizTaskType}
+		        </if>
+		        <if test="dto.remark != null and dto.remark != '' " >    
+		            and t2.remark like concat('%',#{dto.remark},'%')
+		        </if>
+		        <!-- 2014-11-8 14:19:15 chj 新增 任务类型 -->
+		        <if test="dto.bizType != null and dto.bizType != ''">
+		        	and t2.biz_type = #{dto.bizType}
+		        </if>
+		        
+				group by t2.biz_tab_name,t2.biz_inf_id,t2.biz_type)
+				
+		        /*自定义业务表与工作流表关联的sql条件控制*/
+		        <if test="myExtSQL != null and myExtSQL != ''">
+		        	${myExtSQL}
+		        </if>
+			     /*自定义工作流 数据权限控制*/
+		        <if test="dataCSQL != null and dataCSQL != ''">
+		        	${dataCSQL}
+		        </if>
+		        /*角色映射权限控制*/
+		        <if test="dto.roleMappingSql != null and dto.roleMappingSql != ''">
+		        	${dto.roleMappingSql}
+		        </if>
+		        
+			order by t1.id desc 
+</select>	
+<!-- 查询 结束的流程实例信息 QUERY_END_PRO_INFO_BY_MY_SQL-->
+<select id="queryEndProInfoByMySql" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	SELECT TEMP.* FROM (
+    select  ROWNUM NUM,
+    T.*,
+    count(1) over() TOTALRECORDNUM
+    	from(
+    	
+      select
+      	   T1.DBID_					, 
+     	   T1.PROCDEFID_			,
+	       T1.ID_					,
+	       T1.STATE_				,
+	       T1.DBVERSION_			,
+	       date_format(t1.start_,'%Y-%m-%d %H:%i:%s')    START_,
+	       date_format(t1.end_,'%Y-%m-%d %H:%i:%s')      END_,
+	       t1.ENDACTIVITY_
+	       
+       	from jbpm4_hist_procinst t1
+<![CDATA[where t1.end_ is not null ]]>
+		<if test="dto.processInsId != null" >  
+		        	and t1.id_ like concat('%',#{dto.processInsId},'%')
+		</if>
+		
+		<if test="dto.acitityName != null" >  
+		        	and t1.endactivity_=#{dto.acitityName#
+		</if>
+       
+		order by t1.end_ desc
+		) T
+		) TEMP
+		<if test="page != null" >    
+            <![CDATA[
+            WHERE TEMP.NUM >  #{page.startIndex} AND TEMP.NUM <= #{page.startIndex} + #{page.pageSize}
+            ]]>
+        </if>
+	</select>
+	<!-- 查询参与者的相关信息 -->
+  <select id="queryCurrentPlayer" parameterType="java.util.HashMap" resultType="java.lang.String">
+  		 select j.assignee_ from jbpm4_task j where j.execution_id_ = #{mainId} 
+  		 and j.activity_name_ = #{name}
+  </select>
+	
+	
+	<!-- 查询会签子流归属的主流程实例id -->
+  <select id="queryMainProInsIdByHuiQainSubPro" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select e1.id_            PRO_INS_ID 
+     
+     from jbpm4_execution e1 where 1 = 1  
+     and ( exists    (
+ 
+      select e.parent_ 
+
+      from jbpm4_execution e 
+      where 1 =1 
+      and e1.dbid_ = e.parent_ 
+
+      and exists (select d.main_id_ from jbpm4_hist_procinst d where d.id_=#{proInsId} and d.main_id_  = e.id_ )
+
+      )
+      or exists (select d.main_id_ from jbpm4_hist_procinst d
+                 	where d.id_ = #{proInsId}
+                    and d.main_id_ = e1.id_)  
+      )
+		 
+	</select>
+	
+	
+	<!-- 通过主流程实例id查询出该主流程实例名下 最新的待办任务信息 -->
+	<select id="queryLastTaskInfoByMainProInsId" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select cast(t.dbid_ as char)					DBID,
+		       cast(t.execution_id_ as char)			EXECUTION_ID,
+		       cast(t.assignee_ as char)				ASSIGNEE
+		 
+		 	from jbpm4_task t where 1 =1 
+		
+		and exists (select p.id_ from jbpm4_hist_procinst p 
+		where p.end_ is null  
+		and p.state_='active' 
+		and ( p.main_id_=#{mainProInsId# or p.id_=#{mainProInsId})
+		and p.id_ = t.execution_id_ 
+		)
+		order by t.create_ desc 
+		 
+	</select>
+	
+	<select id="queryJbpm4LobInfoByProkey" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT CAST(T1.DBID_ AS CHAR)           DBID, 
+		       CAST(T1.NAME_ AS CHAR)  			NAME, 
+		       CAST(T1.DEPLOYMENT_ AS CHAR)      DEPLOYMENT
+
+	  		from jbpm4_lob t1
+	
+			where 1=1  
+			and t1.deployment_ = (select max(d.deployment_) from jbpm4_deployprop d where d.stringval_=#{proKey})
+		 
+	</select>
+	
+	<!-- 查询该流程的在部署时的 流程定义id -->
+  <select id="queryMaxDeploymnetId" parameterType="java.util.HashMap" resultType="java.lang.String" >
+    	 select max(d.deployment_) deploymentId from jbpm4_deployprop d 
+    	 
+    	 where d.objname_ = #{processName} 
+    	 and d.longval_=#{proVersion}
+				
+  </select>
+  
+  <!-- 更新流程定义信息 -->
+<update id="updateJbpm4Lob" parameterType="com.fintech.platform.jbpm4.dto.JbpmBlobDTO">
+		update jbpm4_lob l set l.blob_value_=#{contents} 
+		
+		where l.deployment_=#{id}
+</update>
+
+	
+	<insert id="addJbpm4FormInfo" parameterType="java.util.HashMap">
+	<selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE" >
+				<!-- select seq_jbpm4_form_info.nextval from dual -->
+				select auto_increment as id from information_schema.tables where  table_name='jbpm4_form_info'
+	</selectKey>
+		<![CDATA[
+		insert into jbpm4_form_info
+		(   		
+				id                             ,
+				pro_def_key                    ,
+				pro_activity_name              ,
+				pro_activity_form              ,
+				participator_type              ,
+				PART_TYPE                    ,
+				other_params                   ,
+				rule_info                      ,
+				create_time                    ,
+				remark                         ,
+				ext1                           ,
+				ext2                           ,
+				ext3                           ,
+				validate_state                 ,
+				pro_level                      
+		)
+		values(#{id}
+					,#{dto.proDefKey,jdbcType=VARCHAR}
+					,#{dto.proActivityName,jdbcType=VARCHAR}
+					,#{dto.proActivityForm,jdbcType=VARCHAR}
+					,#{dto.participatorType,jdbcType=VARCHAR}
+					,#{dto.partType,jdbcType=VARCHAR}
+					,#{dto.otherParams,jdbcType=VARCHAR}
+					,#{dto.ruleInfo,jdbcType=VARCHAR}
+					,now()
+					,#{dto.remark,jdbcType=VARCHAR}
+					,#{dto.ext1,jdbcType=VARCHAR}
+					,#{dto.ext2,jdbcType=VARCHAR}
+					,#{dto.ext3,jdbcType=VARCHAR}
+					,'1'
+					,#{dto.proLevel,jdbcType=VARCHAR}
+		)
+		]]>
+	</insert>
+	
+	
+	  <update id="deleteJbpm4FormInfo" parameterType="java.util.HashMap">
+    <![CDATA[  
+       update jbpm4_form_info t1
+       set 
+       t1.validate_state='0'
+       where t1.id in ($ids$)
+    ]]>
+  </update>
+  
+  <select id="queryListOfJbpm4FormInfoPage" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+   SELECT TEMP.* FROM (
+         select  ROWNUM NUM,
+                 T.*,
+                 count(1) over() TOTALRECORDNUM
+    	 from(
+    	 		select 
+						T1.ID                             ,
+						T1.PRO_DEF_KEY                    ,
+						T1.PRO_ACTIVITY_NAME              ,
+						T1.PRO_ACTIVITY_FORM              ,
+						T1.PARTICIPATOR_TYPE              ,
+						T1.PART_TYPE                    ,
+						T1.OTHER_PARAMS                   ,
+						T1.RULE_INFO                      ,
+						T1.CREATE_TIME                    ,
+						T1.REMARK                         ,
+						T1.EXT1                           ,
+						T1.EXT2                           ,
+						T1.EXT3                           ,
+						T1.VALIDATE_STATE                 ,
+						T1.PRO_LEVEL                      
+					
+				from jbpm4_form_info 		t1
+				where t1.validate_state='1'
+					
+					<if test="dto.id != null" >
+					  <![CDATA[and t1.ID =#{dto.id}]]>
+					</if>
+					
+					<if test="dto.proDefKey != null" >
+					 <![CDATA[and t1.PRO_DEF_KEY =#{dto.proDefKey}]]>
+					</if>
+					
+					<if test="dto.proActivityName != null" >
+					 <![CDATA[and t1.PRO_ACTIVITY_NAME =#{dto.proActivityName}]]>
+					</if>
+					<if test="dto.proActivityForm != null" >
+						  <![CDATA[and t1.PRO_ACTIVITY_FORM =#{dto.proActivityForm}]]>
+					</if>
+					
+					<if test="dto.participatorType != null" >
+					<![CDATA[and t1.PARTICIPATOR_TYPE =#{dto.participatorType}]]>
+					</if>
+					
+					<if test="dto.partType != null" >
+					<![CDATA[and t1.PART_TYPE =#{dto.partType}]]>
+					</if>
+					
+					<if test="dto.otherParams != null" >
+						  <![CDATA[and t1.OTHER_PARAMS =#{dto.otherParams}]]>
+					</if>
+					<if test="dto.ruleInfo != null" >
+						  <![CDATA[and t1.RULE_INFO =#{dto.ruleInfo}]]>
+					</if>
+					
+					<if test="dto.createTime != null" >
+						  <![CDATA[and t1.CREATE_TIME =#{dto.createTime}]]>
+					</if>
+					
+					<if test="dto.remark != null" >
+						  <![CDATA[and t1.REMARK =#{dto.remark}]]>
+					</if>
+					<if test="dto.ext1 != null" >
+						  <![CDATA[and t1.EXT1 =#{dto.ext1}]]>
+					</if>
+					<if test="dto.ext2 != null" >
+						  <![CDATA[and t1.EXT2 =#{dto.ext2}]]>
+					</if>
+					<if test="dto.ext3 != null" >
+						  <![CDATA[and t1.EXT3 =#{dto.ext3}]]>
+					</if>
+					<if test="dto.validateState != null" >
+						  <![CDATA[and t1.VALIDATE_STATE =#{dto.validateState}]]>
+					</if>
+					<if test="dto.proLevel != null" >
+						  <![CDATA[and t1.PRO_LEVEL =#{dto.proLevel}]]>
+					</if>
+				
+				order by t1.id desc
+		     ) T
+		) TEMP
+		
+		<if test="pager != null" >    
+	            <![CDATA[WHERE TEMP.NUM > #{pager.offset} and TEMP.NUM <= (#{pager.pageSize}+#{pager.offset})]]>
+	    </if>
+  </select>
+  
+  
+  <select id="queryOneJbpm4FormInfo" parameterType="java.util.HashMap" resultMap="Jbpm4FormInfoDTO" >
+    	 		select 
+						T1.ID                             ,
+						T1.PRO_DEF_KEY                    ,
+						T1.PRO_ACTIVITY_NAME              ,
+						T1.PRO_ACTIVITY_FORM              ,
+						T1.PARTICIPATOR_TYPE              ,
+						T1.PART_TYPE                    ,
+						T1.OTHER_PARAMS                   ,
+						T1.RULE_INFO                      ,
+						T1.CREATE_TIME                    ,
+						T1.REMARK                         ,
+						T1.EXT1                           ,
+						T1.EXT2                           ,
+						T1.EXT3                           ,
+						T1.VALIDATE_STATE                 ,
+						T1.PRO_LEVEL                      
+				from jbpm4_form_info 		t1
+				where t1.validate_state='1'
+				<if test="dto.id != null" >  
+						  <![CDATA[and t1.id =#{dto.id}]]>
+				</if>
+  </select>
+  
+  <update id="updateJbpm4FormInfo" parameterType="java.util.HashMap">
+    <![CDATA[  
+       update jbpm4_form_info t1
+       set 
+		t1.PRO_DEF_KEY=#{dto.proDefKey,jdbcType=VARCHAR}, 
+		t1.PRO_ACTIVITY_NAME=#{dto.proActivityName,jdbcType=VARCHAR}, 
+		t1.PRO_ACTIVITY_FORM=#{dto.proActivityForm,jdbcType=VARCHAR}, 
+		t1.PARTICIPATOR_TYPE=#{dto.participatorType,jdbcType=VARCHAR}, 
+		t1.PART_TYPE=#{dto.partType,jdbcType=VARCHAR}, 
+		t1.OTHER_PARAMS=#{dto.otherParams,jdbcType=VARCHAR}, 
+		t1.RULE_INFO=#{dto.ruleInfo,jdbcType=VARCHAR}, 
+		t1.CREATE_TIME=now(), 
+		t1.REMARK=#{dto.remark,jdbcType=VARCHAR}, 
+		t1.EXT1=#{dto.ext1,jdbcType=VARCHAR}, 
+		t1.EXT2=#{dto.ext2,jdbcType=VARCHAR}, 
+		t1.EXT3=#{dto.ext3,jdbcType=VARCHAR}, 
+		t1.PRO_LEVEL=#{dto.proLevel,jdbcType=VARCHAR}
+				
+       where t1.id=#{dto.id}
+    ]]>
+  </update>
+  
+  
+   <select id="queryFormInfoIdBySql" parameterType="java.util.HashMap" resultType="java.lang.String" >
+    	 		select 
+						cast(t1.id as char) 				id
+						                             
+						from jbpm4_form_info 		t1
+						where t1.validate_state='1'
+						
+						  <![CDATA[and t1.PRO_DEF_KEY =#{proDefKey}]]>
+						  <![CDATA[and t1.PRO_ACTIVITY_NAME =#{proActivityName}]]>
+						  <![CDATA[and t1.pro_level =#{proLevel}]]>
+				
+  </select>
+  
+  <update id="deleteOldProcessInfoBySql" parameterType="java.util.HashMap">
+       update temporary_jbpm4_info t1
+       set 
+		t1.VALIDATE_STATE='0'
+		,t1.LAST_UPD_BY=#{dto.lastUpdBy,jdbcType=VARCHAR}
+		,t1.LAST_UPD=now()
+				
+       where 1 =1 
+       <!-- -->
+       and t1.proc_name=#{dto.procName,jdbcType=VARCHAR} 
+       and t1.proc_code=#{dto.procCode,jdbcType=VARCHAR}
+       and t1.proc_version=#{dto.procVersion,jdbcType=VARCHAR}
+       and t1.validate_state='1'
+  </update>
+  
+  <insert id="addTemporaryJbpm4Info" parameterType="java.util.HashMap">
+	<selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE" >
+				SELECT AUTO_INCREMENT AS ID FROM INFORMATION_SCHEMA.TABLES WHERE  TABLE_NAME='TEMPORARY_JBPM4_INFO'
+	</selectKey>
+		<![CDATA[
+		insert into temporary_jbpm4_info
+		(   		
+				id                             ,
+				xml_content                    ,
+				validate_state                 ,
+				created_by                     ,
+				created                        ,
+				remark                         ,
+				ext1                           ,
+				proc_version				  ,
+				proc_code					  ,
+				proc_name					  ,
+				biz_file
+		)
+		values(#{id}
+					,#{dto.xmlContent}
+					,'1'
+					,#{dto.lastUpdBy,jdbcType=VARCHAR}
+					,now()
+					,#{dto.remark,jdbcType=VARCHAR}
+					,#{dto.ext1,jdbcType=VARCHAR}
+					,#{dto.procVersion,jdbcType=VARCHAR}
+					,#{dto.procCode,jdbcType=VARCHAR}
+					,#{dto.procName,jdbcType=VARCHAR}
+					,#{dto.bizFile,jdbcType=VARCHAR}
+		)
+		]]>
+	</insert>
+	
+	<update id="deleteTemporaryJbpm4Info" parameterType="java.util.HashMap">
+    <![CDATA[  
+       update temporary_jbpm4_info t1
+       set 
+       t1.validate_state='0'
+       where t1.id in (${ids})
+    ]]>
+  </update>
+<!-- 分页查询 流程设计临时表 列表信息 -->	
+	<select id="queryListOfTemporaryJbpm4InfoPage" parameterType="java.util.HashMap" resultMap="TemporaryJbpm4InfoDTO" >
+    	 		select 
+						t1.id                             ,
+						t1.xml_content                    ,
+						t1.validate_state                 ,
+						t1.last_upd_by                    ,
+						date_format(t1.last_upd,'%Y-%m-%d %H:%i:%s') last_upd,
+						t1.created_by                     ,
+						date_format(t1.created,'%Y-%m-%d %H:%i:%s')   created,
+						t1.remark                         ,
+						t1.ext1                           ,
+						t1.proc_version					  ,
+						t1.proc_code					  ,
+						t1.proc_name					  ,
+						t1.biz_file
+					
+				from temporary_jbpm4_info 		t1
+				where t1.validate_state='1'
+					<if test="dto.id != null and dto.id != '' " >   
+						  <![CDATA[and t1.ID =#{dto.id}]]>
+					</if>
+					<if test="dto.validateState != null and dto.validateState != '' " >   
+						  <![CDATA[and t1.VALIDATE_STATE =#{dto.validateState}]]>
+					</if>
+					<if test="dto.remark != null and dto.remark != '' " >
+						 <![CDATA[and t1.REMARK like concat('%',#{dto.remark},'%')]]>
+					</if>
+					<if test="dto.procVersion != null and dto.procVersion != '' " >
+						  <![CDATA[and t1.proc_version like concat('%',#{dto.procVersion},'%')]]>
+					</if>
+					<if test="dto.procCode != null and dto.procCode != '' " >
+						<![CDATA[and t1.proc_code like concat('%',#{dto.procCode},'%')]]>
+					</if>
+					<if test="dto.procName != null and dto.procName != '' " >
+						<![CDATA[and t1.proc_name like concat('%',#{dto.procName},'%')]]>
+					</if>
+					<if test="dto.bizFile != null and dto.bizFile != '' " >
+						<![CDATA[and t1.biz_file like concat('%',#{dto.bizFile},'%')]]>
+					</if>
+				order by t1.id desc
+		
+  </select>
+  
+   <!-- 查询个人创建的流程信息 -->
+  <select id="querySomeTemporaryJbpm4InfoBySql" parameterType="java.util.HashMap" resultMap="TemporaryJbpm4InfoDTO" >
+    	 		select 
+						t1.id                             ,
+						t1.xml_content                    ,
+						t1.validate_state                 ,
+						t1.last_upd_by                    ,
+						date_format(t1.last_upd,'%Y-%m-%d %H:%i:%s') last_upd,
+						t1.created_by                     ,
+						date_format(t1.created,'%Y-%m-%d %H:%i:%s')   created,
+						t1.remark                         ,
+						t1.ext1                           ,
+						t1.proc_version					  ,
+						t1.proc_code					  ,
+						t1.proc_name					  ,
+						t1.biz_file
+				from temporary_jbpm4_info 		t1
+				where t1.validate_state='1'
+				
+  </select>
+  
+  <select id="queryOneTemporaryJbpm4_info" parameterType="java.util.HashMap" resultMap="TemporaryJbpm4InfoDTO" >
+    	 		select 
+						 t1.id             
+						,t1.xml_content    
+						,t1.validate_state 
+						,t1.last_upd_by    
+						,date_format(t1.last_upd,'%Y-%m-%d %H:%i:%s') last_upd
+						,t1.created_by     
+						,date_format(t1.created,'%Y-%m-%d %H:%i:%s')   created 
+						,t1.remark         
+						,t1.ext1           
+						,t1.proc_version		
+						,t1.proc_code				
+						,t1.proc_name				
+						,t1.biz_file				
+						,'1'	num
+						,'1'	totalRecordNum
+				from temporary_jbpm4_info 		t1
+				where 1 = 1 
+				<if test="id != null" >    
+						  <![CDATA[and t1.id =#{id}]]>
+				</if>
+  </select>
+  
+  <update id="updateTemporaryJbpm4Info" parameterType="java.util.HashMap">
+    <![CDATA[  
+       update temporary_jbpm4_info t1
+       set 
+		t1.XML_CONTENT=#{dto.xmlContent}, 
+		t1.VALIDATE_STATE=#{dto.validateState}, 
+		t1.LAST_UPD_BY=#{dto.lastUpdBy}, 
+		t1.LAST_UPD=now(), 
+		t1.REMARK=#{dto.remark}, 
+		t1.EXT1=#{dto.ext1},
+		t1.proc_version=#{dto.procVersion},
+		t1.proc_code=#{dto.procCode},
+		t1.proc_name=#{dto.procName},
+		t1.biz_file=#{dto.bizFile}
+				
+       where t1.id=#{dto.id}
+    ]]>
+  </update>
+  
+    <select id="queryTempWorkflowIBySql" parameterType="java.util.HashMap" resultType="java.lang.String" >
+    	select max(t.id) 		id 
+    	from temporary_jbpm4_info t 
+    	where 1 =1 
+    	and t.proc_name =#{processName} 
+    	and t.proc_version =#{processVersion]
+  </select>
+  
+  <!-- 发布流程成功后更新流程图片 -->
+  <update id="updateProPngOfTempJbpm4Info1" parameterType="com.fintech.platform.jbpm4.dto.JbpmBlobDTO">
+	       update temporary_jbpm4_info t1
+	       set 
+	       t1.pro_png=''
+	       where 
+	       t1.proc_name= #{proName}
+	       and t1.proc_version=#{proVer}
+	       and t1.pro_png is not null 
+  </update>
+  
+   <update id="updateProPngOfTempJbpm4Info" parameterType="com.fintech.platform.jbpm4.dto.JbpmBlobDTO">
+   <!-- begin 
+       
+	       update temporary_jbpm4_info t1
+	       set 
+	       t1.pro_png=''
+	       where 
+	       t1.proc_name= ( select t2.proc_name from temporary_jbpm4_info t2 where t2.id=#{id})
+	       and t1.proc_version=( select t2.proc_version from temporary_jbpm4_info t2 where t2.id=#{id})
+	       and t1.pro_png is not null ;
+	       
+	       update temporary_jbpm4_info t1
+	       set 
+	       t1.pro_png=#{contents}
+	       where t1.id =#{id};
+       
+       end; -->
+	        <!-- update temporary_jbpm4_info t1
+	       set 
+	       t1.pro_png=#{contents}
+	       where t1.id =#{id} -->
+	       
+	       call updateProPng(#{id},#{contents})
+  </update>
+  
+  <!--设置blob字段的返回格式-->  
+<resultMap id="proPng" type="com.fintech.platform.jbpm4.dto.JbpmBlobDTO">
+		<result property="contents" column="PRO_PNG" jdbcType="BLOB" />
+</resultMap>
+  
+<select id="queryProPngByProNameAndVersion" parameterType="java.util.HashMap" resultMap="proPng" >
+  	 		select 
+				t1.pro_png
+		from temporary_jbpm4_info 		t1
+		where 1 =1 
+ 				
+ 		<if test="id != null and id != '' " >    
+				 and t1.id=#{id}
+		</if>
+		<if test="processName != null and processName != ''" >    
+				and t1.proc_name=#{processName}
+		</if>
+		<if test="processVersion != null and processVersion != ''" >    
+				and t1.proc_version=#{processVersion}
+		</if>
+		<if test="processInstantceId != null and processInstantceId != '' " >    
+				and t1.proc_name=(select d.objname_ from jbpm4_deployprop d where 
+ 										d.stringval_=(select p.procdefid_ from jbpm4_hist_procinst p where instr(#{processInstantceId},p.id_)>0 ))	
+			and t1.proc_version =
+			(select d1.longval_ from jbpm4_deployprop d1 where d1.key_='pdversion' 
+			and d1.objname_ = (select d.objname_ from jbpm4_deployprop d 
+										where d.stringval_=(select p.procdefid_ from jbpm4_hist_procinst p where instr(#{processInstantceId},p.id_)>0)
+							  )
+			)
+		</if>
+		<!-- 通过流程定义key 查找流程图 则取最新的流程图 -->
+		<if test="processDefKey != null and processDefKey != '' " >    
+				and t1.proc_name=( 
+ 										select tt.objname_ from (
+									select d.objname_ ,max(d.deployment_) max_deployment_id 
+										from jbpm4_deployprop d 
+										where d.stringval_=#{processDefKey} 
+										group by d.objname_ 
+									) tt
+ 										)	
+			and t1.proc_version =
+			(select d1.longval_ from jbpm4_deployprop d1 where d1.key_='pdversion' 
+			and d1.deployment_ = (select tt.max_deployment_id from (
+									select d.objname_ ,max(d.deployment_) max_deployment_id 
+										from jbpm4_deployprop d 
+										where d.stringval_=#{processDefKey} 
+										group by d.objname_ 
+									) tt
+							  )
+			)
+		</if>
+		
+		
+		and t1.pro_png is not null  order by t1.id desc limit 0,1
+</select>
+  <!-- 查询 活动着的流程实例信息 QUERY_ACTIVE_PRO_INFO_BY_MY_SQL-->
+	<select id="queryActiveProInfoByMySqlByPaging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+       select 
+       		t1.activityname_  			CUR_ACT_NAME
+	        ,t1.id_						CUR_EXE_ID
+	        ,t1.PROCDEFID_ 		
+	        ,(select t.assignee_ from jbpm4_task t where 
+	        t.execution_id_=(select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_)
+			)  									EXE_USER_ID		
+	        ,(select date_format(p.start_,'%Y-%m-%d %H:%i:%s')  from jbpm4_hist_procinst p where p.dbid_=t1.instance_)  	START_TIME
+	        ,(select b.biz_inf_name from jbpm4_biz_tab b where 
+	        b.pro_instance_id = (select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_)
+			) 							BIZ_INF_NAME
+        	,(select b.biz_type from jbpm4_biz_tab b where 
+        	b.pro_instance_id = (select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_)
+			) 								BIZ_TYPE
+        	,(select b.biz_inf_no from jbpm4_biz_tab b where 
+        	b.pro_instance_id = (select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_)
+			)							BIZ_INF_NO
+        	,(select b.id from jbpm4_biz_tab b where 
+        	b.pro_instance_id = (select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_)
+			)  									BIZ_TAB_ID
+        	,(select b.biz_tab_name from jbpm4_biz_tab b where 
+        	b.pro_instance_id = (select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_)
+			)  						BIZ_TAB_NAME
+       		,(select b.biz_inf_id from jbpm4_biz_tab b where 
+       		b.pro_instance_id = (select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_)
+			)  							BIZ_INF_ID
+        	,(select b.start_pro_userid from jbpm4_biz_tab b where 
+        	b.pro_instance_id = (select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_)
+			)  					START_PRO_USERID
+        	,(select b.pro_instance_state from jbpm4_biz_tab b where 
+	        b.pro_instance_id = (select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_)
+			) 							PRO_INSTANCE_STATE
+       		from  jbpm4_execution t1
+			where 1=1
+		<if test="dto.processInsId != null and dto.processInsId != ''" >    
+			and t1.id_ like concat('%',#{dto.processInsId},'%')
+		</if>
+		
+		<if test="dto.acitityName != null and dto.acitityName != ''" >    
+			and t1.ACTIVITYNAME_=#{dto.acitityName}
+		</if>
+		<if test="dto.startTime != null and dto.startTime != ''" >    
+		    and  exists ( select hp.id_ 
+				 from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_
+				 and hp.start_ >= #{dto.startTime}
+			)
+        </if>
+        <if test="dto.endTime != null and dto.endTime != ''" >    
+            and  exists ( select hp.id_ 
+				 from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_
+				 and hp.start_ <![CDATA[<=]]> date_add(#{dto.endTime}, INTERVAL 1 day) 
+			)
+        </if>
+        
+		<if test="dto.bizInfName != null and dto.bizInfName != ''">
+        	and exists (select b.biz_inf_name from jbpm4_biz_tab b 
+        		where  b.pro_instance_id =(select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					   from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_)
+				and b.biz_inf_name like concat('%',#{dto.bizInfName},'%')
+			)
+        </if>
+        <if test="dto.bizType != null and dto.bizType != ''">
+        	and exists (select * from jbpm4_biz_tab bt where bt.biz_type =#{dto.bizType}
+            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					   	from jbpm4_hist_procinst hp where hp.dbid_=t1.instance_
+				)
+			)
+        </if>
+			order by t1.id_ 	desc 
+	</select>
+	
+  <!-- 查询 结束的流程实例信息 QUERY_END_PRO_INFO_BY_MY_SQL-->
+	<select id="queryEndPrInfoByMySql" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	SELECT TEMP.* FROM (
+    select  ROWNUM NUM,
+    T.*,
+    count(1) over() TOTALRECORDNUM
+    	from(
+    	
+      select
+      	     T1.DBID_					 
+			,T1.PROCDEFID_			
+			,T1.ID_	CUR_EXE_ID				
+			,T1.STATE_				
+			,T1.DBVERSION_			
+			,DATE_FORMAT(t1.start_ ,'%Y-%m-%d %H:%i:%s')   START_TIME
+			,DATE_FORMAT(t1.end_,'%Y-%m-%d %H:%i:%s')     END_TIME
+			,t1.ENDACTIVITY_
+	        ,(select b.biz_inf_name from jbpm4_biz_tab b where 
+	        	b.pro_instance_id =(select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.id_=t1.id_)
+			 ) 		BIZ_INF_NAME
+	      	,(select b.biz_inf_no from jbpm4_biz_tab b where 
+	      		b.pro_instance_id = (select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.id_=t1.id_)
+			 )  	BIZ_INF_NO
+	      	,(select b.BIZ_TYPE from jbpm4_biz_tab b 
+	      		where  b.pro_instance_id = (select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+				from jbpm4_hist_procinst hp where hp.id_=t1.id_)
+			 )  	BIZ_TYPE
+	      	
+       	from jbpm4_hist_procinst t1
+		<![CDATA[where t1.state_ <> 'active']]>
+		<if test="dto.processInsId != null and dto.processInsId != '' " >
+			and t1.id_ like '%${dto.processInsId}%'
+		</if>
+		
+		<if test="dto.acitityName != null and dto.acitityName !='' " >
+			and t1.endactivity_=#{dto.acitityName}
+		</if>
+		<if test="dto.startTime != null and dto.startTime != ''" >    
+		            and  <![CDATA[  t1.end_ >= #{dto.startTime} ]]>
+        </if>
+         <if test="dto.endTime != null and dto.endTime != ''" >    
+            and  <![CDATA[  t1.end_ <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+        </if>
+		<if test="dto.bizInfName != null and dto.bizInfName != ''">
+        	and exists (select b.biz_inf_name from jbpm4_biz_tab b 
+        		where  b.pro_instance_id =(select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					   from jbpm4_hist_procinst hp where hp.id_=t1.id_)
+				and b.biz_inf_name like concat('%',#{dto.bizInfName},'%')
+			)
+        </if>
+        <if test="dto.bizType != null and dto.bizType != ''">
+        	and exists (select * from jbpm4_biz_tab bt where bt.biz_type =#{dto.bizType}
+            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					   	from jbpm4_hist_procinst hp where hp.id_=t1.id_
+				)
+			)
+        </if>
+        
+			order by t1.end_ desc
+		) T
+		) TEMP
+		
+		<if test="page != null" >    
+	            <![CDATA[WHERE TEMP.NUM > #{page.startIndex} and TEMP.NUM <= (#{page.startIndex} + #{page.pageSize})]]>
+        </if>
+	</select>
+	<!-- 通过平台公共分页查询 结束的流程实例信息 -->
+	<select id="queryEndPrInfoByMySqlByPaging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+      select
+      	     T1.DBID_					 
+			,T1.PROCDEFID_			
+			,T1.ID_	CUR_EXE_ID				
+			,T1.STATE_				
+			,T1.DBVERSION_			
+			,DATE_FORMAT(t1.start_,'%Y-%m-%d %H:%i:%s') START_TIME
+			,DATE_FORMAT(t1.end_,'%Y-%m-%d %H:%i:%s')  END_TIME
+			,t1.ENDACTIVITY_
+	      	
+       	from jbpm4_hist_procinst t1
+		<![CDATA[where t1.state_ <> 'active']]>
+		<if test="dto.processInsId != null and dto.processInsId != '' " >
+			and t1.id_ like '%${dto.processInsId}%'
+		</if>
+		
+		<if test="dto.acitityName != null and dto.acitityName !='' " >
+			and t1.endactivity_=#{dto.acitityName}
+		</if>
+		<if test="dto.startTime != null and dto.startTime != ''" >    
+		            and  <![CDATA[  t1.end_ >= #{dto.startTime} ]]>
+        </if>
+         <if test="dto.endTime != null and dto.endTime != ''" >    
+            and  <![CDATA[  t1.end_ <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+        </if>
+		<if test="dto.bizInfName != null and dto.bizInfName != ''">
+        	and exists (select b.biz_inf_name from jbpm4_biz_tab b 
+        		where  b.pro_instance_id =(select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					   from jbpm4_hist_procinst hp where hp.id_=t1.id_)
+				and b.biz_inf_name like concat('%',#{dto.bizInfName},'%')
+			)
+        </if>
+        <if test="dto.bizType != null and dto.bizType != ''">
+        	and exists (select * from jbpm4_biz_tab bt where bt.biz_type =#{dto.bizType}
+            	and bt.pro_instance_id in(
+						select case when hp.main_id_ is not null then hp.main_id_ else hp.id_ end pro_instance_id 
+					   	from jbpm4_hist_procinst hp where hp.id_=t1.id_
+				)
+			)
+        </if>
+			order by t1.end_ desc
+	</select>
+	<!-- 批量 转移 待办至 其他人员名下 -->
+	<update id="batchUpdateAssignee" parameterType="java.util.HashMap">
+        	insert into jbpm4_consigned_task(id,validate_state,created_by,created
+		        	,task_id
+	        		,task_type
+	        		,from_user_id
+	        		,to_user_id) 
+	        		values((select auto_increment as id from information_schema.tables where  table_name='jbpm4_consigned_task'),'1', #{operateId},now()
+	        		,#{taskId}
+	        		,''
+	        		,(select ht.assignee_ from jbpm4_hist_task ht where ht.dbid_ = #{taskId})
+	        		,#{toUserId}
+					)
+  </update>
+  <update id="updatejbpm4Task" parameterType="java.util.HashMap">
+				update jbpm4_task t 
+				set  t.assignee_ = #{toUserId}
+				where t.dbid_ =  #{taskId}
+  </update>
+  <update id="updatejbpm4HistTask" parameterType="java.util.HashMap">
+				update jbpm4_hist_task ht 
+				set  ht.assignee_ = #{toUserId}
+				where ht.dbid_ =  #{taskId}
+  </update>
+  
+<!-- 通过jbpm4_biz_tab id 查询 其对应流程实例的第一个待办任务信息 -->  
+<select id="getFirstTaskByBizTabId" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+	select 
+		  bt.PRO_INSTANCE_ID 
+	from jbpm4_biz_tab bt 
+	where bt.id='${bizTabId}'
+</select>  
+
+<!-- 更改  的字段的值 -->
+<update id="updateDataLockByPrimaryKey" parameterType="java.util.Map">
+		update jbpm4_task j 
+			set j.lock_state= #{state}
+		where j.dbid_ in (${ids})
+</update>
+<!-- 更新 流程监控  批量恢复、挂起的字段 -->
+<update id="batchUpdateStateByIds" parameterType="java.util.Map">
+	    update jbpm4_biz_tab j 
+		 	set j.pro_instance_state = #{state}
+  		where j.pro_instance_id in( ${ids})
+</update>
+<!-- 查看流程执行 轨迹信息 -->
+<select id="viewWorkflowHisLogByPaging" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+	select 
+			DATE_FORMAT(h.create_,'%Y-%m-%d %H:%i:%s') 	START_TIME
+	       ,DATE_FORMAT(h.end_,'%Y-%m-%d %H:%i:%s') 		END_TIME
+	       ,h.assignee_ 	EXE_USER_ID
+	       ,h.outcome_  	OUTCOME
+	       ,h.execution_    PRO_INS_ID
+	       ,(select a.activity_name_ from jbpm4_hist_actinst a where a.htask_ = h.dbid_) 	ACT_NAME
+	from jbpm4_hist_task h 
+	where 1 = 1
+	<if test="processInstantceId != null and processInstantceId != '' " >
+		and h.execution_ in	
+		(select hp.id_ from jbpm4_hist_procinst hp where hp.main_id_='${processInstantceId}' or hp.id_ ='${processInstantceId}' )
+	</if>
+	<if test="processInstantceId == null or processInstantceId == '' " >
+		and h.execution_ in	
+		(select hp.id_ from jbpm4_hist_procinst hp where 
+		hp.main_id_  in (select b.pro_instance_id from jbpm4_biz_tab  b  where  b.biz_tab_name='${bizTabName}' and b.biz_inf_id='${bizInfId}') 
+		or hp.id_  in (select b.pro_instance_id from jbpm4_biz_tab  b  where  b.biz_tab_name='${bizTabName}' and b.biz_inf_id='${bizInfId}') 
+		)
+	</if>
+	order by h.dbid_ desc 
+</select> 
+<!-- 查看流程执行 轨迹信息 查询活动历史表  包含task、custom、decision 类型的活动-->
+<select id="viewActHisLogByPaging" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+	select 
+			DATE_FORMAT(a.start_,'%Y-%m-%d %H:%i:%s')	START_TIME
+	       ,DATE_FORMAT(a.end_,'%Y-%m-%d %H:%i:%s') END_TIME
+	       ,(select t.assignee_ from  jbpm4_hist_task t where t.dbid_=a.htask_ ) 	EXE_USER_ID
+	       ,a.transition_  	OUTCOME
+	       ,a.execution_    PRO_INS_ID
+	       ,a.activity_name_ ACT_NAME
+	       ,a.HTASK_		TASK_ID
+	from jbpm4_hist_actinst a
+	where 1 = 1
+	and a.type_ in('task','custom','decision')
+	<if test="processInstantceId != null and processInstantceId != '' " >
+		and a.execution_ in	
+		(select hp.id_ from jbpm4_hist_procinst hp where hp.main_id_='${processInstantceId}' or hp.id_ ='${processInstantceId}' )
+	</if>
+	<if test="processInstantceId == null or processInstantceId == '' " >
+		and a.execution_ in	
+		(select hp.id_ from jbpm4_hist_procinst hp where 
+		hp.main_id_  in (select b.pro_instance_id from jbpm4_biz_tab  b  where  b.biz_tab_name='${bizTabName}' and b.biz_inf_id='${bizInfId}') 
+		or hp.id_  in (select b.pro_instance_id from jbpm4_biz_tab  b  where  b.biz_tab_name='${bizTabName}' and b.biz_inf_id='${bizInfId}') 
+		)
+	</if>
+	and (a.transition_ is null or a.transition_ not like 'regect%')
+	order by a.start_ desc  ,a.dbid_ desc
+</select> 
+<!-- 查看流程实例下 某个节点的 执行 轨迹信息 -->
+<select id="queryExecuteHisLog" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+	select 
+			DATE_FORMAT(h.create_,'%Y-%m-%d %H:%i:%s')	START_TIME
+	       ,DATE_FORMAT(h.end_,'%Y-%m-%d %H:%i:%s')	END_TIME
+	       ,h.assignee_ 	EXE_USER_ID
+	       ,h.outcome_  	OUTCOME
+	       
+	from jbpm4_hist_task h 
+	where 1 = 1
+	and exists (select * from jbpm4_hist_actinst a where  a.activity_name_ = '${actName}' and a.htask_= h.dbid_ and a.execution_ = h.execution_ )
+	and h.execution_='${proInsId}'
+	and h.state_='completed'
+	order by h.dbid_ desc 
+</select> 
+
+<!-- 查询 流程实例下 未执行的 待办任务信息 -->
+<select id="getTaskInfoByProInsId" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+	select 
+			CAST(T.DBID_ AS CHAR) 			TASK_ID
+			,T.LOCK_STATE				LOCK_STATE
+      		,T.ACTIVITY_NAME_			ACTIVITY_NAME
+ 	from jbpm4_task t  
+ 	where 1 =1
+ 	and t.execution_id_= '${proInsId}'
+ 	order by t.dbid_ desc 
+</select> 
+
+<!-- 通过 taskId 查询  待办任务信息 -->
+<select id="getTaskInfByTaskId" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+	select 
+			CAST(T.DBID_ AS CHAR) 			TASK_ID
+			,T.LOCK_STATE				LOCK_STATE
+      		,T.ACTIVITY_NAME_			ACTIVITY_NAME
+      		,T.ASSIGNEE_				CUR_USER_ID
+ 	from jbpm4_task t  
+ 	where 1 =1
+ 	and t.dbid_= '${taskId}'
+</select> 
+<!-- 获取 历史任务信息 -->
+<select id="getHisTaskInf" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+		select 
+			ht.assignee_ HIS_USER_ID
+		    ,ht.* 
+		from jbpm4_hist_task ht where 1 = 1
+		
+		and ht.dbid_ = (
+			select  max(ht.dbid_)
+			from jbpm4_hist_task ht where 1 = 1
+			and exists (
+				select h.htask_ from jbpm4_hist_actinst h 
+				where h.execution_ in(select p.id_  from jbpm4_hist_procinst p where 1= 1
+										and p.id_ in ( select bt.pro_instance_id  from jbpm4_biz_tab bt  where bt.validate_state='1'  and bt.biz_tab_name='${bizTabName}' and bt.biz_inf_id='${bizInfId}' )
+										or p.main_id_ in(select bt.pro_instance_id  from jbpm4_biz_tab bt  where bt.validate_state='1'  and bt.biz_tab_name='${bizTabName}' and bt.biz_inf_id='${bizInfId}')
+				)
+				and h.activity_name_='${actName}'
+				and h.end_ is not null
+				and h.htask_ = ht.dbid_
+			)
+		)
+		
+</select> 
+
+<!-- 获取 历史任务信息  根据业务类型-->
+<select id="getHisTaskInfByBizType" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+		select 
+			ht.assignee_ HIS_USER_ID
+		    ,ht.* 
+		from jbpm4_hist_task ht where 1 = 1
+		
+		and ht.dbid_ = (
+			select  max(ht.dbid_)
+			from jbpm4_hist_task ht where 1 = 1
+				and exists (
+				select h.htask_ from jbpm4_hist_actinst h 
+				where h.execution_ in(select p.id_  from jbpm4_hist_procinst p where 1= 1
+										and p.id_ in ( select bt.pro_instance_id  from jbpm4_biz_tab bt  where bt.validate_state='1'  and bt.biz_type in ${bizType} and bt.biz_inf_id='${bizInfId}' )
+										or p.main_id_ in(select bt.pro_instance_id  from jbpm4_biz_tab bt  where bt.validate_state='1'  and bt.biz_type in ${bizType} and bt.biz_inf_id='${bizInfId}')
+				)
+				and h.activity_name_='${actName}'
+				and h.end_ is not null
+				and h.htask_ = ht.dbid_
+			)
+		)
+		
+</select> 
+<!-- 获取 最后一个历史任务信息  根据业务类型-->
+<select id="getLastHisUserOfActiveByBizType" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+		select 
+			ht.assignee_ HIS_USER_ID
+		    ,ht.* 
+		from jbpm4_hist_task ht where 1 = 1
+		
+		and ht.dbid_ = (
+			select  max(ht1.dbid_)
+			from jbpm4_hist_task ht1 where 1 = 1
+				and exists (
+				select h.htask_ from jbpm4_hist_actinst h 
+				where h.execution_ in(select p.id_  from jbpm4_hist_procinst p where 1= 1
+										and p.id_ in ( select bt.pro_instance_id  from jbpm4_biz_tab bt  where bt.validate_state='1'  and bt.biz_type in ${bizType} and bt.biz_inf_id='${bizInfId}' )
+										or p.main_id_ in(select bt.pro_instance_id  from jbpm4_biz_tab bt  where bt.validate_state='1'  and bt.biz_type in ${bizType} and bt.biz_inf_id='${bizInfId}')
+				)
+				and h.activity_name_ like concat('%','${actName}','%')
+				and h.end_ is not null
+				and h.htask_ = ht1.dbid_
+			)
+		)
+		
+</select> 
+<!-- 根据流程实例ID获取 历史任务信息 -->
+<select id="getHisTaskInfByProInstId" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+		select 
+			ht.assignee_ HIS_USER_ID
+		    ,ht.* 
+		from jbpm4_hist_task ht where 1 = 1
+		
+		and ht.dbid_ = (
+			select  max(ht.dbid_)
+			from jbpm4_hist_task ht where 1 = 1
+			and exists (
+				select h.htask_ from jbpm4_hist_actinst h 
+				where h.execution_ in(select p.id_  from jbpm4_hist_procinst p 
+													where p.id_ = '${proInstId}'
+														or p.main_id_ = '${proInstId}'
+				)
+				and h.activity_name_='${actName}'
+				and h.end_ is not null
+				and h.htask_ = ht.dbid_
+			)
+		)
+		
+</select> 
+
+<!-- 通过流程实例id和活动名称查询任务信息-->
+<select id="getActInstByProInstIdAndActName" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+	select t.assignee_ 								PERFORMER,
+			DATE_FORMAT(a.end_,'%Y-%m-%d %H:%i:%s') COMPLETETIME,
+			a.ACTIVITY_NAME_ 						ACTNAME
+	from jbpm4_hist_actinst a left join jbpm4_hist_task t on a.htask_=t.dbid_
+	where a.execution_='${proInstId}'
+	and a.activity_name_='${actName}'
+	order by a.dbid_ desc
+</select> 
+
+<!-- 获取当前任务信息-->
+<select id="getCurTaskInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+	SELECT T.NAME_ 			ACTNAME,
+	T.ASSIGNEE_ 			PERFORMER  
+	from jbpm4_task t,jbpm4_biz_tab b
+ 	where t.execution_id_=b.pro_instance_id
+ 	and b.biz_inf_id='${bizInfId}'
+ 	and b.biz_type='${bizType}'
+ 	order by t.create_ desc
+</select>
+<!-- 更改任务超时提醒的状态 -->
+<update id="updateJbpm4BizTabTaskEmergentState" parameterType="java.util.HashMap">
+		update jbpm4_biz_tab t set t.task_state='${emergentState}'
+		where t.id='${jbpm4BizTabId}'
+</update>
+<!-- 获取父流程 -->
+<select id="getParentProcess" parameterType="java.util.HashMap" resultType="java.lang.String">
+     select t.main_id_ from jbpm4_hist_procinst t where t.id_='${proInstId}'
+</select>
+<!-- 判断员工是否请假 -->
+<select id="checkLeaveByUserId" parameterType="java.util.Map" resultType="java.util.Map">
+    	    select 
+    	    		CAST(COUNT(*) AS CHAR) CUN
+    	    		
+			       from SYS_LEAVE_INFO l 
+			      where l.validate_state='1'
+			      and l.status='2'
+			      <![CDATA[ and DATE_FORMAT(l.start_time,'%Y-%m-%d') <= DATE_FORMAT(now(),'%Y-%m-%d')]]>
+			      <![CDATA[ and DATE_FORMAT(l.end_time,'%Y-%m-%d') >= DATE_FORMAT(now(),'%Y-%m-%d')]]>
+			      and l.leave_user_id='${userId}'
+</select>
+<!-- 通过平台公共分页查询 个人的已结的历史任务 流程实例是结束的 不支持 主子流程 会签流程  by xyz-->
+<select id="queryPersonalEndHistTaskInfoByPaging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	        select 
+				 t1.ID
+				,t1.ID				BIZ_TAB_ID
+				,t1.BIZ_TAB_NAME
+				,t1.BIZ_TYPE
+				,t1.BIZ_INF_ID
+				,t1.BIZ_INF_NAME
+				,t1.BIZ_TASK_TYPE
+				,t1.PRO_INSTANCE_ID
+				,t1.PRO_INSTANCE_ID CUR_EXE_ID
+				,t1.START_PRO_USERID
+				,t1.PRO_INSTANCE_STATE
+				,t1.TASK_STATE
+				,t1.OWNER_ID
+				,t1.ORG_ID
+				,DATE_FORMAT(t1.CREATE_TIME,'%Y-%m-%d H%:%i:%s') CREATE_TIME
+				,DATE_FORMAT(h1.end_,'%Y-%m-%d %H:%i:%s') PRO_END_TIME
+				,t1.REMARK
+				,t1.IS_HIDDEN
+				
+				from jbpm4_biz_tab_old t1,jbpm4_hist_procinst_old h1
+				where t1.validate_state='1' and  h1.id_=t1.pro_instance_id
+				<!--考虑一条业务数据多次审核-->
+				and t1.id in (select max(t2.id) from jbpm4_biz_tab_old t2 where t2.validate_state='1'
+				<!--判断流程是否 已经办结-->
+				and exists (select hp.* from jbpm4_hist_procinst_old hp where hp.end_ is not null  and hp.id_=t2.pro_instance_id )
+               <if test="dto.paramUserId != null" > 
+				and exists (select ht.execution_ from jbpm4_hist_task_old ht where ht.assignee_ ='${dto.paramUserId}'  and  ht.execution_  = t2.pro_instance_id )
+			    </if>
+			    <if test="dto.processParticipationName != null and dto.processParticipationName != ''" >    
+	            and exists (select ht.execution_ from jbpm4_hist_task_old ht where ht.assignee_ in (${dto.processParticipationName})  and  ht.execution_  = t2.pro_instance_id )
+	        	</if>
+			    <if test="dto.processInsId !=null and dto.processInsId!=''">
+			    	and t2.pro_instance_id=#{dto.processInsId}
+			    </if>
+			    <if test="dto.startTime != null and dto.startTime != ''" >    
+		            and  <![CDATA[  t2.create_time >= #{dto.startTime} ]]>
+		        </if>
+		        <if test="dto.endTime != null and dto.endTime != ''" >    
+		            and  <![CDATA[  t2.create_time <=  date_add(#{dto.endTime}, INTERVAL 1 day)  ]]>
+		        </if>
+				<if test="dto.busInfoName != null and dto.busInfoName != '' " >    
+		            and t2.biz_inf_name like concat('%',#{dto.busInfoName},'%') 
+		        </if>
+		        <if test="dto.busInfoId != null and dto.busInfoId != '' " >    
+		            and t2.biz_inf_id like concat('%',#{dto.busInfoId},'%') 
+		        </if>
+		        <if test="dto.bizTaskType != null and dto.bizTaskType != '' " >    
+		            and t2.biz_task_type =#{dto.bizTaskType}
+		        </if>
+		        <if test="dto.remark != null and dto.remark != '' " >    
+		            and t2.remark like concat('%',#{dto.remark},'%')
+		        </if>
+		        <!--  任务类型 -->
+		        <if test="dto.bizType != null and dto.bizType != ''">
+		        	and t2.biz_type = #{dto.bizType}
+		        </if>
+		        
+				group by t2.biz_tab_name,t2.biz_inf_id,t2.biz_type)
+				
+		        <!--自定义业务表与工作流表关联的sql条件控制-->
+		        <if test="myExtSQL != null and myExtSQL != ''">
+		        	${myExtSQL}
+		        </if>
+			     <!--自定义工作流 数据权限控制-->
+		        <if test="dataCSQL != null and dataCSQL != ''">
+		        	${dataCSQL}
+		        </if>
+		        <!--角色映射权限控制-->
+		        <if test="dto.roleMappingSql != null and dto.roleMappingSql != ''">
+		        	${dto.roleMappingSql}
+		        </if>
+		        
+			order by t1.id desc 
+</select>
+<!-- 通过历史流程实例ID 查询相关流程定义信息  by xyz-->
+<select id="queryProDefindInfoByHistData" parameterType="java.util.Map" resultType="java.util.Map">
+	  select  
+	  		T1.OBJNAME_     PRO_NAME	
+	       ,T1.DEPLOYMENT_  DEPLOYMENT	
+	       ,T2.STRINGVAL_   PRO_KEY		
+	       ,T3.LONGVAL_    	VERSION		
+	       ,T1.STRINGVAL_  	PRO_DEF_ID  
+	       ,(SELECT TT1.NAME_ FROM JBPM4_LOB TT1 WHERE TT1.DEPLOYMENT_ = T1.DEPLOYMENT_) RESOURCE_NAME /*流程资源名称*/
+	  from JBPM4_DEPLOYMENT t,
+	       JBPM4_DEPLOYPROP t1,
+	       JBPM4_DEPLOYPROP t2,
+	       JBPM4_DEPLOYPROP t3
+	 where t1.KEY_ = 'pdid'
+	   and t1.DEPLOYMENT_ = t.DBID_
+	   and t2.KEY_ = 'pdkey'
+	   and t2.OBJNAME_ = t1.OBJNAME_
+	   and t2.DEPLOYMENT_ = t.DBID_
+	   and t3.KEY_ = 'pdversion'
+	   and t3.OBJNAME_ = t1.OBJNAME_
+	   and t3.DEPLOYMENT_ = t.DBID_
+	   and t1.STRINGVAL_ = (select hp.procdefid_ from jbpm4_hist_procinst_old hp where hp.id_='${proInsId}')
+   </select>
+   <!-- 分页查询历史实例数据  by xyz-->
+   <select id="viewActHisLogForHistByPaging" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+	select 
+			date_format(a.start_, '%Y-%m-%d %H:%i:%s')	START_TIME
+	       ,date_format(a.end_ ,'%Y-%m-%d %H:%i:%s') END_TIME
+	       , (select t.assignee_ from  jbpm4_hist_task_old t where t.dbid_=a.htask_ ) 	EXE_USER_ID
+	       ,A.TRANSITION_  	OUTCOME
+	       ,A.EXECUTION_    PRO_INS_ID
+	       ,A.ACTIVITY_NAME_ ACT_NAME
+	from jbpm4_hist_actinst_old a
+	where 
+	 a.type_ in('task','custom','decision')
+	<if test="processInstantceId != null and processInstantceId != '' " >
+		 and exists
+		(select hp.id_ from jbpm4_hist_procinst_old hp where hp.dbid_=a.hproci_  and  (hp.main_id_='${processInstantceId}' or hp.id_ ='${processInstantceId}') )
+	</if>
+	<if test="processInstantceId == null or processInstantceId == '' " >
+		and exists	
+		(select hp.id_ from jbpm4_hist_procinst_old hp where 
+		hp.main_id_  in (select b.pro_instance_id from jbpm4_biz_tab_old  b  where  b.biz_tab_name='${bizTabName}' and b.biz_inf_id='${bizInfId}') 
+		or hp.id_  in (select b.pro_instance_id from jbpm4_biz_tab_old  b  where  b.biz_tab_name='${bizTabName}' and b.biz_inf_id='${bizInfId}') 
+		)
+	</if>
+	and (a.transition_ is null or a.transition_ not like 'regect%')
+	order by a.start_ desc 
+</select>
+   
+ <!-- 获取图片内容  by xyz-->   
+<select id="queryProPngByProNameAndVersionByHist" parameterType="java.util.HashMap" resultMap="proPng" >
+  	 		select 
+				t1.pro_png
+		from temporary_jbpm4_info 		t1
+		where 1 =1 
+ 				
+ 				<if test="id != null and id != '' " >    
+				 and t1.id=#{id}
+		</if>
+		<if test="processName != null and processName != ''" >    
+				and t1.proc_name=#{processName}
+		</if>
+		<if test="processVersion != null and processVersion != ''" >    
+				and t1.proc_version=#{processVersion}
+		</if>
+		<if test="processInstantceId != null and processInstantceId != '' " >    
+				and t1.proc_name=(select d.objname_ from jbpm4_deployprop d where 
+ 										d.stringval_=(select p.procdefid_ from jbpm4_hist_procinst_old p where instr(#{processInstantceId},p.id_)>0 ))	
+			and t1.proc_version =
+			(select d1.longval_ from jbpm4_deployprop d1 where d1.key_='pdversion' 
+			and d1.objname_ = (select d.objname_ from jbpm4_deployprop d 
+										where d.stringval_=(select p.procdefid_ from jbpm4_hist_procinst_old p where instr(#{processInstantceId},p.id_)>0)
+							  )
+			)
+		</if>
+		<!-- 通过流程定义key 查找流程图 则取最新的流程图 -->
+		<if test="processDefKey != null and processDefKey != '' " >    
+				and t1.proc_name=( 
+ 										select tt.objname_ from (
+									select d.objname_ ,max(d.deployment_) max_deployment_id 
+										from jbpm4_deployprop d 
+										where d.stringval_=#{processDefKey} 
+										group by d.objname_ 
+									) tt
+ 										)	
+			and t1.proc_version =
+			(select d1.longval_ from jbpm4_deployprop d1 where d1.key_='pdversion' 
+			and d1.deployment_ = (select tt.max_deployment_id from (
+									select d.objname_ ,max(d.deployment_) max_deployment_id 
+										from jbpm4_deployprop d 
+										where d.stringval_=#{processDefKey} 
+										group by d.objname_ 
+									) tt
+							  )
+			)
+		</if>
+		and t1.pro_png is not null 
+</select>
+   
+</mapper>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fintech.modules.bpmreport.dao.ProcessReportDao">
+	<resultMap id="dataBean" type="com.fintech.modules.bpmreport.dto.DataBean">
+		<result property="name" column="processDefKey" jdbcType="VARCHAR" />
+		<result property="num" column="num" jdbcType="INTEGER" />
+	</resultMap>
+	<resultMap id="SysDictDetailVo" type="com.fintech.modules.bpmreport.dto.SysDictDetailDTO">
+				<result property="dictDetailName" column="dict_detail_name" jdbcType="VARCHAR" />
+				<result property="dictDetailValue" column="dict_detail_value" jdbcType="VARCHAR" />
+	</resultMap>
+	<!-- 根据用户ID 查询对应的rolecode列表 -->
+	<select id="getRoleCodListByUserId" parameterType="java.lang.Long"		resultType="String">
+
+		select r.role_code
+		from sys_role_user ru,sys_role r
+		where ru.role_id=r.id
+		and ru.target_type='user'
+		and r.role_code='admin'
+		and ru.target_id=#{userId}
+	</select>
+
+
+	<!-- 查询字典值 -->
+	<select id="getSysDictDetailList" parameterType="String" resultMap="SysDictDetailVo">
+
+		SELECT dd.dict_detail_name,
+			   dd.dict_detail_value  
+			   
+		FROM sys_dict_detail dd,sys_dict d
+		WHERE d.id=dd.dict_id  
+		AND d.dict_code=#{processDefDictCode}
+	</select>
+
+	<sql id="selectHead"> SELECT data.num,
+		data.processdefkey AS processDefKey
+		FROM(
+	</sql>
+	<sql id="selectEnd"> ) data limit 1,10 </sql>
+	<sql id="orgLimted">
+		and ou.org_id in (${orgIds})
+	</sql>
+	<!-- 积压最多TOP10 -->
+	<select id="getOverStockMoreDataList" parameterType="java.util.Map"		resultMap="dataBean">
+
+		<include refid="selectHead" />
+		SELECT COUNT(*) as num,
+		bt.biz_type as processdefkey
+		FROM jbpm4_hist_procinst hp , jbpm4_biz_tab bt
+		WHERE hp.id_=bt.pro_instance_id
+		<if test="isAdmin==false">
+			<include refid="orgLimted" />
+		</if>
+		AND hp.state_='active'
+		GROUP BY bt.biz_type
+		ORDER BY count(*) desc
+		<include refid="selectEnd" />
+	</select>
+
+
+
+	<!-- 已办最多TOP10 -->
+	<select id="getProcessedMoreData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT COUNT(*) AS num,
+		bt.biz_type AS processDefKey
+		FROM jbpm4_hist_procinst hp , jbpm4_biz_tab bt
+		WHERE hp.id_=bt.pro_instance_id
+		<if test="isAdmin==false">
+			<include refid="orgLimted" />
+		</if>
+		AND hp.state_='ended'
+		GROUP BY bt.biz_type
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 发起最多TOP10 -->
+	<select id="getStartUpMoreData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT COUNT(*) AS num,
+		bt.biz_type AS processDefKey
+		FROM jbpm4_hist_procinst hp , jbpm4_biz_tab bt
+		WHERE hp.id_=bt.pro_instance_id
+		<if test="isAdmin==false">
+			<include refid="orgLimted" />
+		</if>
+		AND hp.state_='ended'
+		GROUP BY bt.biz_type
+		ORDER BY COUNT(*) DESC
+		<include refid="selectEnd" />
+	</select>
+
+
+	<!-- 平均速率最高TOP10 -->
+	<select id="getAvgEfficientHighestData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT AVG(hp.duration_) AS num,
+		bt.biz_type AS processDefKey
+		FROM jbpm4_hist_procinst hp , jbpm4_biz_tab bt
+		WHERE hp.id_=bt.pro_instance_id
+		<if test="isAdmin==false">
+			<include refid="orgLimted" />
+		</if>
+		AND hp.state_='ended'
+		GROUP BY bt.biz_type
+		ORDER BY AVG(hp.duration_) ASC
+		<include refid="selectEnd" />
+	</select>
+	<!-- 平均速率最低TOP10 -->
+	<select id="getAvgEfficientLowestData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT AVG(hp.duration_) AS num,
+		bt.biz_type AS processDefKey
+		FROM jbpm4_hist_procinst hp , jbpm4_biz_tab bt
+		WHERE hp.id_=bt.pro_instance_id
+		<if test="isAdmin==false">
+			<include refid="orgLimted" />
+		</if>
+		AND hp.state_='ended'
+		GROUP BY bt.biz_type
+		ORDER BY AVG(hp.duration_) DESC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 平均人工速率最高TOP10 -->
+	<select id="getAvgHumanEfficientHighestData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT AVG(ha.duration_) AS num,
+		bt.biz_type AS processDefKey
+		FROM jbpm4_hist_actinst ha,jbpm4_hist_procinst hp ,jbpm4_biz_tab bt
+		WHERE ha.hproci_=hp.dbid_ and hp.id_=bt.pro_instance_id
+		<if test="isAdmin==false">
+			<include refid="orgLimted" />
+		</if>
+		AND ha.type_='task' AND hp.state_='ended' AND ha.duration_>=0
+		GROUP BY bt.biz_type
+		ORDER BY AVG(ha.duration_) ASC
+		<include refid="selectEnd" />
+	</select>
+
+	<!-- 平均人工速率最低TOP10 -->
+	<select id="getAvgHumanEfficientLowestData" parameterType="java.util.Map"		resultMap="dataBean">
+		<include refid="selectHead" />
+		SELECT AVG(ha.duration_) AS num,
+		bt.biz_type AS processDefKey
+		FROM jbpm4_hist_actinst ha,jbpm4_hist_procinst hp ,jbpm4_biz_tab bt
+		WHERE ha.hproci_=hp.dbid_ and hp.id_=bt.pro_instance_id
+		<if test="isAdmin==false">
+			<include refid="orgLimted" />
+		</if>
+		AND ha.type_='task' AND hp.state_='ended' AND ha.duration_>=0
+		GROUP BY bt.biz_type
+		ORDER BY AVG(ha.duration_) DESC
+		<include refid="selectEnd" />
+	</select>
+
+
+</mapper>

@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.archive.dao.HelpDataArchiveDao">
+<!-- 保存数据  -->
+<insert id="insertActInstanceData" parameterType="java.lang.String" >
+	insert into JBPM4_HIST_ACTINST_OLD
+			(   		
+						dbid_,
+						class_,
+						dbversion_,
+						hproci_,
+						type_,
+						execution_,
+						activity_name_,
+						start_,
+						end_,
+						duration_,
+						transition_,
+						nextidx_,
+						htask_
+					
+			)
+(
+      select 			ha.dbid_,
+						ha.class_,
+						ha.dbversion_,
+						ha.hproci_,
+						ha.type_,
+						ha.execution_,
+						ha.activity_name_,
+						ha.start_,
+						ha.end_,
+						ha.duration_,
+						ha.transition_,
+						ha.nextidx_,
+						ha.htask_ 
+      from jbpm4_hist_actinst ha, JBPM4_HIST_PROCINST hp 
+      where hp.dbid_=ha.hproci_  
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertTaskData" parameterType="java.lang.String" >
+	insert into JBPM4_HIST_TASK_OLD
+			(   		
+						dbid_,
+						dbversion_,
+						execution_,
+						outcome_,
+						assignee_,
+						priority_,
+						state_,
+						create_,
+						end_,
+						duration_,
+						nextidx_,
+						supertask_
+					
+			) 
+     (
+      select 			ht.dbid_,
+						ht.dbversion_,
+						ht.execution_,
+						ht.outcome_,
+						ht.assignee_,
+						ht.priority_,
+						ht.state_,
+						ht.create_,
+						ht.end_,
+						ht.duration_,
+						ht.nextidx_,
+						ht.supertask_
+      from jbpm4_hist_task ht,jbpm4_hist_actinst ha, JBPM4_HIST_PROCINST hp 
+      where hp.dbid_=ha.hproci_  and ha.htask_=ht.dbid_
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertConsignedTaskData" parameterType="java.lang.String" >
+	insert into JBPM4_CONSIGNED_TASK_OLD
+			(   		
+						id,
+						task_id,
+						task_type,
+						from_user_id,
+						to_user_id,
+						org_id,
+						validate_state,
+						created_by,
+						created,
+						last_upd_by,
+						last_upd,
+						remark
+			)(
+      select 			ct.id,
+						ct.task_id,
+						ct.task_type,
+						ct.from_user_id,
+						ct.to_user_id,
+						ct.org_id,
+						ct.validate_state,
+						ct.created_by,
+						ct.created,
+						ct.last_upd_by,
+						ct.last_upd,
+						ct.remark
+      from JBPM4_CONSIGNED_TASK ct 
+      <![CDATA[where ct.created  <=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') ]]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertVReportData" parameterType="java.lang.String" >
+	insert into V_REPORT_ANTIFRAUD_JBPM4_OLD
+			(   		
+						biz_type,
+						biz_inf_id,
+						pro_instance_id,
+						start_pro_userid,
+						org_id,
+						create_time,
+						over_time,
+						remind_time,
+						activity_name_,
+						start_,
+						end_,
+						duration_,
+						transition_
+					
+			)(
+      select 			vr.biz_type,
+						vr.biz_inf_id,
+						vr.pro_instance_id,
+						vr.start_pro_userid,
+						vr.org_id,
+						vr.create_time,
+						vr.over_time,
+						vr.remind_time,
+						vr.activity_name_,
+						vr.start_,
+						vr.end_,
+						vr.duration_,
+						vr.transition_ 
+      from V_REPORT_ANTIFRAUD_JBPM4_DATA vr,JBPM4_HIST_PROCINST hp 
+      where hp.ID_=vr.pro_instance_id  
+      <![CDATA[and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertBizInfoData" parameterType="java.lang.String" >
+	insert into JBPM4_BIZ_OPTION_INFO_OLD
+			(   		
+						id,
+						fk_jbpm_biz_tab_id,
+						pro_instance_id,
+						task_id,
+						active_name,
+						system_active_info,
+						option_remark,
+						validate_state,
+						owner_id,
+						org_id,
+						create_time,
+						modify_time,
+						create_by,
+						modify_by,
+						remark
+					
+			)(
+      select 			bi.id,
+						bi.fk_jbpm_biz_tab_id,
+						bi.pro_instance_id,
+						bi.task_id,
+						bi.active_name,
+						bi.system_active_info,
+						bi.option_remark,
+						bi.validate_state,
+						bi.owner_id,
+						bi.org_id,
+						bi.create_time,
+						bi.modify_time,
+						bi.create_by,
+						bi.modify_by,
+						bi.remark 
+      from JBPM4_BIZ_OPTION_INFO bi,JBPM4_HIST_PROCINST hp 
+      where hp.ID_=bi.pro_instance_id  
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertBizTabData" parameterType="java.lang.String" >
+	insert into JBPM4_BIZ_TAB_OLD
+			(   		
+					id                             ,
+					biz_tab_name                   ,
+					biz_type                       ,
+					biz_inf_id                     ,
+					biz_inf_name                   ,
+					biz_task_type                  ,
+					pro_instance_id                ,
+					start_pro_userid               ,
+					pro_instance_state             ,
+					task_state                     ,
+					validate_state                 ,
+					owner_id                       ,
+					org_id                         ,
+					create_time                    ,
+					MODIFY_TIME                    ,
+					create_by                      ,
+					remark                         ,
+					is_hidden                      ,
+					MODIFY_BY					   ,
+					BIZ_INF_NO					   ,
+					OVER_TIME                      ,
+					REMIND_TIME
+					
+			)(
+      select 		bt.id                             ,
+					bt.biz_tab_name                   ,
+					bt.biz_type                       ,
+					bt.biz_inf_id                     ,
+					bt.biz_inf_name                   ,
+					bt.biz_task_type                  ,
+					bt.pro_instance_id                ,
+					bt.start_pro_userid               ,
+					bt.pro_instance_state             ,
+					bt.task_state                     ,
+					bt.validate_state                 ,
+					bt.owner_id                       ,
+					bt.org_id                         ,
+					bt.create_time                    ,
+					bt.MODIFY_TIME                    ,
+					bt.create_by                      ,
+					bt.remark                         ,
+					bt.is_hidden                      ,
+					bt.MODIFY_BY					   ,
+					bt.BIZ_INF_NO					   ,
+					bt.OVER_TIME                      ,
+					bt.REMIND_TIME 
+      from JBPM4_BIZ_TAB bt,JBPM4_HIST_PROCINST hp 
+      where hp.ID_=bt.pro_instance_id  
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertProcessData" parameterType="java.lang.String" >
+	insert into JBPM4_HIST_PROCINST_OLD
+			(   		
+						dbid_,
+						dbversion_,
+						id_,
+						procdefid_,
+						key_,
+						start_,
+						end_,
+						duration_,
+						state_,
+						endactivity_,
+						nextidx_,
+						main_id_
+					
+			)(
+      select 			hp.dbid_,
+						hp.dbversion_,
+						hp.id_,
+						hp.procdefid_,
+						hp.key_,
+						hp.start_,
+						hp.end_,
+						hp.duration_,
+						hp.state_,
+						hp.endactivity_,
+						hp.nextidx_,
+						hp.main_id_ 
+      from JBPM4_HIST_PROCINST hp 
+     <![CDATA[ where  hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active']]>
+      )
+</insert>
+<!-- 删除  -->
+<delete id="deleteConsignedTaskData" parameterType="java.lang.String">
+    	delete from JBPM4_CONSIGNED_TASK ct 
+     <![CDATA[ where ct.created  <=to_date(#{str},'yyyy-MM-dd hh24:mi:ss')]]>
+</delete>
+<!-- 删除  -->
+<delete id="deleteVReportData" parameterType="java.lang.String">
+    	delete from V_REPORT_ANTIFRAUD_JBPM4_DATA vr 
+      where exists (select hp.id_ from JBPM4_HIST_PROCINST hp where hp.ID_=vr.pro_instance_id  
+      <![CDATA[and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active')]]>
+</delete>
+<!-- 删除  -->
+<delete id="deleteBizInfoData" parameterType="java.lang.String">
+    	delete from JBPM4_BIZ_OPTION_INFO bi 
+      where exists (select  hp.id_  from JBPM4_HIST_PROCINST hp where hp.ID_=bi.pro_instance_id  
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active')]]>
+</delete>
+<!-- 删除  -->
+<delete id="deleteBizTabData" parameterType="java.lang.String">
+    	delete from JBPM4_BIZ_TAB bt
+      where exists (select hp.ID_ from JBPM4_HIST_PROCINST hp  where hp.ID_=bt.pro_instance_id  
+     <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active') ]]>
+</delete>
+<!-- 删除  -->
+<delete id="deleteProcessData" parameterType="java.lang.String">
+    	delete from JBPM4_HIST_PROCINST hp 
+    <![CDATA[  where  hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active' ]]>
+</delete>
+<!-- 删除  -->
+<delete id="deleteActInstData" parameterType="java.lang.String">
+ delete from jbpm4_hist_actinst ha 
+      where exists (select hp.dbid_  from  JBPM4_HIST_PROCINST hp  where hp.dbid_=ha.hproci_  
+  <![CDATA[    and hp.end_<=to_date(#{info},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active')]]>
+</delete>
+<!-- 删除  -->
+<delete id="deleteTaskData" parameterType="java.lang.String">
+	delete  from jbpm4_hist_task ht 
+   <![CDATA[   where exists (select  ha.htask_ from  jbpm4_hist_actinst ha, JBPM4_HIST_PROCINST hp  where hp.dbid_=ha.hproci_  and ha.htask_=ht.dbid_
+      and hp.end_<=to_date(#{info},'yyyy-MM-dd hh24:mi:ss') and hp.state_!='active')  ]]>
+</delete>
+</mapper>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.modules.archive.dao.ConsignedTaskDataArchiveDao">
+<resultMap id="ConsignedTaskPo" type="com.jy.modules.archive.dto.ConsignedTaskPo">
+				<result property="id" column="id" jdbcType="DECIMAL" />
+				<result property="taskId" column="task_id" jdbcType="VARCHAR" />
+				<result property="taskType" column="task_type" jdbcType="VARCHAR" />
+				<result property="fromUserId" column="from_user_id" jdbcType="VARCHAR" />
+				<result property="toUserId" column="to_user_id" jdbcType="VARCHAR" />
+				<result property="orgId" column="org_id" jdbcType="VARCHAR" />
+				<result property="validateState" column="validate_state" jdbcType="VARCHAR" />
+				<result property="createBy" column="created_by" jdbcType="VARCHAR" />
+				<result property="createTime" column="created" jdbcType="TIMESTAMP" />
+				<result property="lastUpdateBy" column="last_upd_by" jdbcType="VARCHAR" />
+				<result property="lastUpdateTime" column="last_upd" jdbcType="TIMESTAMP" />
+				<result property="remark" column="remark" jdbcType="VARCHAR" />
+</resultMap>	
+<!-- 查询 -->	
+<select id="getTabDataList" parameterType="java.lang.String" resultMap="ConsignedTaskPo">
+    	 		SELECT 
+						t1.id,
+						t1.task_id,
+						t1.task_type,
+						t1.from_user_id,
+						t1.to_user_id,
+						t1.org_id,
+						t1.validate_state,
+						t1.created_by,
+						t1.created,
+						t1.last_upd_by,
+						t1.last_upd,
+						t1.remark
+					
+				FROM JBPM4_CONSIGNED_TASK 	t1
+				WHERE  t1.task_id=#{str}
+    			 
+</select>
+<!-- 查询数量 -->  
+<select id="getTableNum" resultType="int">
+select count(*) from tabs t where t.TABLE_NAME='JBPM4_CONSIGNED_TASK_OLD'
+</select>
+<!-- 保存数据  -->
+<insert id="insertData"  parameterType="java.lang.String" >
+	insert into JBPM4_CONSIGNED_TASK_OLD
+			(   		
+						id,
+						task_id,
+						task_type,
+						from_user_id,
+						to_user_id,
+						org_id,
+						validate_state,
+						created_by,
+						created,
+						last_upd_by,
+						last_upd,
+						remark
+			)(
+      select 			ct.id,
+						ct.task_id,
+						ct.task_type,
+						ct.from_user_id,
+						ct.to_user_id,
+						ct.org_id,
+						ct.validate_state,
+						ct.created_by,
+						ct.created,
+						ct.last_upd_by,
+						ct.last_upd,
+						ct.remark
+      from JBPM4_CONSIGNED_TASK ct ,jbpm4_hist_actinst ha, JBPM4_HIST_PROCINST hp 
+      where   ha.htask_=ct.task_id and hp.dbid_=ha.hproci_
+      <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss')  and hp.state_!='active' ]]>
+      
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertTMPData"  parameterType="java.lang.String" >
+	insert into JBPM4_CONSIGNED_TASK_TMP
+			(   		
+						id,
+						task_id,
+						task_type,
+						from_user_id,
+						to_user_id,
+						org_id,
+						validate_state,
+						created_by,
+						created,
+						last_upd_by,
+						last_upd,
+						remark
+			)(
+      select 			ct.id,
+						ct.task_id,
+						ct.task_type,
+						ct.from_user_id,
+						ct.to_user_id,
+						ct.org_id,
+						ct.validate_state,
+						ct.created_by,
+						ct.created,
+						ct.last_upd_by,
+						ct.last_upd,
+						ct.remark
+      from JBPM4_CONSIGNED_TASK ct  ,jbpm4_hist_actinst ha, JBPM4_HIST_PROCINST hp 
+      where   ha.htask_=ct.task_id and hp.dbid_=ha.hproci_
+      <![CDATA[ and hp.end_<=to_date(#{str},'yyyy-MM-dd hh24:mi:ss')  and hp.state_!='active' ]]>
+      )
+</insert>
+<!-- 保存数据  -->
+<insert id="insertListData"   parameterType="java.lang.String" >
+	insert into JBPM4_CONSIGNED_TASK_OLD
+			(   		
+						id,
+						task_id,
+						task_type,
+						from_user_id,
+						to_user_id,
+						org_id,
+						validate_state,
+						created_by,
+						created,
+						last_upd_by,
+						last_upd,
+						remark
+			)(
+			SELECT 
+						t1.id,
+						t1.task_id,
+						t1.task_type,
+						t1.from_user_id,
+						t1.to_user_id,
+						t1.org_id,
+						t1.validate_state,
+						t1.created_by,
+						t1.created,
+						t1.last_upd_by,
+						t1.last_upd,
+						t1.remark
+					
+				FROM JBPM4_CONSIGNED_TASK 	t1,jbpm4_hist_task ht,jbpm4_hist_actinst ha, JBPM4_HIST_PROCINST hp  
+       where      ht.dbid_=t1.task_id and   ha.htask_=ht.dbid_  and hp.dbid_=ha.hproci_  and     hp.id_=#{str}
+			)
+</insert>  
+<!-- 创建  -->
+<update id="createTable" >
+	     create table JBPM4_CONSIGNED_TASK_OLD as select * from JBPM4_CONSIGNED_TASK a where a.id=0
+</update>
+<!-- 创建  -->
+<update id="createTMPTable" >
+	     create table JBPM4_CONSIGNED_TASK_TMP as select * from JBPM4_CONSIGNED_TASK a where a.id=0
+</update>
+<!-- 删除  -->
+<delete id="deleteData" >
+    	delete from JBPM4_CONSIGNED_TASK t where exists (select temp.id from JBPM4_CONSIGNED_TASK_TMP temp where t.id=temp.id)
+</delete>
+<!-- 删除  -->
+<delete id="deleteTMPData" >
+    	delete from  JBPM4_CONSIGNED_TASK_TMP
+</delete>
+<!-- 删除  -->
+<delete id="deleteListData"   parameterType="java.lang.String" >
+    	delete FROM JBPM4_CONSIGNED_TASK 	t1
+				WHERE  t1.task_id=#{str}
+</delete>
+</mapper>
