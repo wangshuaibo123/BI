@@ -48,6 +48,7 @@
 
 <body style="overflow: hidden;">
 	<div class="top"> 
+		<div style="height: 8px;overflow: hidden;">&nbsp;</div>
 		<div class="logo"></div>
 		<div class="sysName">
 			<%=ObtainPropertiesInfo.getValByKey("app.name") %>

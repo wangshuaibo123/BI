@@ -59,10 +59,10 @@
 				<p>&nbsp;</p>
 			</li>
 			<li>
-				<span>捷越联合信息咨询有限公司 </span>
-				<p>电话：010-52327119</p>
-				<p>邮箱：itsport@jieyuechina.com</p>
-				<p>网址： www.jieyuechina.com</p>
+				<span> </span>
+				<p>电话：</p>
+				<p>邮箱：</p>
+				<p>网址：</p>
 			</li>
 		</ul>
 	</footer>

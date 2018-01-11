@@ -16,7 +16,7 @@
 	.top .logo{
 	    width: 128px;
 	    height: 40px;
-	    background: url("../../images/homeImg/logo.png") no-repeat;
+	    background: url("../../images/homeImg/logo1.png") no-repeat;
 	    margin: 2px;
 	    margin-left: 15px;
 	    float: left;
@@ -24,7 +24,8 @@
 	.top .sysName{
 		    float: left;
 		    width: 200px;
-		    margin: 6px 0px 0px -10px;
+		    /* margin: 6px 0px 0px -10px; */
+		    margin: 3px 0px 0px -10px;
 		    font-family: "ºÚÌå";
 		    font-size: 22px;
 		    color: #ffffff;

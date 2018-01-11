@@ -17,13 +17,15 @@ ul {list-style-type: none; -webkit-padding-start: 0px; margin:0px; padding:0px; 
 
 .login_logo{
     font-size:30px;
-    background: url("images/logo.png") no-repeat;
+    background: url("images/logo1.png") no-repeat;
     height:150px;
-    line-height:80px;
+    /* line-height:80px; */
+    line-height:130px;
     width:800px;
     margin-left:40%;
     position: relative;
     left:-225px;
+    top:-20px;
 }
 .bg_banner{
 	width:100%;

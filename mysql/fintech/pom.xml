@@ -390,7 +390,7 @@
 			</plugin>
 			
 			<!-- maven插件配置 -->
-			<plugin>
+			<!-- <plugin>
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-assembly-plugin</artifactId>
 			    <executions>
@@ -410,7 +410,7 @@
 			      	<meminitial>512m</meminitial>
           	        <maxmem>1024m</maxmem>
 			    </configuration>
-			  </plugin>
+			  </plugin> -->
 			  <!--新增fingbugs 插件-->
 			  <plugin> 
 	              <groupId>org.codehaus.mojo</groupId> 

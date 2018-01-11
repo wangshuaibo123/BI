@@ -18,7 +18,7 @@
 	
 	
 	<!-- 使用annotation 自动注册bean, 并保证@Required、@Autowired的属性被注入 -->
-	<context:component-scan base-package="com.fintech,com.portal,com.jy">
+	<context:component-scan base-package="com.fintech,com.portal,com.jy,com.easub">
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
 		<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
 	</context:component-scan>
@@ -56,7 +56,7 @@
         <!-- 配置监控统计拦截的filters -->
         <property name="filters" value="${druid.filters}" />
     </bean>
-
+    
     <!-- MyBatis配置 -->
     <bean id="pageInterceptor" class="com.fintech.platform.restservice.mybatis.PageInterceptor"></bean>  
 	<bean id="sqlSessionFactory" class="com.fintech.platform.restservice.mybatis.SqlSessionFactoryBean">
@@ -77,9 +77,10 @@
 		</property>
 	</bean>
 	<!-- 扫描basePackage下所有以@MyBatisRepository标识的 接口-->
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	<bean id="mapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
 		<property name="basePackage" value="com.fintech;com.portal;com.jy" />
 		<property name="annotationClass" value="com.fintech.platform.core.mybatis.MyBatisRepository"/>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
 	</bean>
 	
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
@@ -157,6 +158,7 @@
   	<import resource="classpath*:spring/*-spring.xml" />
   	<import resource="classpath*:spring-redis.xml" />
   	<import resource="classpath*:spring-shiro.xml" />
+  	<import resource="classpath*:spring-bi.xml" />
  	<!--  不启用 定时任务 -->
  	 <!-- <import resource="classpath*:quartz/*-spring.xml" /> -->
 
