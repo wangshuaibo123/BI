@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.easub.bi.dao.BIDao">
+	<resultMap id="ShopsDTO" type="com.easub.bi.dto.ShopsDTO">
+		<result property="id" column="ID" jdbcType="INTEGER" />
+		<result property="uuid" column="UUID" jdbcType="VARCHAR" />
+		<result property="userId" column="USER_ID" jdbcType="VARCHAR" />
+		<result property="name" column="NAME" jdbcType="VARCHAR" />
+		<result property="showName" column="SHOW_NAME" jdbcType="VARCHAR" />
+		<result property="description" column="DESCRIPTION" jdbcType="VARCHAR" />
+		<result property="cover" column="COVER" jdbcType="VARCHAR" />
+		<result property="choiceCover" column="CHOICE_COVER" jdbcType="VARCHAR" />
+		<result property="themeCover" column="THEME_COVER" jdbcType="VARCHAR" />
+		<result property="type" column="TYPE" jdbcType="INTEGER"/>
+		<result property="sn" column="SN" jdbcType="VARCHAR"/>
+		<result property="visible" column="VISIBLE" jdbcType="INTEGER"/>
+		<result property="isDeleted" column="IS_DELETED" jdbcType="INTEGER"/>
+		<result property="createdAt" column="CREATED_AT" jdbcType="TIMESTAMP"/>
+		<result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+		<result property="deletedAt" column="deleted_at" jdbcType="TIMESTAMP"/>
+	</resultMap>
+	<select id="getShopsList" parameterType="java.util.Map" resultMap="ShopsDTO" >
+		select a.id,a.uuid,a.user_id,a.name,a.show_name,a.description,a.cover,a.choice_cover,a.theme_cover,a.type,a.sn,a.visible,a.is_deleted,a.created_at,a.updated_at,a.deleted_at
+		from shops a 
+		where 1 = 1  
+		and a.is_deleted = 0
+	</select>
+
+	<select id="getVideoShopStat" parameterType="java.util.Map" resultType="java.util.Map" >
+		select a.shop_id,count(*) c 
+		from shop_videos a 
+		where 1 = 1  
+		<!-- and a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR} -->
+		and a.is_deleted = 0 
+		and a.media_state = 2
+		group by a.shop_id
+	</select>
+
+	<!-- 按版权统计所有视频数和时长（小时） -->
+	<select id="getVideoCopyrightStat" parameterType="java.util.Map" resultType="java.util.Map" >
+		select a.is_abroad abroad,count(a.id) c,sum(length) sec
+		from videos a
+		where 1 = 1  
+		<!-- and a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR} -->
+		and a.is_deleted = 0 
+		and a.media_state = 2
+		group by a.is_abroad
+	</select>
+
+
+	<!-- 按视频类型统计时间段内的视频数 -->
+	<select id="getVideosSourceTypeStatCount" parameterType="java.util.Map" resultType="java.util.Map" >
+	<!-- 全部 -->
+		select a.source_type sourceType,1 type,count(a.id) c 
+		from videos a
+		where a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		and a.is_deleted = 0 
+		and a.media_state = 2
+		<!--
+		and a.user_id not in(select user_id from user_external_maps)
+		and a.user_id not in(select uid from user_policies where user_type in('iss','ims'))
+		and a.user_id not in(1, 8, 18, 864, 1077, 847)-->
+		group by a.source_type
+		
+		<!-- 混剪中视频等于一的为剪辑，大于1的为混剪
+		union all  
+		select  2 sourceType,1 type, count(id) c
+		from videos a
+		where a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		and a.is_deleted = 0 
+		and a.media_state = 2
+		and a.source_type = 6 and a.id in(select video_id from temp_project_numbers where num = 1)
+		union all  
+		select  6 sourceType,1 type,-count(id) c
+		from videos a
+		where a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		and a.is_deleted = 0 
+		and a.media_state = 2
+		and a.source_type = 6 and a.id in(select video_id from temp_project_numbers where num = 1)
+		-->
+		
+		<!-- 除了iss\ims -->
+		union all 
+		select a.source_type sourceType,2 type,count(a.id) c 
+		from videos a
+		where a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		and a.is_deleted = 0 
+		and a.media_state = 2 
+		and a.user_id not in(select user_id from user_external_maps)
+		and a.user_id not in(select uid from user_policies where user_type in('iss','ims'))
+		and a.user_id not in(1, 8, 18, 864, 1077, 847)
+		group by a.source_type
+		<!-- 新浪 -->
+		union all 
+		select a.source_type sourceType,3 type,count(a.id) c 
+		from videos a
+		where a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		and a.is_deleted = 0 
+		and a.media_state = 2 
+		and a.user_id in(select user_id from user_external_maps)
+		group by a.source_type
+		<!-- 政务媒体 -->
+		union all 
+		select a.source_type sourceType,4 type,count(a.id) c 
+		from videos a
+		where a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		and a.is_deleted = 0 
+		and a.media_state = 2 
+		and a.user_id in(select uid from user_policies where user_type in('weibo_zhengwu','weibo_newsmedia'))
+		group by a.source_type
+	</select>
+	
+	<!-- 按视频类型统计分享视频数 -->
+	<select id="getVideosSourceTypeShareStatCount" parameterType="java.util.Map" resultType="java.util.Map" >
+		<!-- 全部 -->
+		select b.source_type sourceType,1 type, count(a.id) c from user_video_share_logs a
+		left join videos b on a.vid = b.id 
+		where a.shared_time between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+ 		and a.state = 2 
+ 		<!-- and a.user_id not in (1,8,18,864,1077,847)  -->
+		<!-- and a.user_id not in (select uid from user_policies where user_type in ('iss','ims')) -->
+ 		group by b.source_type
+		<!-- 除了iss\ims -->
+		union all 
+		select b.source_type sourceType,2 type, count(a.id) c from user_video_share_logs a
+		left join videos b on a.vid = b.id 
+		where a.shared_time between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+ 		and a.state = 2 
+ 		and a.user_id not in (1,8,18,864,1077,847)
+		and a.user_id not in (select uid from user_policies where user_type in ('iss','ims'))
+ 		group by b.source_type
+ 		<!-- 新浪 -->
+ 		union all 
+		select b.source_type sourceType,3 type, count(a.id) c from user_video_share_logs a
+		left join videos b on a.vid = b.id 
+		where a.shared_time between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+ 		and a.state = 2 
+ 		and a.user_id in(select user_id from user_external_maps) 
+ 		group by b.source_type
+ 		<!-- 政务媒体 -->
+ 		union all 
+		select b.source_type sourceType,4 type, count(a.id) c from user_video_share_logs a
+		left join videos b on a.vid = b.id 
+		where a.shared_time between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+ 		and a.state = 2 
+ 		and a.user_id in(select uid from user_policies where user_type in('weibo_zhengwu','weibo_newsmedia'))
+ 		group by b.source_type
+	</select>
+	
+</mapper>
