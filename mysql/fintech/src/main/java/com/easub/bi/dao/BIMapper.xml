@@ -19,6 +19,7 @@
 		<result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
 		<result property="deletedAt" column="deleted_at" jdbcType="TIMESTAMP"/>
 	</resultMap>
+	
 	<select id="getShopsList" parameterType="java.util.Map" resultMap="ShopsDTO" >
 		select a.id,a.uuid,a.user_id,a.name,a.show_name,a.description,a.cover,a.choice_cover,a.theme_cover,a.type,a.sn,a.visible,a.is_deleted,a.created_at,a.updated_at,a.deleted_at
 		from shops a 
@@ -38,7 +39,7 @@
 
 	<!-- 按版权统计所有视频数和时长（小时） -->
 	<select id="getVideoCopyrightStat" parameterType="java.util.Map" resultType="java.util.Map" >
-		select a.is_abroad abroad,count(a.id) c,sum(length) sec
+		select a.is_abroad * 1 abroad,count(a.id) c,sum(length) sec
 		from videos a
 		where 1 = 1  
 		<!-- and a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR} -->
@@ -53,9 +54,15 @@
 	<!-- 全部 -->
 		select a.source_type sourceType,1 type,count(a.id) c 
 		from videos a
-		where a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		where 1 = 1
 		and a.is_deleted = 0 
 		and a.media_state = 2
+		<if test="startTime != null and startTime != '' ">
+			and a.created_at &gt;= #{startTime,jdbcType=VARCHAR}
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.created_at &lt;= #{endTime,jdbcType=VARCHAR}
+		</if>
 		<!--
 		and a.user_id not in(select user_id from user_external_maps)
 		and a.user_id not in(select uid from user_policies where user_type in('iss','ims'))
@@ -83,30 +90,52 @@
 		union all 
 		select a.source_type sourceType,2 type,count(a.id) c 
 		from videos a
-		where a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		inner join user_policies b on a.user_id = b.uid 
+		where 1 = 1
 		and a.is_deleted = 0 
 		and a.media_state = 2 
-		and a.user_id not in(select user_id from user_external_maps)
-		and a.user_id not in(select uid from user_policies where user_type in('iss','ims'))
+		<if test="startTime != null and startTime != '' ">
+			and a.created_at &gt;= #{startTime,jdbcType=VARCHAR} 
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.created_at &lt;= #{endTime,jdbcType=VARCHAR} 
+		</if>
+		and exists(select user_id from user_external_maps tt where tt.user_id != a.user_id)
+		and b.user_type not in('iss','ims')
 		and a.user_id not in(1, 8, 18, 864, 1077, 847)
 		group by a.source_type
 		<!-- 新浪 -->
 		union all 
 		select a.source_type sourceType,3 type,count(a.id) c 
 		from videos a
-		where a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		where 1 = 1
 		and a.is_deleted = 0 
 		and a.media_state = 2 
-		and a.user_id in(select user_id from user_external_maps)
+		and a.user_id in (select tt.user_id from user_external_maps tt)
+		<!-- and a.user_id in(select user_id from user_external_maps)  -->
+		<if test="startTime != null and startTime != '' ">
+			and a.created_at &gt;= #{startTime,jdbcType=VARCHAR} 
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.created_at &lt;= #{endTime,jdbcType=VARCHAR} 
+		</if>
 		group by a.source_type
 		<!-- 政务媒体 -->
 		union all 
 		select a.source_type sourceType,4 type,count(a.id) c 
-		from videos a
-		where a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		from videos a 
+		inner join user_policies b on a.user_id = b.uid 
+		where 1 = 1 
 		and a.is_deleted = 0 
 		and a.media_state = 2 
-		and a.user_id in(select uid from user_policies where user_type in('weibo_zhengwu','weibo_newsmedia'))
+		and b.user_type in('weibo_zhengwu','weibo_newsmedia') 
+		<!-- and a.user_id in(select uid from user_policies where user_type in('weibo_zhengwu','weibo_newsmedia')) -->
+		<if test="startTime != null and startTime != '' ">
+			and a.created_at &gt;= #{startTime,jdbcType=VARCHAR} 
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.created_at &lt;= #{endTime,jdbcType=VARCHAR} 
+		</if>
 		group by a.source_type
 	</select>
 	
@@ -115,36 +144,183 @@
 		<!-- 全部 -->
 		select b.source_type sourceType,1 type, count(a.id) c from user_video_share_logs a
 		left join videos b on a.vid = b.id 
-		where a.shared_time between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		where 1 = 1
  		and a.state = 2 
+ 		<if test="startTime != null and startTime != '' ">
+			and a.shared_time &gt;= #{startTime,jdbcType=VARCHAR} 
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.shared_time &lt;= #{endTime,jdbcType=VARCHAR} 
+		</if>
  		<!-- and a.user_id not in (1,8,18,864,1077,847)  -->
 		<!-- and a.user_id not in (select uid from user_policies where user_type in ('iss','ims')) -->
  		group by b.source_type
 		<!-- 除了iss\ims -->
 		union all 
 		select b.source_type sourceType,2 type, count(a.id) c from user_video_share_logs a
-		left join videos b on a.vid = b.id 
-		where a.shared_time between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		inner join videos b on a.vid = b.id 
+		inner join user_policies c on a.user_id = c.uid 
+		where 1=1 
  		and a.state = 2 
+ 		<if test="startTime != null and startTime != '' ">
+			and a.shared_time &gt;= #{startTime,jdbcType=VARCHAR} 
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.shared_time &lt;= #{endTime,jdbcType=VARCHAR} 
+		</if>
  		and a.user_id not in (1,8,18,864,1077,847)
-		and a.user_id not in (select uid from user_policies where user_type in ('iss','ims'))
+		and c.user_type not in ('iss','ims') 
  		group by b.source_type
  		<!-- 新浪 -->
  		union all 
 		select b.source_type sourceType,3 type, count(a.id) c from user_video_share_logs a
-		left join videos b on a.vid = b.id 
-		where a.shared_time between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		inner join videos b on a.vid = b.id 
+		where 1=1 
  		and a.state = 2 
- 		and a.user_id in(select user_id from user_external_maps) 
+ 		<if test="startTime != null and startTime != '' ">
+			and a.shared_time &gt;= #{startTime,jdbcType=VARCHAR} 
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.shared_time &lt;= #{endTime,jdbcType=VARCHAR} 
+		</if>
+ 		and exists(select tt.id from user_external_maps tt where tt.user_id=a.user_id) 
  		group by b.source_type
  		<!-- 政务媒体 -->
  		union all 
 		select b.source_type sourceType,4 type, count(a.id) c from user_video_share_logs a
-		left join videos b on a.vid = b.id 
-		where a.shared_time between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		inner join videos b on a.vid = b.id 
+		inner join user_policies c on a.user_id = c.uid 
+		where 1=1 
  		and a.state = 2 
- 		and a.user_id in(select uid from user_policies where user_type in('weibo_zhengwu','weibo_newsmedia'))
+ 		<if test="startTime != null and startTime != '' ">
+			and a.shared_time &gt;= #{startTime,jdbcType=VARCHAR} 
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.shared_time &lt;= #{endTime,jdbcType=VARCHAR} 
+		</if>
+ 		and c.user_type in('weibo_zhengwu','weibo_newsmedia') 
  		group by b.source_type
+	</select>
+	
+	<select id="getVideosStatCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select count(a.id) from videos a 
+		<if test="isNeedUserPolicies">
+			inner join user_policies b on a.user_id = b.uid
+		</if>
+		where 1=1
+		and a.is_deleted = 0
+		<if test="sourceType != null and sourceType != '' ">
+			and a.source_type = #{sourceTyp,jdbcType=INTEGER}
+		</if>
+		<if test="sourceTypes != null and sourceTypes != '' ">
+			and a.source_type in(${sourceTypes})
+		</if>
+		<if test="startCreatedTime != null and startCreatedTime != '' ">
+			and a.created_at &gt;= #{startCreatedTime,jdbcType=VARCHAR}
+		</if>
+		<if test="endCreatedTime != null and endCreatedTime != '' ">
+			and a.created_at &lt;= #{endCreatedTime,jdbcType=VARCHAR}
+		</if>
+		
+		<if test="isNeedUserPolicies">
+			<if test="userType != null and userType != '' ">
+				and b.user_type = #{userType,jdbcType=VARCHAR}
+			</if>
+			<if test="userTypes != null and userTypes != '' ">
+				and b.user_type in(${userTypes})
+			</if>
+			<if test="notUserTypes != null and notUserTypes != '' ">
+				and b.user_type not in(${notUserTypes})
+			</if>
+		</if>
+	</select>
+	
+	<select id="getVideosShareStatCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select count(a.id) from user_video_share_logs a
+		inner join videos b on a.vid = b.id
+		<if test="isNeedUserPolicies">
+			inner join user_policies c on a.user_id = c.uid
+		</if> 
+		where 1=1
+		and a.state = #{state,jdbcType=INTEGER}
+		<if test="startShareTime != null and startShareTime != '' ">
+			and a.shared_time &gt;= #{startShareTime,jdbcType=VARCHAR}
+		</if>
+		<if test="endShareTime != null and endShareTime != '' ">
+			and a.shared_time &lt;= #{endShareTime,jdbcType=VARCHAR}
+		</if>
+		<if test="sourceType != null and sourceType != '' ">
+			and b.source_type = #{sourceTyp,jdbcType=INTEGER}
+		</if>
+		<if test="sourceTypes != null and sourceTypes != '' ">
+			and b.source_type in(${sourceTypes})
+		</if>
+		<if test="isNeedUserPolicies">
+			<if test="userType != null and userType != '' ">
+				and c.user_type = #{userType,jdbcType=VARCHAR}
+			</if>
+			<if test="userTypes != null and userTypes != '' ">
+				and c.user_type in(${userTypes})
+			</if>
+			<if test="notUserTypes != null and notUserTypes != '' ">
+				and c.user_type not in(${notUserTypes})
+			</if>
+		</if>
+	</select>
+	
+	
+	<!-- 本地上传素材量 -->
+	<select id="getUploadMaterialsStatCount" parameterType="java.util.Map" resultType="java.util.Map" >
+		select a.source_type * 1 sourceType,date_format(a.created_at,'%Y-%m-%d') d,count(*) c
+		from mam_materials a 
+		where a.is_deleted = #{isDeleted,jdbcType=INTEGER}
+		and media_state = #{mediaState,jdbcType=INTEGER} 
+		and a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+		<!-- and a.source_type = #{sourceType,jdbcType=INTEGER}  -->
+		group by a.source_type,date_format(a.created_at,'%Y-%m-%d')
+	</select>
+	<!-- 本地上传素材活跃用户 -->
+	<select id="getUploadMaterialsActiveUserStatCount" parameterType="java.util.Map" resultType="java.util.Map" >
+		select t.d,t.sourceType,count(t.user_id) c from (
+			select a.user_id,a.source_type * 1 sourceType,date_format(a.created_at,'%Y-%m-%d') d,count(*) c
+			from mam_materials a 
+			where a.is_deleted = #{isDeleted,jdbcType=INTEGER}
+			and media_state = #{mediaState,jdbcType=INTEGER} 
+			and a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+			<!-- and a.source_type = #{sourceType,jdbcType=INTEGER}  -->
+			group by a.user_id,a.source_type,date_format(a.created_at,'%Y-%m-%d')
+		) t 
+		group by t.d,t.sourceType
+		order by t.d desc
+	</select>
+	
+	<!-- 视频播放量VV -->
+	<select id="getVideoVV" parameterType="java.util.Map" resultType="java.lang.Integer" >
+		select sum(a.vv) sumvv from weibo_statistics a 
+		where 1=1 
+		<if test="startTime != null and startTime != '' ">
+			and a.updated_at &gt;= #{startTime,jdbcType=VARCHAR}
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.updated_at &lt;= #{endTime,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<select id="getVideoSourceTypeCreateTimeCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select date_format(a.created_at,'%Y-%m-%d') d,a.source_type sourceType,count(a.id) 
+		from videos a 
+		where 1 = 1
+		and a.is_deleted = 0
+		<if test="mediaState != null and mediaState != '' ">
+			and a.media_state = #{mediaState,jdbcType=INTEGER}	
+		</if>
+		<if test="startTime != null and startTime != '' ">
+			and a.created_at &gt;= #{startTime,jdbcType=VARCHAR}
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.created_at &lt;= #{endTime,jdbcType=VARCHAR}
+		</if>
+		 group by a.source_type,date_format(a.created_at,'%Y-%m-%d')
 	</select>
 	
 </mapper>

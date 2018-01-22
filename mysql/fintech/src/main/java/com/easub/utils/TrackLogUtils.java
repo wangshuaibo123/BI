@@ -7,20 +7,23 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.fintech.platform.tools.common.DateUtil;
 
 public class TrackLogUtils {
 
-	public static void getTrackLogFileListByTime(String path,String startTime,String endTime) {
-		getTrackLogFileListByTime(path, DateUtil.getDateFromString(startTime), DateUtil.getDateFromString(endTime));
+	public static Map<Date,List<TrackLog>> getTrackLogFileListByTime(String path,String startTime,String endTime) {
+		return getTrackLogFileListByTime(path, DateUtil.getDateFromString(startTime), DateUtil.getDateFromString(endTime));
 	}
 	
-	public static void getTrackLogFileListByTime(String path,Date startTime,Date endTime) {
+	public static Map<Date,List<TrackLog>> getTrackLogFileListByTime(String path,Date startTime,Date endTime) {
+		Map<Date,List<TrackLog>> trackLogMap = new HashMap<Date, List<TrackLog>>();
 		if(path == null || "".equals(path.trim())) {
-			return;
+			return new HashMap();
 		}
 		if(startTime == null) {
 			startTime = new Date();
@@ -33,8 +36,9 @@ public class TrackLogUtils {
 		
 		File dir = new File(path);
 		if(!dir.exists()) {
-			return;
+			return new HashMap();
 		}
+		
 		if(dir.isDirectory()) {
 			File[] fileList = dir.listFiles();
 			for(File file : fileList) {
@@ -50,13 +54,11 @@ public class TrackLogUtils {
 				CalendarUtils.clearHMS(tempDate);
 				if(tempDate.getTime() >= startTime.getTime() && tempDate.getTime() <= endTime.getTime()) {
 					List<TrackLog> list = parseTrackLogFile(file);
-					for(TrackLog l : list) {
-						System.out.println(l.getProperty("platformType"));
-					}
+					trackLogMap.put(tempDate, list);
 				}
-				
 			}
 		}
+		return trackLogMap;
 	}
 	
 	public static void main(String[] args) {
@@ -66,7 +68,7 @@ public class TrackLogUtils {
 		getTrackLogFileListByTime(path, "2018-01-01", "2018-01-10");
 	}
 	
-	public static String getExtendName(String fileName) {
+	private static String getExtendName(String fileName) {
 		if(fileName == null || "".equals(fileName.trim())) {
 			return "";
 		}
@@ -84,7 +86,7 @@ public class TrackLogUtils {
 	 * 解析埋点的日志文件
 	 * @param file
 	 */
-	public static List<TrackLog> parseTrackLogFile(File file) {
+	private static List<TrackLog> parseTrackLogFile(File file) {
 		
 		if(file == null || !file.isFile() || !file.exists()) {
 			return new ArrayList();
@@ -99,7 +101,6 @@ public class TrackLogUtils {
 //				System.out.println(line);
 //				JSONObject json = JSONObject.parseObject(line);
 				TrackLog trackLog = JSONObject.parseObject(line, TrackLog.class);
-				
 //				net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(line);
 //				TrackLog trackLog = (TrackLog) net.sf.json.JSONObject.toBean(jsonObject, TrackLog.class);
 				

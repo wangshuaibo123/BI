@@ -97,6 +97,62 @@ public class Constant implements Serializable{
 			sourceTypeMap.put(SOURCE_TYPE_WEIBO_JOIN, "微博接入");
 		}
 		
+		
+		//分享
+		//0转码中,1发送成功,2分享成功,3分享失败,5审核被拒绝,4审核中,6 等待分享
+		/**
+		 * 视频分享状态：转码中
+		 */
+		public static final int SHARE_STATE_TRANSCODING = 0;
+		/**
+		 * 视频分享状态：发送成功
+		 */
+		public static final int SHARE_STATE_SEND_SUCESS = 1;
+		/**
+		 * 视频分享状态：分享成功
+		 */
+		public static final int SHARE_STATE_SHARE_SUCESS = 2;
+		/**
+		 * 视频分享状态：分享失败
+		 */
+		public static final int SHARE_STATE_SHARE_FAIL = 3;
+		/**
+		 * 视频分享状态：审核中
+		 */
+		public static final int SHARE_STATE_AUDITING = 4;
+		/**
+		 * 视频分享状态：审核被拒绝
+		 */
+		public static final int SHARE_STATE_AUDIT_REFUSE = 5;
+		/**
+		 * 视频分享状态：等等分享
+		 */
+		public static final int SHARE_STATE_WAIT_SHARE = 6;
+		
+	}
+	/**
+	 * 素材
+	 * @author jiangshuncheng
+	 *
+	 */
+	public static class Materials{
+		/**
+		 * 上传
+		 */
+		public final static int SOURCE_TYPE_UPLOAD = 0;
+		/**
+		 * 生产剪辑
+		 */
+		public final static int SOURCE_TYPE_CLIP = 1;
+		/**
+		 * 购买
+		 */
+		public final static int SOURCE_TYPE_BUY = 2;
+		/**
+		 * 拉取
+		 */
+		public final static int SOURCE_TYPE_PULL = 3;
+		
 	}
 	
 	

@@ -79,6 +79,36 @@ public class BIService implements IBIService{
 		return this.dao.getVideosSourceTypeShareStatCount(map);
 	}
 
+	@Override
+	public List getUploadMaterialsStatCount(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		return this.dao.getUploadMaterialsStatCount(map);
+	}
+
+	@Override
+	public List getUploadMaterialsActiveUserStatCount(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		return this.dao.getUploadMaterialsActiveUserStatCount(map);
+	}
+
+	@Override
+	public Integer getVideosStatCount(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		return this.dao.getVideosStatCount(map);
+	}
+
+	@Override
+	public Integer getVideosShareStatCount(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		return this.dao.getVideosShareStatCount(map);
+	}
+
+	@Override
+	public Integer getVideoVV(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		return this.dao.getVideoVV(map);
+	}
+
 
 
 	

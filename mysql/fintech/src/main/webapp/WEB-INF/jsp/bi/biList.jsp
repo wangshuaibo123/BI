@@ -45,6 +45,9 @@
 			case 6:
 				url = "${basePath}bi/prepareExecute/toVideosSourceTypeShareStatCount?id=" + id;
 				break;
+			case 7:
+				url = "${basePath}bi/prepareExecute/toCloudClipWeeklyStat?id=" + id;
+				break;
 		}
 		if(url == ""){
 			alert("找不到页面！");
