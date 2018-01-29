@@ -23,6 +23,12 @@ public interface IBIService extends Serializable{
 	 */
 	List getVideoCopyrightStat(String startTime,String endTime) throws Exception;
 	/**
+	 * 按条件统计视频数和时长（秒）
+	 * @param map
+	 * @return
+	 */
+	public Map<String,Object> getVideoStatCount(Map<String,Object> map) throws Exception;
+	/**
 	 * 按视频类型统计时间段内的视频数
 	 * @param startTime
 	 * @param endTime
@@ -67,5 +73,5 @@ public interface IBIService extends Serializable{
 	 * @param map
 	 * @return
 	 */
-	Integer getVideoVV(Map<String,Object> map);
+	Long getVideoVV(Map<String,Object> map);
 }

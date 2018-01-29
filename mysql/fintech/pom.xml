@@ -329,6 +329,22 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
 		</dependency>
+		<!-- <dependency>  
+	        <groupId>org.elasticsearch</groupId>  
+	        <artifactId>elasticsearch</artifactId>  
+	        <version>1.4.4</version>  
+	    </dependency> -->
+		<!-- <dependency>  
+	      <groupId>org.apache.hadoop</groupId>  
+	      <artifactId>hadoop-common</artifactId>  
+	      <version>3.0.0</version>  
+	    </dependency>  
+	    <dependency>  
+	      <groupId>org.apache.hadoop</groupId> 
+	      <artifactId>hadoop-hdfs</artifactId>
+	      <version>3.0.0</version>
+	    </dependency>  --> 
+		
 		<!-- Test -->
 		<dependency>
 			<groupId>org.springframework</groupId>

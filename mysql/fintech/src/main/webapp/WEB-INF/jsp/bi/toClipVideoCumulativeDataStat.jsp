@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head>
    <%@ include file="/common/StaticJavascript.jsp" %>
-  <title>本周云剪数据</title>
+  <title>累计云剪数据</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <script type="text/javascript" src="${basePath}js/threeJs/echarts/echarts.min.js"></script>
 <!-- 相关js方法 -->
@@ -25,121 +25,31 @@
 	function initFn(){
 	    var startTime = $("#startTime").val();
 	    var endTime = $("#endTime").val();
-	    var url = contextRootPath+"/bi/getCloudClipWeeklyStatData";
+	    var url = contextRootPath+"/bi/getClipVideoCumulativeDataStat";
 	    var params = {"startTime":startTime,"endTime":endTime};
 	    //JSON.stringify(params)
 	    jyAjax(url,params,function(msg){
 	    	console.log(msg);
         	var data = msg.data;
-        	//var copyrightDataMap = data.copyrightDataMap;
-        	var thisClipDataMap = data.thisClipDataMap;
-        	var thisClipShareDataMap = data.thisClipShareDataMap;
-        	var lastClipDataMap = data.lastClipDataMap;
-        	var lastClipShareDataMap = data.lastClipShareDataMap;
-        	
-        	/*var thisCumulativeClipDataMap = data.thisCumulativeClipDataMap;
+        	var copyrightDataMap = data.copyrightDataMap;
+        	var thisCumulativeClipDataMap = data.thisCumulativeClipDataMap;
         	var thisCumulativeClipShareDataMap = data.thisCumulativeClipShareDataMap;
         	var lastCumulativeClipDataMap = data.lastCumulativeClipDataMap;
-        	var lastCumulativeClipShareDataMap = data.lastCumulativeClipShareDataMap;*/
+        	var lastCumulativeClipShareDataMap = data.lastCumulativeClipShareDataMap;
+        	
         	//账号情况
-        	//$("#allUserCountSpan").html(data["allUserCount"]);
-        	//$("#issImsUserCountSpan").html(data["issImsUserCount"]);
-        	//$("#zwMediaUserCountSpan").html(data["zwMediaUserCount"]);
-        	$("#newAddUserCountSpan").html(data["newAddUserCount"]);
+        	$("#allUserCountSpan").html(data["allUserCount"]);
+        	$("#issImsUserCountSpan").html(data["issImsUserCount"]);
+        	$("#zwMediaUserCountSpan").html(data["zwMediaUserCount"]);
         	//版权情况
-        	/*$("#abroadVideoCountSpan").html(copyrightDataMap["abroadCount"]);
+        	$("#abroadVideoCountSpan").html(copyrightDataMap["abroadCount"]);
         	$("#abroadVideoHourSpan").html(copyrightDataMap["abroadHour"]);
         	$("#homeVideoCountSpan").html(copyrightDataMap["homeCount"]);
         	$("#homeVideoHourSpan").html(copyrightDataMap["homeHour"]);
         	$("#totalVideoCountSpan").html(copyrightDataMap["abroadCount"] + copyrightDataMap["homeCount"]);
-        	$("#totalVideoHourSpan").html(copyrightDataMap["abroadHour"] + copyrightDataMap["homeHour"]);*/
-        	//本周数据
-        	var zbCount = thisClipDataMap["1_3"];
-        	var lastZbCount = lastClipDataMap["1_3"];
-        	var zbjzCount = thisClipDataMap["1_4"];
-        	var lastZbjzCount = lastClipDataMap["1_4"];
-        	var zbjzShareCount = thisClipShareDataMap["1_4"];
-        	var lastZbjzShareCount = lastClipShareDataMap["1_4"];
-        	
-        	zbCount = zbCount ? zbCount : 0;
-        	lastZbCount = lastZbCount ? lastZbCount : 0;
-        	zbjzCount = zbjzCount ? zbjzCount : 0;
-        	lastZbjzCount = lastZbjzCount ? lastZbjzCount : 0;
-        	zbjzShareCount = zbjzShareCount ? zbjzShareCount : 0;
-        	lastZbjzShareCount = lastZbjzShareCount ? lastZbjzShareCount : 0;
-        	$("#zbCountSpan").html(zbCount);
-        	$("#zbPercentSpan").html(getPercent(zbCount,lastZbCount));
-        	$("#zbjzCountSpan").html(zbjzCount);
-        	$("#zbjzPercentSpan").html(getPercent(lastZbjzCount,lastZbjzCount));
-        	$("#zbjzShareCountSpan").html(zbjzShareCount);
-        	$("#zbjzSharePercentSpan").html(getPercent(zbjzShareCount,lastZbjzShareCount));
-        	//======================================
-        	var uploadCount = thisClipDataMap["1_0"];
-        	var lastUploadCount = lastClipDataMap["1_0"];
-        	var uploadNotIssImsCount = thisClipDataMap["2_0"];
-        	var lastUploadNotIssImsCount = lastClipDataMap["2_0"];
-        	var uploadShareCount = thisClipShareDataMap["1_0"];
-        	var lastUploadShareCount = lastClipShareDataMap["1_0"];
-        	var uploadNotIssImsShareCount = thisClipShareDataMap["2_0"];
-        	var lastUploadNotIssImsShareCount = lastClipShareDataMap["2_0"];
-        	
-        	uploadCount = uploadCount ? uploadCount : 0;
-        	lastUploadCount = lastUploadCount ? lastUploadCount : 0;
-        	uploadNotIssImsCount = uploadNotIssImsCount ? uploadNotIssImsCount : 0;
-        	lastUploadNotIssImsCount = lastUploadNotIssImsCount ? lastUploadNotIssImsCount : 0;
-        	uploadShareCount = uploadShareCount ? uploadShareCount : 0;
-        	lastUploadShareCount = lastUploadShareCount ? lastUploadShareCount : 0;
-        	uploadNotIssImsShareCount = uploadNotIssImsShareCount ? uploadNotIssImsShareCount : 0;
-        	lastUploadNotIssImsShareCount = lastUploadNotIssImsShareCount ? lastUploadNotIssImsShareCount : 0;
-        		
-        	$("#uploadCountSpan").html(uploadCount);
-        	$("#uploadPercentSpan").html(getPercent(uploadCount,lastUploadCount));
-        	$("#uploadNotIssImsCountSpan").html(uploadNotIssImsCount);
-        	$("#uploadNotIssImsPercentSpan").html(getPercent(uploadNotIssImsCount,lastUploadNotIssImsCount));
-        	$("#uploadShareCountSpan").html(uploadShareCount);
-        	$("#uploadSharePercentSpan").html(getPercent(uploadShareCount,lastUploadShareCount));
-        	$("#uploadNotIssImsShareCountSpan").html(uploadNotIssImsShareCount);
-        	$("#uploadNotIssImsSharePercentSpan").html(getPercent(uploadNotIssImsShareCount,lastUploadNotIssImsShareCount));
-        	//======================================
-        	var jzCount = thisClipDataMap["1_2"];
-        	var lastJzCount = lastClipDataMap["1_2"];
-        	var jzNotIssImsCount = thisClipDataMap["2_2"];
-        	var lastJzNotIssImsCount = lastClipDataMap["2_2"];
-        	var jzShareCount = thisClipShareDataMap["1_2"];
-        	var lastJzShareCount = lastClipShareDataMap["1_2"];
-        	var jzNotIssImsShareCount = thisClipShareDataMap["2_2"];
-        	var lastJzNotIssImsShareCount = lastClipShareDataMap["2_2"];
-        	
-        	jzCount = jzCount ? jzCount : 0;
-        	lastJzCount = lastJzCount ? lastJzCount : 0;
-        	jzNotIssImsCount = jzNotIssImsCount ? jzNotIssImsCount : 0;
-        	lastJzNotIssImsCount = lastJzNotIssImsCount ? lastJzNotIssImsCount : 0;
-        	jzShareCount = jzShareCount ? jzShareCount : 0;
-        	lastJzShareCount = lastJzShareCount ? lastJzShareCount : 0;
-        	jzNotIssImsShareCount = jzNotIssImsShareCount ? jzNotIssImsShareCount : 0;
-        	lastJzNotIssImsShareCount = lastJzNotIssImsShareCount ? lastJzNotIssImsShareCount : 0;
-        	$("#jzCountSpan").html(jzCount);
-        	$("#jzPercentSpan").html(getPercent(jzCount,lastJzCount));
-        	$("#jzNotIssImsCountSpan").html(jzNotIssImsCount);
-        	$("#jzNotIssImsPercentSpan").html(getPercent(jzNotIssImsCount,lastJzNotIssImsCount));
-        	$("#jzShareCountSpan").html(jzShareCount);
-        	$("#jzSharePercentSpan").html(getPercent(jzShareCount,lastJzShareCount));
-        	$("#jzNotIssImsShareCountSpan").html(jzNotIssImsShareCount);
-        	$("#jzNotIssImsSharePercentSpan").html(getPercent(jzNotIssImsShareCount,lastJzNotIssImsShareCount));
-        	
-        	$("#activeUserCountSpan").html(data["allActiveUserCount"]);
-        	$("#activeAvgUserCountSpan").html(data["allActiveAvgUserCount"]);
-        	$("#activeUserCount1_0Span").html(data["activeUserCount_1_0"]);
-        	$("#activeAvgUserCount1_0Span").html(data["activeAvgUserCount_1_0"]);
-        	$("#activeUserCount2_0Span").html(data["activeUserCount"]);
-        	$("#activeAvgUserCount2_0Span").html(data["activeAvgUserCount"]);
-        	$("#shareCountSpan").html(data["videoShareCount"]);
-        	$("#shareAvgCountSpan").html(data["videoAvgShareCount"]);
-        	$("#playCountSpan").html(data["videoVVCount"]);
-        	$("#playAvgCountSpan").html(data["videoAvgVVCount"]);
+        	$("#totalVideoHourSpan").html(copyrightDataMap["abroadHour"] + copyrightDataMap["homeHour"]);
         	
         	//累计数据
-        	/*
         	var zbCount = thisCumulativeClipDataMap["1_3"];
         	var lastZbCount = lastCumulativeClipDataMap["1_3"];
         	var zbjzCount = thisCumulativeClipDataMap["1_4"];
@@ -214,7 +124,7 @@
         	$("#ljjzNotIssImsSharePercentSpan").html(getPercent(jzNotIssImsShareCount,lastJzNotIssImsShareCount));
         	
         	$("#ljshareCountSpan").html(data["ljvideoShareCount"]);
-        	$("#ljplayCountSpan").html(data["ljvideoVVCount"]);*/
+        	$("#ljplayCountSpan").html(data["ljvideoVVCount"]);
 		})
 	    
 	   /* $.ajax({
@@ -239,7 +149,7 @@
 	function exportExcelFun(){
 		var startTime = $("#startTime").val();
 	    var endTime = $("#endTime").val();
-	    var url = contextRootPath+"/bi/exportCloudClipWeeklyStatData";
+	    var url = contextRootPath+"/bi/exportClipVideoCumulativeStatData";
 	    var params = {"startTime":startTime,"endTime":endTime};
 	    var mask=$("").newMask();
 		mask.show("正在导出...");
@@ -249,7 +159,7 @@
 	    	$.ajax({
 	            type:"POST",
 	            dataType:"JSON",
-	            url:contextRootPath+"/bi/checkExportCloudClipWeeklyStatDataSuccess",
+	            url:contextRootPath+"/bi/checkExportClipVideoCumulativeStatDataSuccess",
 	            data:{},
 	            success:function(msg){
 	            	if(msg == 1){
@@ -289,21 +199,16 @@
 </head>
 <body style="background-color:#FFFFFF">
 	<h3 class="" style="height: 30px;line-height: 30px;padding-left:2px;background-color: #e8f6f6;border: 1px solid #c6eded;border-bottom: 0px;">
-		本周云剪数据
+		累计云剪数据
 	</h3>
 	
 	<div>
 		<form name="frm" method="post" action="">
 			<div class="field">
-				<label class="fieldName" for="speed"> 开始时间 :</label>
-				<input type="text" style=" width:200px; " value="${startTime }" name="startTime" id="startTime" onClick="WdatePicker()">
-			</div>
-			<div class="field">
-				<label class="fieldName" for="speed"> 结束时间 :</label>
+				<label class="fieldName" for="speed"> 截止时间 :</label>
 				<input type="text" style=" width:200px; " value="${endTime }" name="endTime" id="endTime" onClick="WdatePicker()">
 			</div>
 		</form>
-		<!-- <div class="searchBtn"> -->
 		<div class="field" style="margin-bottom: 10px;">
 			<button class="ui-button ui-corner-all ui-widget" onclick="queryData()">
 				<span class="ui-button-icon ui-icon ui-icon-search"></span>
@@ -313,7 +218,7 @@
 	</div>
 	
 	<div id="tableToolbar" class="tableToolbar" >
-		 <!-- <a href="javascript:void(0)" onclick="returnFun()" index="0">返回</a> -->
+		<!--  <a href="javascript:void(0)" onclick="returnFun()" index="0">返回</a> -->
 		 <a href="javascript:void(0)" onclick="exportExcelFun()" index="0">导出到Excel</a>
 	 </div>
 	 <!-- 页面初始化 需要的 div -->
@@ -321,9 +226,9 @@
 		<table cellpadding="0" cellspacing="0" width="" border="0">
 			<tr>
 				<td rowspan="2" style="font-weight: bold;">用户情况</td>
-				<td class="tdHeader">本周新增账号总数</td>
-				<td class="tdHeader">&nbsp;</td>
-				<td class="tdHeader">&nbsp;</td>
+				<td class="tdHeader">ISS/IMS账号数</td>
+				<td class="tdHeader">政务媒体账号数</td>
+				<td class="tdHeader">账号总数</td>
 				<td class="tdHeader">&nbsp;</td>
 				<td class="tdHeader">&nbsp;</td>
 				<td class="tdHeader">&nbsp;</td>
@@ -331,9 +236,9 @@
 				<td class="tdHeader">&nbsp;</td>
 			</tr>	
 			<tr>
-				<td><span id="newAddUserCountSpan"></span></td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
+				<td><span id="issImsUserCountSpan"></span></td>
+				<td><span id="zwMediaUserCountSpan"></span></td>
+				<td><span id="allUserCountSpan"></span></td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
@@ -341,113 +246,50 @@
 				<td>&nbsp;</td>
 			</tr>
 			<tr>
-				<td rowspan="10" style="font-weight: bold;">本周云剪后台数据</td>
-				<td class="tdHeader">活跃用户总数</td>
-				<td class="tdHeader">日均活跃用户总数</td>
-				<td class="tdHeader">活跃用户数（1.0）</td>
-				<td class="tdHeader">日均活跃用户数（1.0）</td>
-				<td class="tdHeader">活跃用户数（2.0）</td>
-				<td class="tdHeader">日均活跃用户数（2.0）</td>
+				<td rowspan="2" style="font-weight: bold;">版权情况</td>
+				<td class="tdHeader">海外片段数量</td>
+				<td class="tdHeader">海外总时长</td>
+				<td class="tdHeader">国内片段数量</td>
+				<td class="tdHeader">国内总时长</td>
+				<td class="tdHeader">总计片段数量</td>
+				<td class="tdHeader">总计时长</td>
 				<td class="tdHeader">&nbsp;</td>
 				<td class="tdHeader">&nbsp;</td>
-			</tr>
+			</tr>	
 			<tr>
-				<td><span id="activeUserCountSpan"></span></td>
-				<td><span id="activeAvgUserCountSpan"></span></td>
-				<td><span id="activeUserCount1_0Span"></span></td>
-				<td><span id="activeAvgUserCount1_0Span"></span></td>
-				<td><span id="activeUserCount2_0Span"></span></td>
-				<td><span id="activeAvgUserCount2_0Span"></span></td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="tdHeader">视频分享数</td>
-				<td class="tdHeader">日均视频分享数</td>
-				<td class="tdHeader">视频播放量</td>
-				<td class="tdHeader">日均视频播放量</td>
-				<td class="tdHeader">&nbsp;</td>
-				<td class="tdHeader">&nbsp;</td>
-				<td class="tdHeader">&nbsp;</td>
-				<td class="tdHeader">&nbsp;</td>
-			</tr>
-			<tr>
-				<td><span id="shareCountSpan"></span></td>
-				<td><span id="shareAvgCountSpan"></span></td>
-				<td><span id="playCountSpan"></span></td>
-				<td><span id="playAvgCountSpan"></span></td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
+				<td><span id="abroadVideoCountSpan"></span></td>
+				<td><span id="abroadVideoHourSpan"></span></td>
+				<td><span id="homeVideoCountSpan"></span></td>
+				<td><span id="homeVideoHourSpan"></span></td>
+				<td><span id="totalVideoCountSpan"></span></td>
+				<td><span id="totalVideoHourSpan"></span></td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 			</tr>
 			
-			<tr>
-				
-				<td class="tdHeader">接入直播数量</td>
-				<td class="tdHeader">环比增长</td>
-				<td class="tdHeader">直播内容剪辑数量</td>
-				<td class="tdHeader">环比增长</td>
-				<td class="tdHeader">直播内容剪辑分享</td>
-				<td class="tdHeader">环比增长</td>
-				<td class="tdHeader">&nbsp;</td>
-				<td class="tdHeader">&nbsp;</td>
-			</tr>	
-			<tr>
-				<td><span id="zbCountSpan"></span></td>
-				<td><span id="zbPercentSpan"></span></td>
-				<td><span id="zbjzCountSpan"></span></td>
-				<td><span id="zbjzPercentSpan"></span></td>
-				<td><span id="zbjzShareCountSpan"></span></td>
-				<td><span id="zbjzSharePercentSpan"></span></td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="tdHeader">上传数量</td>
-				<td class="tdHeader">环比增长</td>
-				<td class="tdHeader">上传数量（去除ISS/IMS）</td>
-				<td class="tdHeader">环比增长</td>
-				<td class="tdHeader">上传后分享</td>
-				<td class="tdHeader">环比增长</td>
-				<td class="tdHeader">上传后分享（去除ISS/IMS）</td>
-				<td class="tdHeader">环比增长</td>
-			</tr>	
-			<tr>
-				<td><span id="uploadCountSpan"></span></td>
-				<td><span id="uploadPercentSpan"></span></td>
-				<td><span id="uploadNotIssImsCountSpan"></span></td>
-				<td><span id="uploadNotIssImsPercentSpan"></span></td>
-				<td><span id="uploadShareCountSpan"></span></td>
-				<td><span id="uploadSharePercentSpan"></span></td>
-				<td><span id="uploadNotIssImsShareCountSpan"></span></td>
-				<td><span id="uploadNotIssImsSharePercentSpan"></span></td>
-			</tr>
-			<tr>
-				<td class="tdHeader">剪辑数量</td>
-				<td class="tdHeader">环比增长</td>
-				<td class="tdHeader">剪辑数量（去除ISS/IMS）</td>
-				<td class="tdHeader">环比增长</td>
-				<td class="tdHeader">剪辑后分享</td>
-				<td class="tdHeader">环比增长</td>
-				<td class="tdHeader">剪辑后分享 （去除ISS/IMS）</td>
-				<td class="tdHeader">环比增长</td>
-			</tr>	
-			<tr>
-				<td><span id="jzCountSpan"></span></td>
-				<td><span id="jzPercentSpan"></span></td>
-				<td><span id="jzNotIssImsCountSpan"></span></td>
-				<td><span id="jzNotIssImsPercentSpan"></span></td>
-				<td><span id="jzShareCountSpan"></span></td>
-				<td><span id="jzSharePercentSpan"></span></td>
-				<td><span id="jzNotIssImsShareCountSpan"></span></td>
-				<td><span id="jzNotIssImsSharePercentSpan"></span></td>
-			</tr>
-			
-			
-			<!-- 
 			<tr>
 				<td rowspan="8" style="font-weight: bold;">累计云剪后台数据</td>
+				<td class="tdHeader">视频分享数</td>
+				<td class="tdHeader">视频播放量</td>
+				<td class="tdHeader">&nbsp;</td>
+				<td class="tdHeader">&nbsp;</td>
+				<td class="tdHeader">&nbsp;</td>
+				<td class="tdHeader">&nbsp;</td>
+				<td class="tdHeader">&nbsp;</td>
+				<td class="tdHeader">&nbsp;</td>
+			</tr>
+			<tr>
+				<td><span id="ljshareCountSpan"></span></td>
+				<td><span id="ljplayCountSpan"></span></td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				
 				<td class="tdHeader">接入直播数量</td>
 				<td class="tdHeader">环比增长</td>
 				<td class="tdHeader">直播内容剪辑数量</td>
@@ -507,26 +349,7 @@
 				<td><span id="ljjzNotIssImsShareCountSpan"></span></td>
 				<td><span id="ljjzNotIssImsSharePercentSpan"></span></td>
 			</tr>
-			<tr>
-				<td class="tdHeader">视频分享数</td>
-				<td class="tdHeader">视频播放量</td>
-				<td class="tdHeader">&nbsp;</td>
-				<td class="tdHeader">&nbsp;</td>
-				<td class="tdHeader">&nbsp;</td>
-				<td class="tdHeader">&nbsp;</td>
-				<td class="tdHeader">&nbsp;</td>
-				<td class="tdHeader">&nbsp;</td>
-			</tr>
-			<tr>
-				<td><span id="ljshareCountSpan"></span></td>
-				<td><span id="ljplayCountSpan"></span></td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-			</tr>-->
+			
 		</table>
 	</div>
 </body>

@@ -73,12 +73,13 @@
 				<value>classpath*:com/portal/**/dao/*Mapper.xml</value>
 				<value>classpath*:com/jy/**/dao/*Mapper.xml</value>
 				<value>classpath*:mybatis/*Mapper.xml</value>
+				<value>classpath*:com/easub/clip/dao/*Mapper.xml</value>
 			</list>
 		</property>
 	</bean>
 	<!-- 扫描basePackage下所有以@MyBatisRepository标识的 接口-->
 	<bean id="mapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<property name="basePackage" value="com.fintech;com.portal;com.jy" />
+		<property name="basePackage" value="com.fintech;com.portal;com.jy;com.easub.clip" />
 		<property name="annotationClass" value="com.fintech.platform.core.mybatis.MyBatisRepository"/>
 		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
 	</bean>
@@ -96,6 +97,7 @@
 		<aop:advisor pointcut="execution(* com.fintech..service..*.*(..))" advice-ref="txAdvice" order="1"/>
 		<aop:advisor pointcut="execution(* com.jy..service..*.*(..))" advice-ref="txAdvice" order="2"/>
 		<aop:advisor pointcut="execution(* com.portal..service..*.*(..))" advice-ref="txAdvice" order="3"/>
+		<aop:advisor pointcut="execution(* com.easub..service..*.*(..))" advice-ref="txAdvice" order="4"/>
 	</aop:config>
 	<!-- 基本事务定义,使用transactionManager作事务管理 -->
 	<tx:advice id="txAdvice" transaction-manager="transactionManager">
@@ -160,7 +162,7 @@
   	<import resource="classpath*:spring-shiro.xml" />
   	<import resource="classpath*:spring-bi.xml" />
  	<!--  不启用 定时任务 -->
- 	 <!-- <import resource="classpath*:quartz/*-spring.xml" /> -->
+ 	<import resource="classpath*:quartz/*-spring.xml" />
 
  		 
 </beans>

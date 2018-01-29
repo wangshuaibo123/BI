@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.easub.analysis.dao.ClipAnalysisDao">
+	
+	<!-- 视频播放量VV -->
+	<select id="getVideoVV" parameterType="java.util.Map" resultType="java.lang.Long" >
+		select sum(a.vv) sumvv from weibo_daily_total_statistics a 
+		where 1=1 
+		<if test="startTime != null and startTime != ''">
+			and stats_timestamp &gt;= #{startTime,jdbcType=BIGINT}
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and stats_timestamp &lt; #{endTime,jdbcType=BIGINT} 
+		</if>
+	</select>
+	
+</mapper>

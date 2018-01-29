@@ -96,7 +96,22 @@ public class Constant implements Serializable{
 			sourceTypeMap.put(SOURCE_TYPE_PUBLIC_LIBRARY_SHARE, "公共库共享");
 			sourceTypeMap.put(SOURCE_TYPE_WEIBO_JOIN, "微博接入");
 		}
-		
+		/**
+		 * 视频状态：上传中 0
+		 */
+		public static final int MEDIA_STATE_UPLOAD = 0;
+		/**
+		 * 视频状态：处理中 1
+		 */
+		public static final int MEDIA_STATE_HANDLE = 1;
+		/**
+		 * 视频状态：成功 2
+		 */
+		public static final int MEDIA_STATE_SUCCESS = 2;
+		/**
+		 * 视频状态：失败 3
+		 */
+		public static final int MEDIA_STATE_FAIL = 3;
 		
 		//分享
 		//0转码中,1发送成功,2分享成功,3分享失败,5审核被拒绝,4审核中,6 等待分享

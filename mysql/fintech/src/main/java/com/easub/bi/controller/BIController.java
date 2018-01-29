@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.easub.analysis.service.impl.ClipAnalysisService;
 import com.easub.bi.BIConfig;
 import com.easub.bi.Constant;
 import com.easub.bi.dto.ClipUsersDTO;
@@ -40,6 +41,13 @@ import com.easub.bi.dto.ShopsDTO;
 import com.easub.bi.excel.ExcelHelper;
 import com.easub.bi.service.IBIService;
 import com.easub.bi.service.IClipUsersService;
+import com.easub.biextra.service.IBIExtraService;
+import com.easub.clip.dto.ClipVideoCopyrightSummaryStatDTO;
+import com.easub.clip.dto.ClipVideoSummaryStatDTO;
+import com.easub.clip.dto.ClipVideoSummaryStatDetailDTO;
+import com.easub.clip.service.ClipVideoCopyrightSummaryStatService;
+import com.easub.clip.service.ClipVideoSummaryStatDetailService;
+import com.easub.clip.service.ClipVideoSummaryStatService;
 import com.easub.utils.BaseUtils;
 import com.easub.utils.CalendarUtils;
 import com.easub.utils.TrackLog;
@@ -61,9 +69,19 @@ public class BIController extends BaseController {
 	
 	@Resource(name="com.easub.bi.service.impl.BIService")
 	private IBIService biService;
+	@Resource(name="com.easub.biextra.service.impl.BIExtraService")
+	private IBIExtraService biExtraService;
 	
 	@Resource(name="com.easub.bi.service.impl.ClipUsersService")
 	private IClipUsersService clipUsersService;
+	@Resource(name="com.easub.clip.service.ClipVideoSummaryStatService")
+	private ClipVideoSummaryStatService clipVideoSummaryStatService;
+	@Resource(name="com.easub.clip.service.ClipVideoSummaryStatDetailService")
+	private ClipVideoSummaryStatDetailService clipVideoSummaryStatDetailService;
+	@Resource(name="com.easub.clip.service.ClipVideoCopyrightSummaryStatService")
+	private ClipVideoCopyrightSummaryStatService clipVideoCopyrightSummaryStatService;
+	@Resource(name="com.easub.analysis.service.impl.ClipAnalysisService")
+	private ClipAnalysisService clipAnalysisService;
 	
 	
 	@RequestMapping(value = "/prepareExecute/{operate}") 
@@ -109,7 +127,7 @@ public class BIController extends BaseController {
 			model.addObject("endTime", DateUtil.format(endTime, "yyyy-MM-dd"));
 			model.setViewName("bi/toVideosSourceTypeShareStatCount");
 		} else if ("toCloudClipWeeklyStat".equals(operate)) {
-			//按视频类型统计时间段内的视频数
+			//云剪业务周报
 			//获取当前日期上周的周四和上上周的周五（周五至下周四为1周）
 			//每周从周日开始，周末结束
 			Calendar cal = Calendar.getInstance();
@@ -123,6 +141,12 @@ public class BIController extends BaseController {
 			model.addObject("startTime", DateUtil.format(startTime, "yyyy-MM-dd"));
 			model.addObject("endTime", DateUtil.format(endTime, "yyyy-MM-dd"));
 			model.setViewName("bi/toCloudClipWeeklyStat");
+		} else if ("toClipVideoCumulativeDataStat".equals(operate)) {
+			//统计云剪累计视频数据
+			Calendar cal = Calendar.getInstance();
+			cal.add(Calendar.DATE, -1);//默认上一天
+			model.addObject("endTime", DateUtil.format(cal.getTime(), "yyyy-MM-dd"));
+			model.setViewName("bi/toClipVideoCumulativeDataStat");
 		}
 		return model;
 	}
@@ -454,8 +478,14 @@ public class BIController extends BaseController {
 				dayCount = 0;
 			}
 			Map<String,Object> conditions = new HashMap();
-			conditions.put("startTime", startTime);
-			conditions.put("endTime", endTime);
+			Date sTime = DateUtil.getDateFromString(startTime, "yyyy-MM-dd");
+			if(sTime != null) {
+				conditions.put("startTime", sTime.getTime()/1000);//秒
+			}
+			Date eTime = DateUtil.getDateFromString(endTime, "yyyy-MM-dd");
+			if(eTime != null) {
+				conditions.put("endTime", eTime.getTime()/1000);
+			}
 			List<Map<String,Object>> list = this.biService.getVideosSourceTypeShareStatCount(conditions);
 			Map<String,Integer> dataMap = new HashMap();
 			Map<Integer,Map<String,Integer>> tempMap = new HashMap();
@@ -561,175 +591,23 @@ public class BIController extends BaseController {
 		try {
 			String startTime = request.getParameter("startTime");
 			String endTime = request.getParameter("endTime");
-//			Calendar cal = Calendar.getInstance();
-//			CalendarUtils.clearHMS(cal);
-//			if(startTime == null || "".equals(startTime.trim()) || endTime == null || "".equals(endTime)) {
-//				//获取当前日期上周的周四和上上周的周五（周五至下周四为1周）
-//				//每周从周日开始，周末结束
-//				int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);//当前周几
-//				//上周的周四
-//				cal.add(Calendar.DATE, Calendar.SUNDAY - dayOfWeek - 3);//上周四
-//				Date endTime1 = cal.getTime();
-//				//上上周的周五
-//				cal.add(Calendar.DATE, -6);//上上周的周五
-//				Date startTime1 = cal.getTime();
-//				startTime = DateUtil.format(startTime1, "yyyy-MM-dd");
-//				endTime = DateUtil.format(endTime1, "yyyy-MM-dd");
-//			}
-//			//获取开始时间的上一周数据
-//			cal.setTime(DateUtil.getDateFromString(startTime,"yyyy-MM-dd"));
-//			cal.add(Calendar.DATE, -1);
-//			Date lastEndTime = cal.getTime();
-//			cal.add(Calendar.DATE, -6);
-//			Date lastStartTime = cal.getTime();
-//			
-//			Map<String,Object> conditions = new HashMap();
-//			long b = System.currentTimeMillis();
-//			System.out.println("===================start" + b);
-//			//用户情况
-//			//总账号数
-//			Integer allUserCount = this.clipUsersService.getUsersAccountCount(conditions);
-//			conditions.put("userType", "'iss','ims'");
-//			//iss/ims账号数
-//			Integer issImsUserCount = this.clipUsersService.getUsersAccountCount(conditions);
-//			//政务媒体账号数
-//			conditions.put("userType", "'weibo_zhengwu','weibo_newsmedia'");
-//			Integer zwMediaUserCount = this.clipUsersService.getUsersAccountCount(conditions);
-//			//这个时间段内新增的账号数
-//			conditions.clear();
-//			conditions.put("startCreatedTime", startTime);
-//			conditions.put("endCreatedTime", endTime);
-//			Integer newAddUserCount = this.clipUsersService.getUsersAccountCount(conditions);
-//			System.out.println("==============user===" + (System.currentTimeMillis() - b));
-//			//视频版权情况（国内、海外）
-//			conditions.clear();
-//			List<Map<String,Object>> copyrightDataList = this.biService.getVideoCopyrightStat(startTime, endTime);
-//			Map<String,Map<String,Object>> copyrightDataMap = new HashMap();
-//			
-//			for(Map<String,Object> m : copyrightDataList) {
-//				int abroad = BaseUtils.parseToInt(m.get("abroad"));
-//				int count = BaseUtils.parseToInt(m.get("c"));//数量
-//				double sec = BaseUtils.parseToDouble(m.get("sec"));//秒数
-//				
-//				Map tempMap = copyrightDataMap.get(abroad + "");
-//				if(tempMap == null) {
-//					tempMap = new HashMap();
-//				}
-//				tempMap.put("count", count);
-//				tempMap.put("hour", Math.round(sec / 3600));
-//				copyrightDataMap.put(abroad + "", tempMap);
-//			}
-//			System.out.println("==============abroad===" + (System.currentTimeMillis() - b));
-//			//本周云剪后台数据
-//			conditions.clear();
-//			conditions.put("startTime", startTime);
-//			conditions.put("endTime", endTime);
-//			//本周云剪数据key=thisWeek_sourceType/thisWeekNoIssIms_sourceType
-//			Map<String,Integer> thisClipDataMap = this.getClipWeeklyData(conditions);
-//			//本周云剪分享数据key=thisWeek_sourceType/thisWeekNoIssIms_sourceType
-//			Map<String,Integer> thisClipShareDataMap = this.getClipWeeklyShareData(conditions);
-//			//上周
-//			conditions.clear();
-//			conditions.put("startTime", DateUtil.format(lastStartTime, "yyyy-MM-dd"));
-//			conditions.put("endTime", DateUtil.format(lastEndTime, "yyyy-MM-dd"));
-//			Map<String,Integer> lastClipDataMap = this.getClipWeeklyData(conditions);
-//			Map<String,Integer> lastClipShareDataMap = this.getClipWeeklyShareData(conditions);
-//			
-//			//累计云剪数据
-//			conditions.clear();
-//			conditions.put("endTime", endTime);
-//			//本周云剪数据key=thisWeek_sourceType/thisWeekNoIssIms_sourceType
-//			Map<String,Integer> thisCumulativeClipDataMap = this.getClipWeeklyData(conditions);
-//			//本周云剪分享数据key=thisWeek_sourceType/thisWeekNoIssIms_sourceType
-//			Map<String,Integer> thisCumulativeClipShareDataMap = this.getClipWeeklyShareData(conditions);
-//			//上周
-//			conditions.clear();
-//			conditions.put("endTime", DateUtil.format(lastEndTime, "yyyy-MM-dd"));
-//			Map<String,Integer> lastCumulativeClipDataMap = this.getClipWeeklyData(conditions);
-//			Map<String,Integer> lastCumulativeClipShareDataMap = this.getClipWeeklyShareData(conditions);
-//			Map dataMap = new HashMap();
-//			dataMap.put("allUserCount", allUserCount);
-//			dataMap.put("issImsUserCount", issImsUserCount);
-//			dataMap.put("zwMediaUserCount", zwMediaUserCount);
-//			dataMap.put("newAddUserCount", newAddUserCount);
-//			dataMap.put("copyrightDataMap", copyrightDataMap);
-//			dataMap.put("thisClipDataMap", thisClipDataMap);
-//			dataMap.put("thisClipShareDataMap", thisClipShareDataMap);
-//			dataMap.put("lastClipDataMap", lastClipDataMap);
-//			dataMap.put("lastClipShareDataMap", lastClipShareDataMap);
-//			dataMap.put("thisCumulativeClipDataMap", thisCumulativeClipDataMap);
-//			dataMap.put("thisCumulativeClipShareDataMap", thisCumulativeClipShareDataMap);
-//			dataMap.put("lastCumulativeClipDataMap", lastCumulativeClipDataMap);
-//			dataMap.put("lastCumulativeClipShareDataMap", lastCumulativeClipShareDataMap);
-			
 			long b = System.currentTimeMillis();
 			System.out.println("============start:" + b);
 			Map dataMap = this.getCloudClipWeeklyData(startTime, endTime);
 			System.out.println("============end:" + (System.currentTimeMillis() - b));
 			dataMsg.setData(dataMap);
-//			conditions.clear();
-//			//本周接入直播数量
-//			conditions.put("startCreatedTime", startTime);
-//			conditions.put("endCreatedTime", endTime);
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_LIVE_BROADCAST);
-//			Integer thisWeekLiveCount = this.biService.getVideosStatCount(conditions);
-//			//本周直播剪辑数量
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_LIVE_BROADCAST_CLIP);
-//			Integer thisWeekLiveClipCount = this.biService.getVideosStatCount(conditions);
-//			//本周上传数量
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_UPLOAD);
-//			Integer thisWeekUploadCount = this.biService.getVideosStatCount(conditions);
-//			//本周剪辑数量
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_CLIP);
-//			Integer thisWeekClipCount = this.biService.getVideosStatCount(conditions);
-//			//本周上传数量（iss/ims除外）
-//			conditions.put("isNeedUserPolicies", true);
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_UPLOAD);
-//			conditions.put("notUserTypes", "'iss','ims'");
-//			Integer thisWeekUploadNotIssImsCount = this.biService.getVideosStatCount(conditions);
-//			//本周剪辑数量（iss/ims除外）
-//			conditions.put("isNeedUserPolicies", true);
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_CLIP);
-//			conditions.put("notUserTypes", "'iss','ims'");
-//			Integer thisWeekClipNotIssImsCount = this.biService.getVideosStatCount(conditions);
-//			//分享
-//			conditions.clear();
-//			//本周直播内容剪辑分享数量
-//			conditions.put("startShareTime", startTime);
-//			conditions.put("endShareTime", endTime);
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_LIVE_BROADCAST_CLIP);
-//			Integer thisWeekLiveClipShareCount = this.biService.getVideosShareStatCount(conditions);
-//			//上传后分享数量
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_UPLOAD);
-//			Integer thisWeekUploadShareCount = this.biService.getVideosShareStatCount(conditions);
-//			//剪辑分享数量
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_UPLOAD);
-//			Integer thisWeekClipShareCount = this.biService.getVideosShareStatCount(conditions);
-//			//本周上传分享数量（iss/ims除外）
-//			conditions.put("isNeedUserPolicies", true);
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_UPLOAD);
-//			conditions.put("notUserTypes", "'iss','ims'");
-//			Integer thisWeekUploadNotIssImsShareCount = this.biService.getVideosStatCount(conditions);
-//			//本周剪辑数量（iss/ims除外）
-//			conditions.put("isNeedUserPolicies", true);
-//			conditions.put("sourceType", Constant.Videos.SOURCE_TYPE_CLIP);
-//			conditions.put("notUserTypes", "'iss','ims'");
-//			Integer thisWeekClipNotIssImsShareCount = this.biService.getVideosStatCount(conditions);
 		} catch (Exception e) {
 			e.printStackTrace();
 			dataMsg.failed(e.getMessage());
 			logger.error(e.getMessage(), e);
 		}
-//		JSONObject jsonObject = JSONObject.fromObject(dataMsg);
-//		System.out.println(jsonObject);
-		
 		return dataMsg;
 	}
 	
-	private Map getCloudClipWeeklyData(String startTime,String endTime) throws Exception{
+	private Map getCloudClipWeeklyData(String sStartTime,String sEndTime) throws Exception{
 		Calendar cal = Calendar.getInstance();
 		CalendarUtils.clearHMS(cal);
-		if(startTime == null || "".equals(startTime.trim()) || endTime == null || "".equals(endTime)) {
+		if(sStartTime == null || "".equals(sStartTime.trim()) || sEndTime == null || "".equals(sEndTime)) {
 			//获取当前日期上周的周四和上上周的周五（周五至下周四为1周）
 			//每周从周日开始，周末结束
 			int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);//当前周几
@@ -739,134 +617,179 @@ public class BIController extends BaseController {
 			//上上周的周五
 			cal.add(Calendar.DATE, -6);//上上周的周五
 			Date startTime1 = cal.getTime();
-			startTime = DateUtil.format(startTime1, "yyyy-MM-dd");
-			endTime = DateUtil.format(endTime1, "yyyy-MM-dd");
+			sStartTime = DateUtil.format(startTime1, "yyyy-MM-dd");
+			sEndTime = DateUtil.format(endTime1, "yyyy-MM-dd");
 		}
+		Date startTime = DateUtil.getDateFromString(sStartTime, "yyyy-MM-dd");
+		Date endTime = DateUtil.getDateFromString(sEndTime, "yyyy-MM-dd");
+		cal.setTime(endTime);
+		cal.add(Calendar.DATE, 1);
+		Date nextEndTime = cal.getTime();//下一天，日期判断小于下一天
+		
 		//获取开始时间的上一周数据
-		cal.setTime(DateUtil.getDateFromString(startTime,"yyyy-MM-dd"));
+		cal.setTime(startTime);
 		cal.add(Calendar.DATE, -1);
 		Date lastEndTime = cal.getTime();
 		cal.add(Calendar.DATE, -6);
 		Date lastStartTime = cal.getTime();
 		Map<String,Object> conditions = new HashMap();
-		//用户情况
-		//总账号数
-		Integer allUserCount = this.clipUsersService.getUsersAccountCount(conditions);
-		conditions.put("userType", "'iss','ims'");
-		//iss/ims账号数
-		Integer issImsUserCount = this.clipUsersService.getUsersAccountCount(conditions);
-		//政务媒体账号数
-		conditions.put("userType", "'weibo_zhengwu','weibo_newsmedia'");
-		Integer zwMediaUserCount = this.clipUsersService.getUsersAccountCount(conditions);
+		
 		//这个时间段内新增的账号数
 		conditions.clear();
-		conditions.put("startCreatedTime", startTime);
-		conditions.put("endCreatedTime", endTime);
-		Integer newAddUserCount = this.clipUsersService.getUsersAccountCount(conditions);
-		//视频版权情况（国内、海外）
-		conditions.clear();
-		List<Map<String,Object>> copyrightDataList = this.biService.getVideoCopyrightStat(startTime, endTime);
-		Map<String,Map<String,Object>> copyrightDataMap = new HashMap();
+//		conditions.put("userPoliciesState", 1);
+//		conditions.put("startCreatedTime", startTime.getTime()/1000);
+//		conditions.put("endCreatedTime", nextEndTime.getTime()/1000);
+//		Integer newAddUserCount = this.clipUsersService.getUsersAccountCount(conditions);
+		conditions.put("isStartUsing", 1);
+		conditions.put("notUserType", "'admin','dev','test'");
+		conditions.put("startTime", startTime.getTime()/1000);
+		conditions.put("endTime", nextEndTime.getTime()/1000);
+		Integer newAddUserCount = this.clipUsersService.getUserOperationLogsCount(conditions);
 		
-		for(Map<String,Object> m : copyrightDataList) {
-			int abroad = BaseUtils.parseToInt(m.get("abroad"));
-			int count = BaseUtils.parseToInt(m.get("c"));//数量
-			double sec = BaseUtils.parseToDouble(m.get("sec"));//秒数
-			
-			Map tempMap = copyrightDataMap.get(abroad + "");
-			if(tempMap == null) {
-				tempMap = new HashMap();
-			}
-			tempMap.put("count", count);
-			tempMap.put("hour", Math.round(sec / 3600));
-			copyrightDataMap.put(abroad + "", tempMap);
-		}
 		//本周云剪后台数据
 		conditions.clear();
-		conditions.put("startTime", startTime);
-		conditions.put("endTime", endTime);
-		//本周云剪数据key=thisWeek_sourceType/thisWeekNoIssIms_sourceType
-		Map<String,Integer> thisClipDataMap = this.getClipWeeklyData(conditions);
-		//本周云剪分享数据key=thisWeek_sourceType/thisWeekNoIssIms_sourceType
-		Map<String,Integer> thisClipShareDataMap = this.getClipWeeklyShareData(conditions);
-		//上周
-		conditions.clear();
-		conditions.put("startTime", DateUtil.format(lastStartTime, "yyyy-MM-dd"));
-		conditions.put("endTime", DateUtil.format(lastEndTime, "yyyy-MM-dd"));
-		Map<String,Integer> lastClipDataMap = this.getClipWeeklyData(conditions);
-		Map<String,Integer> lastClipShareDataMap = this.getClipWeeklyShareData(conditions);
+//		conditions.put("startTime", sStartTime);
+//		conditions.put("endTime", sEndTime);
+//		//本周云剪数据key=thisWeek_sourceType/thisWeekNoIssIms_sourceType
+//		Map<String,Integer> thisClipDataMap = this.getClipWeeklyData(conditions);
+//		//本周云剪分享数据key=thisWeek_sourceType/thisWeekNoIssIms_sourceType
+//		Map<String,Integer> thisClipShareDataMap = this.getClipWeeklyShareData(conditions);
+//		
+//		System.out.println("========本周");
+//		//上周
+//		conditions.clear();
+//		conditions.put("startTime", CalendarUtils.format(lastStartTime));
+//		conditions.put("endTime", CalendarUtils.format(lastEndTime));
+//		Map<String,Integer> lastClipDataMap = this.getClipWeeklyData(conditions);
+//		Map<String,Integer> lastClipShareDataMap = this.getClipWeeklyShareData(conditions);
+//		System.out.println("========上周");
 		
-		//累计云剪数据
-		conditions.clear();
-		conditions.put("endTime", endTime);
-		//本周云剪数据key=thisWeek_sourceType/thisWeekNoIssIms_sourceType
-		Map<String,Integer> thisCumulativeClipDataMap = this.getClipWeeklyData(conditions);
-		//本周云剪分享数据key=thisWeek_sourceType/thisWeekNoIssIms_sourceType
-		Map<String,Integer> thisCumulativeClipShareDataMap = this.getClipWeeklyShareData(conditions);
-		//上周
-		conditions.clear();
-		conditions.put("endTime", DateUtil.format(lastEndTime, "yyyy-MM-dd"));
-		Map<String,Integer> lastCumulativeClipDataMap = this.getClipWeeklyData(conditions);
-		Map<String,Integer> lastCumulativeClipShareDataMap = this.getClipWeeklyShareData(conditions);
-
-		//活跃用户，读取埋点文件
-		long dayCount = DateUtil.daysOfTwo(endTime, startTime) + 1;
+		//从统计库中查询================
+		Map<String,Integer> thisClipDataMap = new HashMap();
+		Map<String,Integer> thisClipShareDataMap = new HashMap();
+		Map<String,Integer> lastClipDataMap = new HashMap();
+		Map<String,Integer> lastClipShareDataMap = new HashMap();
+		//本周视频数量和共享数量
+		this.setClipStatData(sStartTime,sEndTime,thisClipDataMap,thisClipShareDataMap);
+		//上周视频数量和共享数量
+		this.setClipStatData(CalendarUtils.format(lastStartTime),CalendarUtils.format(lastEndTime),lastClipDataMap,lastClipShareDataMap);
+		System.out.println("===============视频数和共享数量=============");
+		
+		//活跃用户，读取埋点文件2.0
+		long dayCount = DateUtil.daysOfTwo(sEndTime, sStartTime) + 1;
 		if(dayCount < 0) {
 			dayCount = 0;
 		}
 		String path = BIConfig.getValue("FRONTEND_TRACK_LOG_PATH");;
-		Map<Date,List<TrackLog>> trackLogMap = TrackLogUtils.getTrackLogFileListByTime(path, startTime, endTime);
+ 		Map<Date,List<TrackLog>> trackLogMap = TrackLogUtils.getTrackLogFileListByTime(path, sStartTime, sEndTime);
 		Set<String> distinctIdSet = new HashSet();
+		
+		Map<Date,Set<String>> totalDistinctCountMap = new HashMap();
 		for(Date trackLogDate : trackLogMap.keySet()) {
 			List<TrackLog> logList = trackLogMap.get(trackLogDate);
+			Set<String> set = totalDistinctCountMap.get(trackLogDate);
+			if(set == null) {
+				set = new HashSet();
+			}
 			for(TrackLog log : logList) {
-				if(log.getDistinctId() != null && "page_visit".equalsIgnoreCase(log.getEvent())) {
+				if(log.getDistinctId() != null && "page_visit".equalsIgnoreCase(log.getEvent()) && log.getDistinctId().trim().length() == 36) {
+					//登录用户
 					distinctIdSet.add(log.getDistinctId().trim());
+					set.add(log.getDistinctId().trim());
 				}
 			}
+			totalDistinctCountMap.put(trackLogDate, set);
 		}
+		int totalDistinctCount = 0;
+		for(Date trackLogDate : totalDistinctCountMap.keySet()) {
+			Set<String> set = totalDistinctCountMap.get(trackLogDate);
+			totalDistinctCount += set.size();
+		}
+		
 		int activeUserCount = distinctIdSet.size();
-		int activeAvgUserCount = dayCount == 0 ? 0 : (int)(activeUserCount/dayCount);
+		int activeAvgUserCount = dayCount == 0 ? 0 : (int)(totalDistinctCount/dayCount);//几天的用户总数/7
+		//1.0的埋点日志
+		String path1_0 = BIConfig.getValue("FRONTEND_TRACK_LOG_PATH_1_0");
+		Map<Date,List<TrackLog>> trackLogMap1 = TrackLogUtils.getTrackLogFileListByTime(path1_0, sStartTime, sEndTime);
+		Set<String> distinctIdSet1 = new HashSet();
+		Map<Date,Set<String>> totalDistinctCountMap1 = new HashMap();
+		for(Date trackLogDate : trackLogMap1.keySet()) {
+			List<TrackLog> logList = trackLogMap1.get(trackLogDate);
+			Set<String> set = totalDistinctCountMap1.get(trackLogDate);
+			if(set == null) {
+				set = new HashSet();
+			}
+			for(TrackLog log : logList) {
+				if(log.getDistinctId() != null && "page_visit".equalsIgnoreCase(log.getEvent()) && log.getDistinctId().trim().length() == 36) {
+					distinctIdSet1.add(log.getDistinctId().trim());
+					set.add(log.getDistinctId().trim());
+				}
+			}
+			totalDistinctCountMap.put(trackLogDate, set);
+		}
+		int totalDistinctCount_1_0 = 0;
+		for(Date trackLogDate : totalDistinctCountMap.keySet()) {
+			Set<String> set = totalDistinctCountMap.get(trackLogDate);
+			totalDistinctCount_1_0 += set.size();
+		}
+		int activeUserCount_1_0 = distinctIdSet1.size();
+		int activeAvgUserCount_1_0 = dayCount == 0 ? 0 : (int)(totalDistinctCount_1_0/dayCount);
+		
+		Set<String> allDistinctIdSet = new HashSet();
+		allDistinctIdSet.addAll(distinctIdSet);
+		allDistinctIdSet.addAll(distinctIdSet1);
+		int allActiveUserCount = allDistinctIdSet.size();
+		int allActiveAvgUserCount = dayCount == 0 ? 0 : (int)((totalDistinctCount + totalDistinctCount_1_0)/dayCount);
 				
 		//视频分享数
 		conditions.clear();
-		conditions.put("endShareTime", endTime);//累计共享视频数
-		conditions.put("state", Constant.Videos.SHARE_STATE_SHARE_SUCESS);
-		Integer ljvideoShareCount = this.biService.getVideosShareStatCount(conditions);
-		conditions.put("startShareTime", startTime);
+		//秒
+//		conditions.put("startShareTime", startTime.getTime()/1000);//秒
+//		conditions.put("endShareTime", nextEndTime.getTime()/1000);
+//		conditions.put("state", Constant.Videos.SHARE_STATE_SHARE_SUCESS);
+//		conditions.put("sourceTypes", "0,1,2,3,4,6");
+//		Integer videoShareCount1 = this.biService.getVideosShareStatCount(conditions);//本周共享视频
+//		Integer videoExtraShareCount = this.biExtraService.getVideosShareStatCount(conditions);
+//		Integer videoShareCount = videoShareCount1 + videoExtraShareCount;
 		
-		Integer videoShareCount = this.biService.getVideosShareStatCount(conditions);
+		int[] sourceTypeArr = {0,1,2,3,4,6};//上传、拉取、剪辑、直播、直播剪辑、混剪
+		int videoShareCount = 0;
+		for(int st : sourceTypeArr) {
+			String key = "1_" + st;
+			Integer count = thisClipShareDataMap.get(key);
+			videoShareCount += BaseUtils.parseToInt(count);
+		}
+		System.out.println("=====视频分享数" + videoShareCount);
 		int videoAvgShareCount = dayCount == 0 ? 0 : (int)(videoShareCount/dayCount);
+		
 		//视频播放量
 		conditions.clear();
-		conditions.put("endTime", endTime);
-		Integer ljvideoVVCount = this.biService.getVideoVV(conditions);//累计播放量
-		conditions.put("startTime", startTime);
-		Integer videoVVCount = this.biService.getVideoVV(conditions);
-		int videoAvgVVCount = dayCount == 0 ? 0 : (int)(videoVVCount/dayCount);
-		
+		conditions.put("startTime", startTime.getTime()/1000);
+		conditions.put("endTime",  nextEndTime.getTime()/1000);
+//		Long videoVVCount1 = this.biService.getVideoVV(conditions);
+//		Long extraVVCount = this.biExtraService.getVideoVV(conditions);
+//		Long videoVVCount = videoVVCount1 + extraVVCount;
+		Long videoVVCount = BaseUtils.parseToLong(this.clipAnalysisService.getVideoVV(conditions));
+		long videoAvgVVCount = dayCount == 0 ? 0 : (videoVVCount/dayCount);
+		System.out.println("=====视频播放量");
 		Map dataMap = new HashMap();
-		dataMap.put("allUserCount", allUserCount);
-		dataMap.put("issImsUserCount", issImsUserCount);
-		dataMap.put("zwMediaUserCount", zwMediaUserCount);
 		dataMap.put("newAddUserCount", newAddUserCount);
-		dataMap.put("copyrightDataMap", copyrightDataMap);
 		dataMap.put("thisClipDataMap", thisClipDataMap);
 		dataMap.put("thisClipShareDataMap", thisClipShareDataMap);
 		dataMap.put("lastClipDataMap", lastClipDataMap);
 		dataMap.put("lastClipShareDataMap", lastClipShareDataMap);
-		dataMap.put("thisCumulativeClipDataMap", thisCumulativeClipDataMap);
-		dataMap.put("thisCumulativeClipShareDataMap", thisCumulativeClipShareDataMap);
-		dataMap.put("lastCumulativeClipDataMap", lastCumulativeClipDataMap);
-		dataMap.put("lastCumulativeClipShareDataMap", lastCumulativeClipShareDataMap);
+		
 		dataMap.put("activeUserCount", activeUserCount);
 		dataMap.put("activeAvgUserCount", activeAvgUserCount);
+		dataMap.put("activeUserCount_1_0", activeUserCount_1_0);
+		dataMap.put("activeAvgUserCount_1_0", activeAvgUserCount_1_0);
+		dataMap.put("allActiveUserCount", allActiveUserCount);
+		dataMap.put("allActiveAvgUserCount", allActiveAvgUserCount);
 		dataMap.put("videoShareCount", videoShareCount);
 		dataMap.put("videoAvgShareCount", videoAvgShareCount);
 		dataMap.put("videoVVCount", videoVVCount);
 		dataMap.put("videoAvgVVCount", videoAvgVVCount);
-		dataMap.put("ljvideoShareCount", ljvideoShareCount);
-		dataMap.put("ljvideoVVCount", ljvideoVVCount);
+		
 		return dataMap;
 	}
 	
@@ -875,30 +798,40 @@ public class BIController extends BaseController {
 		if(conditions == null) {
 			return new HashMap();
 		}
-		String startTime = BaseUtils.parseToString(conditions.get("startTime"));
-		String endTime = BaseUtils.parseToString(conditions.get("endTime"));
-		List<Map<String,Object>> clipDataList = this.biService.getVideosSourceTypeStatCount(startTime, endTime);
+		String sStartTime = BaseUtils.parseToString(conditions.get("startTime"));
+		String sEndTime = BaseUtils.parseToString(conditions.get("endTime"));
+		Date startTime = DateUtil.getDateFromString(sStartTime, "yyyy-MM-dd");
+		Date endTime = DateUtil.getDateFromString(sEndTime, "yyyy-MM-dd");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(endTime);
+		cal.add(Calendar.DATE, 1);
+		Date nextEndTime = cal.getTime();
+		
+		Map<String,Object> map = new HashMap();
+		map.put("startTime", startTime.getTime()/1000);
+		map.put("endTime", nextEndTime.getTime()/1000);
+		List<Map<String,Object>> clipDataList = this.biService.getVideosSourceTypeStatCount(sStartTime, sEndTime);
+		List<Map<String,Object>> clipExtraDataList = this.biExtraService.getVideosSourceTypeStatCount(map);
+		List<Map<String,Object>> allClipDataList = new ArrayList();
+		allClipDataList.addAll(clipDataList);
+		allClipDataList.addAll(clipExtraDataList);
+		
 		Map<String,Integer> clipDataMap = new HashMap();
-		for(Map<String,Object> m : clipDataList) {
+		for(Map<String,Object> m : allClipDataList) {
 			int sourceType = BaseUtils.parseToInt(m.get("sourceType"));
 			int type = BaseUtils.parseToInt(m.get("type"));////1全部、2除了ims\iss、3新浪、4政务媒体
 			int count = BaseUtils.parseToInt(m.get("c"));
-			if(type == 1) {
-				String key = type + "_" + sourceType;
-				Integer tempCount = clipDataMap.get(key);
-				if(tempCount == null) {
-					tempCount = 0;
-				}
-				clipDataMap.put(key, tempCount + count);
-			}else if(type == 2) {
-				//除了ims\iss
-				String key = type + "_" + sourceType;
-				Integer tempCount = clipDataMap.get(key);
-				if(tempCount == null) {
-					tempCount = 0;
-				}
-				clipDataMap.put(key, tempCount + count);
+			if(sourceType == Constant.Videos.SOURCE_TYPE_UPLOAD || sourceType == Constant.Videos.SOURCE_TYPE_PULL) {
+				sourceType = Constant.Videos.SOURCE_TYPE_UPLOAD;//上传和拉取汇总到上传
+			}else if(sourceType == Constant.Videos.SOURCE_TYPE_CLIP || sourceType == Constant.Videos.SOURCE_TYPE_MIXING_CLIP) {
+				sourceType = Constant.Videos.SOURCE_TYPE_CLIP;//剪辑和混剪汇总到剪辑
 			}
+			String key = type + "_" + sourceType;
+			Integer tempCount = clipDataMap.get(key);
+			if(tempCount == null) {
+				tempCount = 0;
+			}
+			clipDataMap.put(key, tempCount + count);
 		}
 		return clipDataMap;
 	}
@@ -907,30 +840,40 @@ public class BIController extends BaseController {
 		if(conditions == null) {
 			return new HashMap();
 		}
-//		String startTime = BaseUtils.parseToString(conditions.get("startTime"));
-//		String endTime = BaseUtils.parseToString(conditions.get("endTime"));
+		String sStartTime = BaseUtils.parseToString(conditions.get("startTime"));
+		String sEndTime = BaseUtils.parseToString(conditions.get("endTime"));
+		
+		Date startTime = DateUtil.getDateFromString(sStartTime, "yyyy-MM-dd");
+		Date endTime = DateUtil.getDateFromString(sEndTime, "yyyy-MM-dd");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(endTime);
+		cal.add(Calendar.DATE, 1);
+		Date nextEndTime = cal.getTime();
+		conditions.put("startTime",startTime.getTime()/1000);//秒
+		conditions.put("endTime", nextEndTime.getTime()/1000);
+		
 		List<Map<String,Object>> clipShareDataList = this.biService.getVideosSourceTypeShareStatCount(conditions);
+		List<Map<String,Object>> clipExtraShareDataList = this.biExtraService.getVideosSourceTypeShareStatCount(conditions);
+		List<Map<String,Object>> allClipShareDataList = new ArrayList();
+		allClipShareDataList.addAll(clipShareDataList);
+		allClipShareDataList.addAll(clipExtraShareDataList);
 		Map<String,Integer> clipShareDataMap = new HashMap();
-		for(Map<String,Object> m : clipShareDataList) {
+		for(Map<String,Object> m : allClipShareDataList) {
 			int sourceType = BaseUtils.parseToInt(m.get("sourceType"));
 			int type = BaseUtils.parseToInt(m.get("type"));////1全部、2除了ims\iss、3新浪、4政务媒体
 			int count = BaseUtils.parseToInt(m.get("c"));
-			if(type == 1) {
-				String key = type + "_" + sourceType;
-				Integer tempCount = clipShareDataMap.get(key);
-				if(tempCount == null) {
-					tempCount = 0;
-				}
-				clipShareDataMap.put(key, tempCount + count);
-			}else if(type == 2) {
-				//除了ims\iss
-				String key = type + "_" + sourceType;
-				Integer tempCount = clipShareDataMap.get(key);
-				if(tempCount == null) {
-					tempCount = 0;
-				}
-				clipShareDataMap.put(key, tempCount + count);
+			if(sourceType == Constant.Videos.SOURCE_TYPE_UPLOAD || sourceType == Constant.Videos.SOURCE_TYPE_PULL) {
+				sourceType = Constant.Videos.SOURCE_TYPE_UPLOAD;//上传和拉取汇总到上传
+			}else if(sourceType == Constant.Videos.SOURCE_TYPE_CLIP || sourceType == Constant.Videos.SOURCE_TYPE_MIXING_CLIP) {
+				sourceType = Constant.Videos.SOURCE_TYPE_CLIP;//剪辑和混剪汇总到剪辑
 			}
+			
+			String key = type + "_" + sourceType;
+			Integer tempCount = clipShareDataMap.get(key);
+			if(tempCount == null) {
+				tempCount = 0;
+			}
+			clipShareDataMap.put(key, tempCount + count);
 		}
 		return clipShareDataMap;
 	}
@@ -941,41 +884,207 @@ public class BIController extends BaseController {
 		return returnValue;
 	}
 	
+	private void setClipStatData(String sStartTime,String sEndTime,Map<String,Integer> clipDataMap,Map<String,Integer> clipShareDataMap) throws Exception{
+		Date startTime = CalendarUtils.parseDate(sStartTime);
+		Date endTime = CalendarUtils.parseDate(sEndTime);
+//		Calendar cal = Calendar.getInstance();
+//		cal.setTime(endTime);
+//		cal.add(Calendar.DATE, 1);
+//		Date nextEndTime = cal.getTime();
+		Map<String,Object> conditions = new HashMap();
+		conditions.put("startSummaryDateMillisecond", startTime.getTime());
+		conditions.put("endSummaryDateMillisecond", endTime.getTime());
+		List<ClipVideoSummaryStatDetailDTO> dtoList = clipVideoSummaryStatDetailService.searchClipVideoSummaryStatDetail(conditions);
+		for(ClipVideoSummaryStatDetailDTO dto : dtoList) {
+			int sourceType = dto.getSourceType();
+			if(sourceType == Constant.Videos.SOURCE_TYPE_UPLOAD || sourceType == Constant.Videos.SOURCE_TYPE_PULL) {
+				sourceType = Constant.Videos.SOURCE_TYPE_UPLOAD;//上传和拉取汇总到上传
+			}else if(sourceType == Constant.Videos.SOURCE_TYPE_CLIP || sourceType == Constant.Videos.SOURCE_TYPE_MIXING_CLIP) {
+				sourceType = Constant.Videos.SOURCE_TYPE_CLIP;//剪辑和混剪汇总到剪辑
+			}
+			String key = dto.getType() +"_" + sourceType;
+			//数量
+			Integer tempCount = clipDataMap.get(key);
+			if(tempCount == null) {
+				tempCount = 0;
+			}
+			clipDataMap.put(key, tempCount + dto.getCount());
+			//共享数量
+			tempCount = clipShareDataMap.get(key);
+			if(tempCount == null) {
+				tempCount = 0;
+			}
+			clipShareDataMap.put(key, tempCount + dto.getShareCount());
+		}
+	}
+	
+	
+	@ResponseBody
+	@RequestMapping("/getClipVideoCumulativeDataStat")
+	public DataMsg getClipVideoCumulativeDataStat(HttpServletRequest request) {
+		DataMsg dataMsg = new DataMsg();
+		try {
+			String sEndTime = request.getParameter("endTime");
+			Date endTime = CalendarUtils.parseDate(sEndTime);
+			Map<String,Object> searchParams = new HashMap();
+			
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(endTime);
+			cal.add(Calendar.DATE, 1);
+			Date nextEndTime = cal.getTime();
+			String sNextEndTime = CalendarUtils.format(nextEndTime);
+			
+			Map<String,Object> conditions = new HashMap();
+			//用户情况
+			//iss/ims账号数
+			conditions.put("userTypes", "'iss','ims'");
+			conditions.put("userPoliciesState", 1);
+			conditions.put("endTime", nextEndTime.getTime()/1000);
+			int issImsUserCount = this.biExtraService.getUserAccount(conditions);
+			//政务媒体账号数
+			conditions.clear();
+//			conditions.put("userType", "'weibo_zhengwu','weibo_newsmedia'");
+			conditions.put("userPoliciesState", 1);
+			conditions.put("notUserType", "'iss','ims','admin','dev','test'");
+			conditions.put("endCreatedTime", nextEndTime.getTime()/1000);
+			Integer zwMediaUserCount = this.clipUsersService.getUsersAccountCount(conditions);
+			//总账号数
+			Integer allUserCount = issImsUserCount + zwMediaUserCount;
+			//视频版权情况（国内、海外）
+			conditions.clear();
+			ClipVideoCopyrightSummaryStatDTO copyrightdto = new ClipVideoCopyrightSummaryStatDTO();
+			copyrightdto.setSummaryDateMillisecond(endTime.getTime());
+			searchParams.put("dto", copyrightdto);
+			List<ClipVideoCopyrightSummaryStatDTO> copyrightDtoList = this.clipVideoCopyrightSummaryStatService.searchClipVideoCopyrightSummaryStat(searchParams);
+			Map<String,Object> copyrightDataMap = new HashMap();
+			//只有一条数据
+			if(copyrightDtoList.size() > 0) {
+				ClipVideoCopyrightSummaryStatDTO copyrightDto = copyrightDtoList.get(0);
+				copyrightDataMap.put("abroadCount", copyrightDto.getAbroadCount());
+				copyrightDataMap.put("abroadHour", Math.round(copyrightDto.getAbroadLength() / 3600));
+				copyrightDataMap.put("homeCount", copyrightDto.getHomeCount());
+				copyrightDataMap.put("homeHour", Math.round(copyrightDto.getHomeLength() / 3600));
+			}
+			ClipVideoSummaryStatDTO dto = new ClipVideoSummaryStatDTO();
+			dto.setSummaryDateMillisecond(endTime.getTime());
+			searchParams.put("dto", dto);
+			List<ClipVideoSummaryStatDTO> dtoList = this.clipVideoSummaryStatService.searchClipVideoSummaryStat(searchParams);
+			Map dataMap = new HashMap();
+			Map<String,Integer> thisCumulativeClipDataMap = new HashMap();
+			Map<String,Integer> thisCumulativeClipShareDataMap = new HashMap();
+			Map<String,Integer> lastCumulativeClipDataMap = new HashMap();
+			Map<String,Integer> lastCumulativeClipShareDataMap = new HashMap();
+			
+			Integer ljvideoShareCount = 0;//累计视频共享总数
+			for(ClipVideoSummaryStatDTO stat : dtoList) {
+				int sourceType = stat.getSourceType();
+				if(sourceType == Constant.Videos.SOURCE_TYPE_UPLOAD || sourceType == Constant.Videos.SOURCE_TYPE_PULL) {
+					sourceType = Constant.Videos.SOURCE_TYPE_UPLOAD;//上传和拉取汇总到上传
+				}else if(sourceType == Constant.Videos.SOURCE_TYPE_CLIP || sourceType == Constant.Videos.SOURCE_TYPE_MIXING_CLIP) {
+					sourceType = Constant.Videos.SOURCE_TYPE_CLIP;//剪辑和混剪汇总到剪辑
+				}
+				String key = stat.getType() +"_" + sourceType;
+				//数量
+				Integer tempCount = thisCumulativeClipDataMap.get(key);
+				if(tempCount == null) {
+					tempCount = 0;
+				}
+				thisCumulativeClipDataMap.put(key, tempCount + stat.getCount());
+				//共享
+				tempCount = thisCumulativeClipShareDataMap.get(key);
+				if(tempCount == null) {
+					tempCount = 0;
+				}
+				thisCumulativeClipShareDataMap.put(key, tempCount + stat.getShareCount());
+				if(stat.getType() == 1) {
+					ljvideoShareCount += stat.getShareCount();
+				}
+			}
+			//上一周的累计数据
+			cal.setTime(endTime);
+			cal.add(Calendar.DATE, -7);
+			CalendarUtils.clearHMS(cal);
+			dto.setSummaryDateMillisecond(cal.getTimeInMillis());
+			searchParams.clear();
+			searchParams.put("dto", dto);
+			List<ClipVideoSummaryStatDTO> dtoList1 = this.clipVideoSummaryStatService.searchClipVideoSummaryStat(searchParams);
+			for(ClipVideoSummaryStatDTO stat : dtoList1) {
+				int sourceType = stat.getSourceType();
+				if(sourceType == Constant.Videos.SOURCE_TYPE_UPLOAD || sourceType == Constant.Videos.SOURCE_TYPE_PULL) {
+					sourceType = Constant.Videos.SOURCE_TYPE_UPLOAD;//上传和拉取汇总到上传
+				}else if(sourceType == Constant.Videos.SOURCE_TYPE_CLIP || sourceType == Constant.Videos.SOURCE_TYPE_MIXING_CLIP) {
+					sourceType = Constant.Videos.SOURCE_TYPE_CLIP;//剪辑和混剪汇总到剪辑
+				}
+				String key = stat.getType() +"_" + sourceType;
+				//数量
+				Integer tempCount = lastCumulativeClipDataMap.get(key);
+				if(tempCount == null) {
+					tempCount = 0;
+				}
+				lastCumulativeClipDataMap.put(key, tempCount + stat.getCount());
+				//共享
+				tempCount = lastCumulativeClipShareDataMap.get(key);
+				if(tempCount == null) {
+					tempCount = 0;
+				}
+				lastCumulativeClipShareDataMap.put(key, tempCount + stat.getShareCount());
+			}
+			//视频累计播放量
+			conditions = new HashMap();
+			conditions.put("endTime",  nextEndTime.getTime()/1000);
+//			Long ljvideoVVCount1 = this.biService.getVideoVV(conditions);//累计播放量
+//			Long ljvideoExtraVVCount = this.biExtraService.getVideoVV(conditions);//累计播放量
+//			Long ljvideoVVCount = ljvideoVVCount1 + ljvideoExtraVVCount;
+			Long ljvideoVVCount = this.clipAnalysisService.getVideoVV(conditions);
+			
+			dataMap.put("allUserCount", allUserCount);
+			dataMap.put("issImsUserCount", issImsUserCount);
+			dataMap.put("zwMediaUserCount", zwMediaUserCount);
+			dataMap.put("copyrightDataMap", copyrightDataMap);
+			
+			dataMap.put("thisCumulativeClipDataMap", thisCumulativeClipDataMap);
+			dataMap.put("thisCumulativeClipShareDataMap", thisCumulativeClipShareDataMap);
+			dataMap.put("lastCumulativeClipDataMap", lastCumulativeClipDataMap);
+			dataMap.put("lastCumulativeClipShareDataMap", lastCumulativeClipShareDataMap);
+			dataMap.put("ljvideoShareCount", ljvideoShareCount);
+			dataMap.put("ljvideoVVCount", ljvideoVVCount);
+			dataMsg.setData(dataMap);
+		} catch (Exception e) {
+			e.printStackTrace();
+			dataMsg.failed(e.getMessage());
+			logger.error(e.getMessage(), e);
+		}
+		return dataMsg;
+	}
+	
 	@RequestMapping("/exportCloudClipWeeklyStatData")
 	public void exportCloudClipWeeklyStatData(HttpServletRequest request,HttpServletResponse response) {
 		try {
-			String startTime = BaseUtils.parseToString(request.getParameter("startTime"));
-			String endTime = BaseUtils.parseToString(request.getParameter("endTime"));
+			String sStartTime = BaseUtils.parseToString(request.getParameter("startTime"));
+			String sEndTime = BaseUtils.parseToString(request.getParameter("endTime"));
 			//1：导出前设置一个标志，前端监听这个标志是否存在，不存在表示导出完成，关闭提示。监听文件是否组装完毕，让客户端显示正在下载的提示。
 			//2:也可使用ajax请求，组装的Excel文件写在服务器上，返回文件路径给前端，然后前端处理完成下载。
 			//暂时使用第一种方式
 			request.getSession().setAttribute("CloudClipWeeklyStatData_sesion", "true");
 			//获取数据
-			Map dataMap = this.getCloudClipWeeklyData(startTime, endTime);
-			Integer allUserCount = BaseUtils.parseToInt(dataMap.get("allUserCount"));
-			Integer issImsUserCount = BaseUtils.parseToInt(dataMap.get("issImsUserCount"));
-			Integer zwMediaUserCount = BaseUtils.parseToInt(dataMap.get("zwMediaUserCount"));
+			Map dataMap = this.getCloudClipWeeklyData(sStartTime, sEndTime);
 			Integer newAddUserCount = BaseUtils.parseToInt(dataMap.get("newAddUserCount"));
-			Map copyrightDataMap = (Map) dataMap.get("copyrightDataMap");
 			
 			Map<String,Integer> thisClipDataMap = (Map) dataMap.get("thisClipDataMap");
 			Map<String,Integer> thisClipShareDataMap = (Map) dataMap.get("thisClipShareDataMap");
 			Map<String,Integer> lastClipDataMap = (Map) dataMap.get("lastClipDataMap");
 			Map<String,Integer> lastClipShareDataMap = (Map) dataMap.get("lastClipShareDataMap");
 			
-			Map<String,Integer> thisCumulativeClipDataMap = (Map) dataMap.get("thisCumulativeClipDataMap");
-			Map<String,Integer> thisCumulativeClipShareDataMap = (Map) dataMap.get("thisCumulativeClipShareDataMap");
-			Map<String,Integer> lastCumulativeClipDataMap = (Map) dataMap.get("lastCumulativeClipDataMap");
-			Map<String,Integer> lastCumulativeClipShareDataMap = (Map) dataMap.get("lastCumulativeClipShareDataMap");
-			
+			Integer allActiveUserCount = BaseUtils.parseToInt(dataMap.get("allActiveUserCount"));
+			Integer allActiveAvgUserCount = BaseUtils.parseToInt(dataMap.get("allActiveAvgUserCount"));
 			Integer activeUserCount = BaseUtils.parseToInt(dataMap.get("activeUserCount"));
 			Integer activeAvgUserCount = BaseUtils.parseToInt(dataMap.get("activeAvgUserCount"));
+			Integer activeUserCount_1_0 = BaseUtils.parseToInt(dataMap.get("activeUserCount_1_0"));
+			Integer activeAvgUserCount_1_0 = BaseUtils.parseToInt(dataMap.get("activeAvgUserCount_1_0"));
 			Integer videoShareCount = BaseUtils.parseToInt(dataMap.get("videoShareCount"));
 			Integer videoAvgShareCount = BaseUtils.parseToInt(dataMap.get("videoAvgShareCount"));
 			Integer videoVVCount = BaseUtils.parseToInt(dataMap.get("videoVVCount"));
 			Integer videoAvgVVCount = BaseUtils.parseToInt(dataMap.get("videoAvgVVCount"));
-			Integer ljvideoShareCount = BaseUtils.parseToInt(dataMap.get("ljvideoShareCount"));
-			Integer ljvideoVVCount = BaseUtils.parseToInt(dataMap.get("ljvideoVVCount"));
 			
 			XSSFWorkbook wb = new XSSFWorkbook();
 			XSSFSheet sheet = wb.createSheet();
@@ -1038,7 +1147,7 @@ public class BIController extends BaseController {
 				cell1.setCellStyle(style1);
 			}
 			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum, 0, 8));
-			cell.setCellValue("云剪业务周报");
+			cell.setCellValue("本周云剪数据");
 			cell.setCellStyle(style1);
 			row.setHeight((short) 1000);
 			
@@ -1051,8 +1160,8 @@ public class BIController extends BaseController {
 				cell1.setCellStyle(style2);
 			}
 			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum, 0, 8));
-			String strStartTime = DateUtil.getStringDateFromDate(DateUtil.getDateFromString(startTime), "yyyy年MM月dd日");
-			String strEndTime = DateUtil.getStringDateFromDate(DateUtil.getDateFromString(endTime), "yyyy年MM月dd日");
+			String strStartTime = DateUtil.getStringDateFromDate(DateUtil.getDateFromString(sStartTime), "yyyy年MM月dd日");
+			String strEndTime = DateUtil.getStringDateFromDate(DateUtil.getDateFromString(sEndTime), "yyyy年MM月dd日");
 			cell.setCellValue("日期：" + strStartTime + "-" + strEndTime);
 			cell.setCellStyle(style2);
 			row.setHeight((short) height);
@@ -1078,8 +1187,8 @@ public class BIController extends BaseController {
 			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum + 1, col, col));
 			cell.setCellValue("用户情况");
 			cell.setCellStyle(style2);
-			String[] headers = {"ISS/IMS账号数","政务媒体账号数","账号总数","本周新增账号总数","","","",""};
-			Object[] values = {allUserCount,issImsUserCount,zwMediaUserCount,newAddUserCount,"","","",""};
+			String[] headers = {"本周新增账号总数","","","","","","",""};
+			Object[] values = {newAddUserCount,"","","","","","",""};
 			for(String h : headers) {
 				col ++;
 				cell = row.createCell(col);
@@ -1103,45 +1212,63 @@ public class BIController extends BaseController {
 			row.setHeight((short) height);
 			col = 0;
 			cell = row.createCell(col);
-			cell.setCellStyle(style2);
-			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum + 1, col, col));
-			cell.setCellValue("版权情况");
-			headers = new String[]{"海外片段数量","海外总时长","国内片段数量","国内总时长","总计片段数量","总计时长","",""};
-			
-			Map homeDataMap = (Map) copyrightDataMap.get("0");
-			Map abroadDataMap = (Map) copyrightDataMap.get("1");
-			Integer abroadCount = BaseUtils.parseToInt(abroadDataMap.get("count"));
-			Double abroadHour = BaseUtils.parseToDouble(abroadDataMap.get("hour"));
-			Integer homeCount = BaseUtils.parseToInt(homeDataMap.get("count"));
-			Double homeHour = BaseUtils.parseToDouble(homeDataMap.get("hour"));
-			
-			values = new Object[]{abroadCount,abroadHour,homeCount,homeHour,abroadCount + homeCount,abroadHour + homeHour,"",""};
-			for(String h : headers) {
-				col ++;
-				cell = row.createCell(col);
-				cell.setCellStyle(style3);
-				cell.setCellValue(h);
-			}
-			
-			rownum ++;
-			row = sheet.createRow(rownum);
-			row.setHeight((short) height);
-			col = 0;
-			for(Object o : values) {
-				col ++;
-				cell = row.createCell(col);
-				cell.setCellStyle(style);
-				ExcelHelper.setExcelValue(cell, o);
-			}
-			
-			rownum ++;
-			row = sheet.createRow(rownum);
-			row.setHeight((short) height);
-			col = 0;
-			cell = row.createCell(col);
-			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum + 7, col, col));
+			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum + 9, col, col));
 			cell.setCellStyle(style2);
 			cell.setCellValue("本周云剪后台数据");
+//			rownum ++;
+//			row = sheet.createRow(rownum);
+//			row.setHeight((short) height);
+//			col = 0;
+			headers = new String[]{"活跃用户总数","日均活跃用户总数","活跃用户数（1.0）","日均活跃用户数（1.0）","活跃用户数（2.0）","日均活跃用户数（2.0）","",""};
+			values = new Object[]{allActiveUserCount,allActiveAvgUserCount,
+					activeUserCount_1_0,activeAvgUserCount_1_0,
+					activeUserCount,activeAvgUserCount,"",""};
+			for(String h : headers) {
+				col ++;
+				cell = row.createCell(col);
+				cell.setCellStyle(style3);
+				cell.setCellValue(h);
+			}
+			
+			rownum ++;
+			row = sheet.createRow(rownum);
+			row.setHeight((short) height);
+			col = 0;
+			for(Object o : values) {
+				col ++;
+				cell = row.createCell(col);
+				cell.setCellStyle(style);
+				ExcelHelper.setExcelValue(cell, o);
+			}
+			
+			rownum ++;
+			row = sheet.createRow(rownum);
+			row.setHeight((short) height);
+			col = 0;
+			headers = new String[]{"视频分享数","日均视频分享数","视频播放量","日均视频播放量","","","",""};
+			values = new Object[]{videoShareCount,videoAvgShareCount,
+					videoVVCount,videoAvgVVCount,"","","",""};
+			for(String h : headers) {
+				col ++;
+				cell = row.createCell(col);
+				cell.setCellStyle(style3);
+				cell.setCellValue(h);
+			}
+			rownum ++;
+			row = sheet.createRow(rownum);
+			row.setHeight((short) height);
+			col = 0;
+			for(Object o : values) {
+				col ++;
+				cell = row.createCell(col);
+				cell.setCellStyle(style);
+				ExcelHelper.setExcelValue(cell, o);
+			}
+			
+			rownum++;
+			row = sheet.createRow(rownum);
+			row.setHeight((short) height);
+			col = 0;
 			headers = new String[]{"接入直播数量","环比增长","直播内容剪辑数量","环比增长","直播内容剪辑分享","环比增长","",""};
 			Integer zbCount = BaseUtils.parseToInt(thisClipDataMap.get("1_3"));
 			Integer lastZbCount = BaseUtils.parseToInt(lastClipDataMap.get("1_3"));
@@ -1239,14 +1366,250 @@ public class BIController extends BaseController {
 				ExcelHelper.setExcelValue(cell, o);
 			}
 			
+			ServletOutputStream out = response.getOutputStream();
+			String fileName = new String(("本周云剪数据").getBytes(), "ISO8859_1");  
+			response.setHeader("Content-disposition", "attachment; filename=" + fileName + ".xlsx");
+			wb.write(out);
+			out.flush();
+			out.close();
+			request.getSession().removeAttribute("CloudClipWeeklyStatData_sesion");
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	@ResponseBody
+	@RequestMapping("/checkExportCloudClipWeeklyStatDataSuccess")
+	public int checkExportCloudClipWeeklyStatDataSuccess(HttpServletRequest request) {
+		Object t = request.getSession().getAttribute("CloudClipWeeklyStatData_sesion");
+		return t == null ? 1 : 0;
+	}
+	
+	@RequestMapping("/exportClipVideoCumulativeStatData")
+	public void exportClipVideoCumulativeStatData(HttpServletRequest request,HttpServletResponse response) {
+		try {
+			String sEndTime = BaseUtils.parseToString(request.getParameter("endTime"));
+			//1：导出前设置一个标志，前端监听这个标志是否存在，不存在表示导出完成，关闭提示。监听文件是否组装完毕，让客户端显示正在下载的提示。
+			//2:也可使用ajax请求，组装的Excel文件写在服务器上，返回文件路径给前端，然后前端处理完成下载。
+			//暂时使用第一种方式
+			request.getSession().setAttribute("ClipVideoCumulativeStatData_Session", "true");
+			//获取数据
+			Date endTime = CalendarUtils.parseDate(sEndTime);
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(endTime);
+			cal.add(Calendar.DATE, 1);
+			Date nextEndTime = cal.getTime();
+			String sNextEndTime = CalendarUtils.format(nextEndTime);
+			Map<String,Object> conditions = new HashMap();
+			Map<String,Object> searchParams = new HashMap();
+			//用户情况
+			//iss/ims账号数
+			conditions.put("userTypes", "'iss','ims'");
+			conditions.put("userPoliciesState", 1);
+			conditions.put("endTime", nextEndTime.getTime()/1000);
+			int issImsUserCount = this.biExtraService.getUserAccount(conditions);
+			//政务媒体账号数
+			conditions.clear();
+//			conditions.put("userType", "'weibo_zhengwu','weibo_newsmedia'");
+			conditions.put("userPoliciesState", 1);
+			conditions.put("notUserType", "'iss','ims','admin','dev','test'");
+			conditions.put("endCreatedTime", nextEndTime.getTime()/1000);
+			Integer zwMediaUserCount = this.clipUsersService.getUsersAccountCount(conditions);
+			//总账号数
+			Integer allUserCount = issImsUserCount + zwMediaUserCount;
+			//视频版权情况（国内、海外）
+			conditions.clear();
+			ClipVideoCopyrightSummaryStatDTO copyrightdto = new ClipVideoCopyrightSummaryStatDTO();
+			copyrightdto.setSummaryDateMillisecond(endTime.getTime());
+			searchParams.put("dto", copyrightdto);
+			List<ClipVideoCopyrightSummaryStatDTO> copyrightDtoList = this.clipVideoCopyrightSummaryStatService.searchClipVideoCopyrightSummaryStat(searchParams);
+			Map<String,Object> copyrightDataMap = new HashMap();
+			//只有一条数据
+			if(copyrightDtoList.size() > 0) {
+				ClipVideoCopyrightSummaryStatDTO copyrightDto = copyrightDtoList.get(0);
+				copyrightDataMap.put("abroadCount", copyrightDto.getAbroadCount());
+				copyrightDataMap.put("abroadHour", Math.round(copyrightDto.getAbroadLength() / 3600));
+				copyrightDataMap.put("homeCount", copyrightDto.getHomeCount());
+				copyrightDataMap.put("homeHour", Math.round(copyrightDto.getHomeLength() / 3600));
+			}
+			
+			searchParams.clear();
+			ClipVideoSummaryStatDTO dto = new ClipVideoSummaryStatDTO();
+			dto.setSummaryDateMillisecond(endTime.getTime());
+			searchParams.put("dto", dto);
+			List<ClipVideoSummaryStatDTO> dtoList = this.clipVideoSummaryStatService.searchClipVideoSummaryStat(searchParams);
+			Map dataMap = new HashMap();
+			Map<String,Integer> thisCumulativeClipDataMap = new HashMap();
+			Map<String,Integer> thisCumulativeClipShareDataMap = new HashMap();
+			Map<String,Integer> lastCumulativeClipDataMap = new HashMap();
+			Map<String,Integer> lastCumulativeClipShareDataMap = new HashMap();
+			
+			Integer ljvideoShareCount = 0;//累计视频共享总数
+			for(ClipVideoSummaryStatDTO stat : dtoList) {
+				int sourceType = stat.getSourceType();
+				if(sourceType == Constant.Videos.SOURCE_TYPE_UPLOAD || sourceType == Constant.Videos.SOURCE_TYPE_PULL) {
+					sourceType = Constant.Videos.SOURCE_TYPE_UPLOAD;//上传和拉取汇总到上传
+				}else if(sourceType == Constant.Videos.SOURCE_TYPE_CLIP || sourceType == Constant.Videos.SOURCE_TYPE_MIXING_CLIP) {
+					sourceType = Constant.Videos.SOURCE_TYPE_CLIP;//剪辑和混剪汇总到剪辑
+				}
+				String key = stat.getType() +"_" + sourceType;
+				//数量
+				Integer tempCount = thisCumulativeClipDataMap.get(key);
+				if(tempCount == null) {
+					tempCount = 0;
+				}
+				thisCumulativeClipDataMap.put(key, tempCount + stat.getCount());
+				//共享
+				tempCount = thisCumulativeClipShareDataMap.get(key);
+				if(tempCount == null) {
+					tempCount = 0;
+				}
+				thisCumulativeClipShareDataMap.put(key, tempCount + stat.getShareCount());
+				
+				if(stat.getType() == 1) {
+					ljvideoShareCount += stat.getShareCount();
+				}
+			}
+			//上一周的累计数据
+			cal.setTime(endTime);
+			CalendarUtils.clearHMS(cal);
+			cal.add(Calendar.DATE, -7);
+			dto.setSummaryDateMillisecond(cal.getTimeInMillis());
+			searchParams.clear();
+			searchParams.put("dto", dto);
+			List<ClipVideoSummaryStatDTO> dtoList1 = this.clipVideoSummaryStatService.searchClipVideoSummaryStat(searchParams);
+			for(ClipVideoSummaryStatDTO stat : dtoList1) {
+				int sourceType = stat.getSourceType();
+				if(sourceType == Constant.Videos.SOURCE_TYPE_UPLOAD || sourceType == Constant.Videos.SOURCE_TYPE_PULL) {
+					sourceType = Constant.Videos.SOURCE_TYPE_UPLOAD;//上传和拉取汇总到上传
+				}else if(sourceType == Constant.Videos.SOURCE_TYPE_CLIP || sourceType == Constant.Videos.SOURCE_TYPE_MIXING_CLIP) {
+					sourceType = Constant.Videos.SOURCE_TYPE_CLIP;//剪辑和混剪汇总到剪辑
+				}
+				String key = stat.getType() +"_" + sourceType;
+				//数量
+				Integer tempCount = lastCumulativeClipDataMap.get(key);
+				if(tempCount == null) {
+					tempCount = 0;
+				}
+				lastCumulativeClipDataMap.put(key, tempCount + stat.getCount());
+				//共享
+				tempCount = lastCumulativeClipShareDataMap.get(key);
+				if(tempCount == null) {
+					tempCount = 0;
+				}
+				lastCumulativeClipShareDataMap.put(key, tempCount + stat.getShareCount());
+			}
+			//视频累计播放量
+			conditions = new HashMap();
+			conditions.put("endTime", nextEndTime.getTime()/1000);
+//			Long ljvideoVVCount1 = this.biService.getVideoVV(conditions);//累计播放量
+//			Long ljvideoExtraVVCount = this.biExtraService.getVideoVV(conditions);//累计播放量
+//			Long ljvideoVVCount = ljvideoVVCount1 + ljvideoExtraVVCount;
+			Long ljvideoVVCount = this.clipAnalysisService.getVideoVV(conditions);
+			
+			XSSFWorkbook wb = new XSSFWorkbook();
+			XSSFSheet sheet = wb.createSheet();
+			for(int i = 0 ; i < 9 ; i ++) {
+				sheet.setColumnWidth(i, 255*25);
+			}
+//			sheet.setDefaultColumnWidth(30);
+			
+			XSSFFont font1 = wb.createFont();
+			font1.setBold(true);
+			font1.setFontHeightInPoints((short)16);
+			XSSFFont font2 = wb.createFont();
+			font2.setBold(true);
+			
+			XSSFCellStyle style = wb.createCellStyle();
+			style.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+			style.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);
+			style.setBorderBottom(XSSFCellStyle.BORDER_THIN); //下边框
+			style.setBorderLeft(XSSFCellStyle.BORDER_THIN);//左边框
+			style.setBorderTop(XSSFCellStyle.BORDER_THIN);//上边框
+			style.setBorderRight(XSSFCellStyle.BORDER_THIN);//右边框
+			
+			XSSFCellStyle style1 = wb.createCellStyle();
+			style1.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+			style1.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);
+			style1.setBorderBottom(XSSFCellStyle.BORDER_THIN); //下边框
+			style1.setBorderLeft(XSSFCellStyle.BORDER_THIN);//左边框
+			style1.setBorderTop(XSSFCellStyle.BORDER_THIN);//上边框
+			style1.setBorderRight(XSSFCellStyle.BORDER_THIN);//右边框
+			style1.setFont(font1);
+			
+			XSSFCellStyle style2 = wb.createCellStyle();
+			style2.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+			style2.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);
+			style2.setBorderBottom(XSSFCellStyle.BORDER_THIN); //下边框
+			style2.setBorderLeft(XSSFCellStyle.BORDER_THIN);//左边框
+			style2.setBorderTop(XSSFCellStyle.BORDER_THIN);//上边框
+			style2.setBorderRight(XSSFCellStyle.BORDER_THIN);//右边框
+			style2.setFont(font2);
+			
+			XSSFCellStyle style3 = wb.createCellStyle();
+			style3.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+			style3.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);
+			style3.setBorderBottom(XSSFCellStyle.BORDER_THIN); //下边框
+			style3.setBorderLeft(XSSFCellStyle.BORDER_THIN);//左边框
+			style3.setBorderTop(XSSFCellStyle.BORDER_THIN);//上边框
+			style3.setBorderRight(XSSFCellStyle.BORDER_THIN);//右边框
+			style3.setFillForegroundColor(new XSSFColor(new Color(211, 211, 211)));// 设置背景色
+			style3.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
+			
+			int height = 500;
+			//表头
+			int rownum = 0;
+			int col = 0;
+			XSSFRow row = sheet.createRow(rownum);
+			XSSFCell cell = row.createCell(0);
+			for(int i = 1 ; i < 9 ; i ++) {
+				XSSFCell cell1 = row.createCell(i);
+				cell1.setCellValue("");
+				cell1.setCellStyle(style1);
+			}
+			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum, 0, 8));
+			cell.setCellValue("累计云剪数据");
+			cell.setCellStyle(style1);
+			row.setHeight((short) 1000);
+			
 			rownum ++;
 			row = sheet.createRow(rownum);
+			cell = row.createCell(0);
+			for(int i = 1 ; i < 9 ; i ++) {
+				XSSFCell cell1 = row.createCell(i);
+				cell1.setCellValue("");
+				cell1.setCellStyle(style2);
+			}
+			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum, 0, 8));
+			String strEndTime = DateUtil.getStringDateFromDate(DateUtil.getDateFromString(sEndTime), "yyyy年MM月dd日");
+			cell.setCellValue("截止日期：" + strEndTime);
+			cell.setCellStyle(style2);
 			row.setHeight((short) height);
+			
+			rownum ++;
+			row = sheet.createRow(rownum);
+			cell = row.createCell(1);
+			row.setHeight((short) height);
+			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum, 1, 8));
+			for(int i = 2 ; i < 9 ; i ++) {
+				XSSFCell cell1 = row.createCell(i);
+				cell1.setCellValue("");
+				cell1.setCellStyle(style2);
+			}
+			cell.setCellValue("基本数据情况");
+			cell.setCellStyle(style2);
+			
+			//账户数
+			rownum ++;
 			col = 0;
-			headers = new String[]{"活跃用户数","日均活跃用户数","视频分享数","日均视频分享数","视频播放量","日均视频播放量","",""};
-			values = new Object[]{activeUserCount,activeAvgUserCount,
-					videoShareCount,videoAvgShareCount,
-					videoVVCount,videoAvgVVCount,"","",""};
+			row = sheet.createRow(rownum);
+			cell = row.createCell(col);
+			row.setHeight((short) height);
+			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum + 1, col, col));
+			cell.setCellValue("用户情况");
+			cell.setCellStyle(style2);
+			String[] headers = {"ISS/IMS账号数","政务媒体账号数","账号总数","","","","",""};
+			Object[] values = {allUserCount,issImsUserCount,zwMediaUserCount,"","","","",""};
 			for(String h : headers) {
 				col ++;
 				cell = row.createCell(col);
@@ -1264,7 +1627,41 @@ public class BIController extends BaseController {
 				ExcelHelper.setExcelValue(cell, o);
 			}
 			
+			rownum ++;
+			row = sheet.createRow(rownum);
+			row.setHeight((short) height);
+			col = 0;
+			cell = row.createCell(col);
+			cell.setCellStyle(style2);
+			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum + 1, col, col));
+			cell.setCellValue("版权情况");
+			headers = new String[]{"海外片段数量","海外总时长","国内片段数量","国内总时长","总计片段数量","总计时长","",""};
+			Integer abroadCount = BaseUtils.parseToInt(copyrightDataMap.get("abroadCount"));
+			Double abroadHour = BaseUtils.parseToDouble(copyrightDataMap.get("abroadHour"));
+			Integer homeCount = BaseUtils.parseToInt(copyrightDataMap.get("homeCount"));
+			Double homeHour = BaseUtils.parseToDouble(copyrightDataMap.get("homeHour"));
+			
+			values = new Object[]{abroadCount,abroadHour,homeCount,homeHour,abroadCount + homeCount,abroadHour + homeHour,"",""};
+			for(String h : headers) {
+				col ++;
+				cell = row.createCell(col);
+				cell.setCellStyle(style3);
+				cell.setCellValue(h);
+			}
+			
+			rownum ++;
+			row = sheet.createRow(rownum);
+			row.setHeight((short) height);
+			col = 0;
+			for(Object o : values) {
+				col ++;
+				cell = row.createCell(col);
+				cell.setCellStyle(style);
+				ExcelHelper.setExcelValue(cell, o);
+			}
+			
 			//累计云剪后台数据
+			
 			rownum ++;
 			row = sheet.createRow(rownum);
 			row.setHeight((short) height);
@@ -1273,6 +1670,31 @@ public class BIController extends BaseController {
 			sheet.addMergedRegion(new CellRangeAddress(rownum, rownum + 7, col, col));
 			cell.setCellStyle(style2);
 			cell.setCellValue("累计云剪后台数据");
+			
+			headers = new String[]{"视频分享数","视频播放量","","","","","",""};
+			values = new Object[]{ljvideoShareCount,ljvideoVVCount,"","","","","",""};
+			for(String h : headers) {
+				col ++;
+				cell = row.createCell(col);
+				cell.setCellStyle(style3);
+				cell.setCellValue(h);
+			}
+			rownum ++;
+			row = sheet.createRow(rownum);
+			row.setHeight((short) height);
+			col = 0;
+			for(Object o : values) {
+				col ++;
+				cell = row.createCell(col);
+				cell.setCellStyle(style);
+				ExcelHelper.setExcelValue(cell, o);
+			}
+			
+			rownum ++;
+			row = sheet.createRow(rownum);
+			row.setHeight((short) height);
+			col = 0;
+			
 			headers = new String[]{"接入直播数量","环比增长","直播内容剪辑数量","环比增长","直播内容剪辑分享","环比增长","",""};
 			Integer ljzbCount = BaseUtils.parseToInt(thisCumulativeClipDataMap.get("1_3"));
 			Integer ljlastZbCount = BaseUtils.parseToInt(lastCumulativeClipDataMap.get("1_3"));
@@ -1371,52 +1793,24 @@ public class BIController extends BaseController {
 				ExcelHelper.setExcelValue(cell, o);
 			}
 			
-			rownum ++;
-			row = sheet.createRow(rownum);
-			row.setHeight((short) height);
-			col = 0;
-			headers = new String[]{"视频分享数","视频播放量","","","","","",""};
-			values = new Object[]{ljvideoShareCount,ljvideoVVCount,"","","","","","","",""};
-			for(String h : headers) {
-				col ++;
-				cell = row.createCell(col);
-				cell.setCellStyle(style3);
-				cell.setCellValue(h);
-			}
-			rownum ++;
-			row = sheet.createRow(rownum);
-			row.setHeight((short) height);
-			col = 0;
-			for(Object o : values) {
-				col ++;
-				cell = row.createCell(col);
-				cell.setCellStyle(style);
-				ExcelHelper.setExcelValue(cell, o);
-			}
-			
-			rownum ++;
-			row = sheet.createRow(rownum);
-			row.setHeight((short) height);
-			col = 0;
-			cell = row.createCell(col);
-			ExcelHelper.setExcelValue(cell, new Date());
 			
 			ServletOutputStream out = response.getOutputStream();
-			String fileName = new String(("云剪周报数据").getBytes(), "ISO8859_1");  
+			String fileName = new String(("累计云剪数据").getBytes(), "ISO8859_1");  
 			response.setHeader("Content-disposition", "attachment; filename=" + fileName + ".xlsx");
 			wb.write(out);
 			out.flush();
 			out.close();
-			request.getSession().removeAttribute("CloudClipWeeklyStatData_sesion");
+			request.getSession().removeAttribute("ClipVideoCumulativeStatData_Session");
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
+	
 	@ResponseBody
-	@RequestMapping("/checkExportCloudClipWeeklyStatDataSuccess")
-	public int checkExportCloudClipWeeklyStatDataSuccess(HttpServletRequest request) {
-		Object t = request.getSession().getAttribute("CloudClipWeeklyStatData_sesion");
+	@RequestMapping("/checkExportClipVideoCumulativeStatDataSuccess")
+	public int checkExportClipVideoCumulativeStatDataSuccess(HttpServletRequest request) {
+		Object t = request.getSession().getAttribute("ClipVideoCumulativeStatData_Session");
 		return t == null ? 1 : 0;
 	}
 	
@@ -1503,8 +1897,9 @@ public class BIController extends BaseController {
 			String path = BIConfig.getValue("FRONTEND_TRACK_LOG_PATH");;
 			Calendar cal = Calendar.getInstance();
 			CalendarUtils.clearHMS(cal);
+			cal.add(Calendar.DATE, 1);
 			Date endTime = cal.getTime();
-			cal.add(Calendar.DATE, -6);
+			cal.add(Calendar.DATE, -7);
 			Date startTime = cal.getTime();
 			Map<Date,List<TrackLog>> trackLogMap = TrackLogUtils.getTrackLogFileListByTime(path, startTime, endTime);
 			
@@ -1653,16 +2048,17 @@ public class BIController extends BaseController {
 		try {
 			Calendar cal = Calendar.getInstance();
 			CalendarUtils.clearHMS(cal);
+			cal.add(Calendar.DATE, 1);
 			Date endTime = cal.getTime();
-			cal.add(Calendar.DATE, -6);
+			cal.add(Calendar.DATE, -7);
 			Date startTime = cal.getTime();
 			
 			Map<String,Object> conditions = new HashMap();
 			conditions.put("isDeleted", 0);
 //			conditions.put("sourceType", 0);
 			conditions.put("mediaState", 2);
-			conditions.put("startTime", DateUtil.getStringDateFromDate(startTime, "yyyy-MM-dd"));
-			conditions.put("endTime", DateUtil.getStringDateFromDate(endTime, "yyyy-MM-dd"));
+			conditions.put("startTime", startTime != null ? startTime.getTime()/1000 : "");//秒
+			conditions.put("endTime", endTime != null ? endTime.getTime()/1000 : "");
 			List<Map<String,Object>> list = this.biService.getUploadMaterialsStatCount(conditions);
 			Map<String,Integer> uploadMaterialsCountMap = new HashMap(); //上传素材数，key=date value=数量
 			Map<String,Integer> buyMaterialsCountMap = new HashMap(); //购买素材数，key=date value=数量
@@ -1734,16 +2130,17 @@ public class BIController extends BaseController {
 		try {
 			Calendar cal = Calendar.getInstance();
 			CalendarUtils.clearHMS(cal);
+			cal.add(Calendar.DATE, 1);
 			Date endTime = cal.getTime();
-			cal.add(Calendar.DATE, -6);
+			cal.add(Calendar.DATE, -7);
 			Date startTime = cal.getTime();
 			
 			Map<String,Object> conditions = new HashMap();
 			conditions.put("isDeleted", 0);
 			conditions.put("sourceType", 0);
 			conditions.put("mediaState", 2);
-			conditions.put("startTime", DateUtil.getStringDateFromDate(startTime, "yyyy-MM-dd"));
-			conditions.put("endTime", DateUtil.getStringDateFromDate(endTime, "yyyy-MM-dd"));
+			conditions.put("startTime", startTime != null ? startTime.getTime()/1000 : "");//秒
+			conditions.put("endTime", endTime != null ? endTime.getTime()/1000 : "");
 			List<Map<String,Object>> list = this.biService.getUploadMaterialsActiveUserStatCount(conditions);
 			Map<String,Integer> uploadActiveUserCountMap = new HashMap(); //上传素材活跃用户数，key=date value=数量
 			Map<String,Integer> buyActiveUserCountMap = new HashMap(); //购买素材活跃用户数，key=date value=数量

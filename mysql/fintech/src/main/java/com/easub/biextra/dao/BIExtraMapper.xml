@@ -1,81 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.easub.bi.dao.BIDao">
-	<resultMap id="ShopsDTO" type="com.easub.bi.dto.ShopsDTO">
-		<result property="id" column="ID" jdbcType="INTEGER" />
-		<result property="uuid" column="UUID" jdbcType="VARCHAR" />
-		<result property="userId" column="USER_ID" jdbcType="VARCHAR" />
-		<result property="name" column="NAME" jdbcType="VARCHAR" />
-		<result property="showName" column="SHOW_NAME" jdbcType="VARCHAR" />
-		<result property="description" column="DESCRIPTION" jdbcType="VARCHAR" />
-		<result property="cover" column="COVER" jdbcType="VARCHAR" />
-		<result property="choiceCover" column="CHOICE_COVER" jdbcType="VARCHAR" />
-		<result property="themeCover" column="THEME_COVER" jdbcType="VARCHAR" />
-		<result property="type" column="TYPE" jdbcType="INTEGER"/>
-		<result property="sn" column="SN" jdbcType="VARCHAR"/>
-		<result property="visible" column="VISIBLE" jdbcType="INTEGER"/>
-		<result property="isDeleted" column="IS_DELETED" jdbcType="INTEGER"/>
-		<result property="createdAt" column="CREATED_AT" jdbcType="TIMESTAMP"/>
-		<result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
-		<result property="deletedAt" column="deleted_at" jdbcType="TIMESTAMP"/>
-	</resultMap>
+<mapper namespace="com.easub.biextra.dao.BIExtraDao">
 	
-	<select id="getShopsList" parameterType="java.util.Map" resultMap="ShopsDTO" >
-		select a.id,a.uuid,a.user_id,a.name,a.show_name,a.description,a.cover,a.choice_cover,a.theme_cover,a.type,a.sn,a.visible,a.is_deleted,a.created_at,a.updated_at,a.deleted_at
-		from shops a 
-		where 1 = 1  
-		and a.is_deleted = 0
-	</select>
-
-	<select id="getVideoShopStat" parameterType="java.util.Map" resultType="java.util.Map" >
-		select a.shop_id,count(*) c 
-		from shop_videos a 
-		where 1 = 1  
-		<!-- and a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR} -->
-		and a.is_deleted = 0 
-		and a.media_state = 2
-		group by a.shop_id
-	</select>
-
-	<!-- 按版权统计所有视频数和时长（小时） -->
-	<select id="getVideoCopyrightStat" parameterType="java.util.Map" resultType="java.util.Map" >
-		select a.is_abroad * 1 abroad,count(a.id) c,sum(length) sec
-		from videos a
-		where 1 = 1  
-		<!-- <if test="startTime != null and startTime != '' and startTime != 0 ">
-			and a.created_timestamp &gt;= #{startTime,jdbcType=BIGINT}
+	<select id="getUserAccount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select count(a.id) from users a
+		left join user_policies b on a.id = b.uid
+		where 1=1
+		<if test="userPoliciesState != null and userPoliciesState != ''">
+			and b.state = #{userPoliciesState,jdbcType=INTEGER}
 		</if>
-		<if test="endTime != null and endTime != '' and startTime != 0">
-			and a.created_timestamp &lt;= #{endTime,jdbcType=BIGINT}
-		</if> -->
-		<!-- and a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR} -->
-		and a.is_deleted = 0 
-		and a.media_state = 2
-		group by a.is_abroad
-	</select>
-	<!-- 按条件统计所有视频数和时长（秒） -->
-	<select id="getVideoStatCount" parameterType="java.util.Map" resultType="java.util.Map" >
-		select count(a.id) c,sum(length) sec
-		from videos a
-		where 1 = 1  
-		and a.is_deleted = 0 
-		<if test="startTime != null and startTime != '' and startTime != 0 ">
-			and a.created_timestamp &gt;= #{startTime,jdbcType=BIGINT}
+		<if test="userTypes != null and userTypes != ''">
+			and b.user_type in (${userTypes})
 		</if>
-		<if test="endTime != null and endTime != '' and endTime != 0">
-			and a.created_timestamp &lt; #{endTime,jdbcType=BIGINT}
+		<if test="startTime != null and startTime != ''">
+			and unix_timestamp(a.created_at) &gt;= #{startTime,jdbcType=BIGINT}
 		</if>
-		<if test="mediaState != null and mediaState != ''">
-			and a.media_state = #{mediaState,jdbcType=INTEGER}
-		</if>
-		<if test="isPublic != null and isPublic != ''">
-			and a.is_public = #{isPublic,jdbcType=INTEGER}
-		</if>
-		<if test="isAbroad != null and isAbroad != ''">
-			and a.is_abroad = #{isAbroad,jdbcType=INTEGER}
-		</if>
-		<if test="userIds != null and userIds != ''">
-			and a.user_id in(${userIds})
+		<if test="endTime != null and endTime != ''">
+			and unix_timestamp(a.created_at) &lt; #{endTime,jdbcType=BIGINT}
 		</if>
 	</select>
 
@@ -93,11 +34,12 @@
 		<if test="endTime != null and endTime != '' and endTime != 0">
 			and a.created_timestamp &lt; #{endTime,jdbcType=BIGINT}
 		</if>
-		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('iss','ims','admin','dev','test'))
+		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('admin','dev','test'))
 		and a.user_id not in(select user_id from user_external_maps)
 		group by a.source_type
 		
 		<!-- 混剪中视频等于一的为剪辑，大于1的为混剪-->
+		
 		union all  
 		select  2 sourceType,1 type, count(id) c
 		from videos a
@@ -110,7 +52,7 @@
 		</if>
 		and a.is_deleted = 0 
 		and a.media_state = 2
-		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('iss','ims','admin','dev','test'))
+		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('admin','dev','test'))
 		and a.user_id not in(select user_id from user_external_maps)
 		and a.source_type = 6 and a.id in(select video_id from temp_project_numbers where num = 1)
 		
@@ -126,7 +68,7 @@
 		</if>
 		and a.is_deleted = 0 
 		and a.media_state = 2
-		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('iss','ims','admin','dev','test'))
+		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('admin','dev','test'))
 		and a.user_id not in(select user_id from user_external_maps)
 		and a.source_type = 6 and a.id in(select video_id from temp_project_numbers where num = 1)
 		
@@ -196,7 +138,7 @@
 		<if test="endTime != null and endTime != '' and endTime != 0">
 			and a.shared_timestamp &lt; #{endTime,jdbcType=BIGINT} 
 		</if>
-		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('iss','ims','admin','dev','test'))
+		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('admin','dev','test'))
  		group by b.source_type
  		
  		<!-- 混剪中视频等于一的为剪辑，大于1的为混剪-->
@@ -212,7 +154,7 @@
 		<if test="endTime != null and endTime != '' and endTime != 0">
 			and a.shared_timestamp &lt;= #{endTime,jdbcType=BIGINT} 
 		</if>
-		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('iss','ims','admin','dev','test'))
+		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('admin','dev','test'))
 		and b.source_type = 6 
 		and a.vid in(select video_id from temp_project_numbers where num = 1)
 		
@@ -228,7 +170,7 @@
 		<if test="endTime != null and endTime != '' and endTime != 0">
 			and a.shared_timestamp &lt;= #{endTime,jdbcType=BIGINT} 
 		</if>
-		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('iss','ims','admin','dev','test'))
+		and a.user_id not in(select tt.uid from user_policies tt where tt.user_type in('admin','dev','test'))
 		and b.source_type = 6 
 		and a.vid in(select video_id from temp_project_numbers where num = 1) 
  		
@@ -259,8 +201,7 @@
 		<if test="endTime != null and endTime != '' and endTime != 0">
 			and a.shared_timestamp &lt; #{endTime,jdbcType=BIGINT} 
 		</if>
- 		<!-- and exists(select tt.id from user_external_maps tt where tt.user_id=a.user_id) --> 
- 		and a.user_id in(select tt.user_id from user_external_maps tt)
+ 		and exists(select tt.id from user_external_maps tt where tt.user_id=a.user_id) 
  		group by b.source_type
  		<!-- 政务媒体 -->
  		union all 
@@ -329,7 +270,7 @@
 			and a.shared_timestamp &lt; #{endShareTime,jdbcType=BIGINT} 
 		</if>
 		<if test="sourceType != null and sourceType != '' ">
-			and b.source_type = #{sourceType,jdbcType=INTEGER}
+			and b.source_type = #{sourceTyp,jdbcType=INTEGER}
 		</if>
 		<if test="sourceTypes != null and sourceTypes != '' ">
 			and b.source_type in(${sourceTypes})
@@ -347,44 +288,6 @@
 		</if>
 	</select>
 	
-	
-	<!-- 本地上传素材量 -->
-	<select id="getUploadMaterialsStatCount" parameterType="java.util.Map" resultType="java.util.Map" >
-		select a.source_type * 1 sourceType,date_format(a.created_at,'%Y-%m-%d') d,count(*) c
-		from mam_materials a 
-		where a.is_deleted = #{isDeleted,jdbcType=INTEGER}
-		and media_state = #{mediaState,jdbcType=INTEGER} 
-		<!-- and a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR} -->
-		<if test="startTime != null and startTime != '' and startTime != 0 ">
-			and a.created_timestamp &gt;= #{startTime,jdbcType=BIGINT}
-		</if>
-		<if test="endTime != null and endTime != '' and endTime != 0">
-			and a.created_timestamp &lt; #{endTime,jdbcType=BIGINT} 
-		</if>
-		<!-- and a.source_type = #{sourceType,jdbcType=INTEGER}  -->
-		group by a.source_type,date_format(a.created_at,'%Y-%m-%d')
-	</select>
-	<!-- 本地上传素材活跃用户 -->
-	<select id="getUploadMaterialsActiveUserStatCount" parameterType="java.util.Map" resultType="java.util.Map" >
-		select t.d,t.sourceType,count(t.user_id) c from (
-			select a.user_id,a.source_type * 1 sourceType,date_format(a.created_at,'%Y-%m-%d') d,count(*) c
-			from mam_materials a 
-			where a.is_deleted = #{isDeleted,jdbcType=INTEGER}
-			and media_state = #{mediaState,jdbcType=INTEGER} 
-			<!-- and a.created_at between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR} -->
-			<if test="startTime != null and startTime != '' and startTime != 0 ">
-				and a.created_timestamp &gt;= #{startTime,jdbcType=BIGINT}
-			</if>
-			<if test="endTime != null and endTime != '' and endTime != 0">
-				and a.created_timestamp &lt; #{endTime,jdbcType=BIGINT} 
-			</if>
-			<!-- and a.source_type = #{sourceType,jdbcType=INTEGER}  -->
-			group by a.user_id,a.source_type,date_format(a.created_at,'%Y-%m-%d')
-		) t 
-		group by t.d,t.sourceType
-		order by t.d desc
-	</select>
-	
 	<!-- 视频播放量VV -->
 	<select id="getVideoVV" parameterType="java.util.Map" resultType="java.lang.Long" >
 		select sum(a.vv) sumvv from weibo_statistics a 
@@ -395,23 +298,6 @@
 		<if test="endTime != null and endTime != '' ">
 			and unix_timestamp(a.updated_at) &lt; #{endTime,jdbcType=BIGINT} 
 		</if>
-	</select>
-	
-	<select id="getVideoSourceTypeCreateTimeCount" parameterType="java.util.Map" resultType="java.util.Map">
-		select a.created_timestamp d,a.source_type sourceType,count(a.id) 
-		from videos a 
-		where 1 = 1
-		and a.is_deleted = 0
-		<if test="mediaState != null and mediaState != '' ">
-			and a.media_state = #{mediaState,jdbcType=INTEGER}	
-		</if>
-		<if test="startTime != null and startTime != '' and startTime != 0 ">
-			and a.created_timestamp &gt;= #{startTime,jdbcType=BIGINT}
-		</if>
-		<if test="endTime != null and endTime != '' and endTime != 0">
-			and a.created_timestamp &lt; #{endTime,jdbcType=BIGINT} 
-		</if>
-		 group by a.source_type,a.created_timestamp
 	</select>
 	
 </mapper>

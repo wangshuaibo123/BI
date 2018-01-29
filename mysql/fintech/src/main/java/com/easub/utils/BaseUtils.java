@@ -14,6 +14,16 @@ public class BaseUtils {
 		return 0;
 	}
 	
+	public static long parseToLong(Object obj) {
+		try {
+			if(obj != null && !"".equals(obj.toString().trim())) {
+				return Long.parseLong(obj.toString());
+			}
+		} catch (Exception e) {
+		}
+		return 0;
+	}
+	
 	public static String parseToString(Object obj) {
 		if(obj == null || "".equals(obj.toString().trim()) || "null".equalsIgnoreCase(obj.toString().trim())) {
 			return "";

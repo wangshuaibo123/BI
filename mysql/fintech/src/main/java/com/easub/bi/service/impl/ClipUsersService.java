@@ -34,5 +34,11 @@ public class ClipUsersService implements IClipUsersService{
 		return this.dao.getUsersAccountCount(map);
 	}
 
+	@Override
+	public Integer getUserOperationLogsCount(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		return this.dao.getUserOperationLogsCount(map);
+	}
+
 	
 }

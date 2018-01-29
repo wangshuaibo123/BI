@@ -10,26 +10,53 @@
 	
 	<select id="getUsersList" parameterType="java.util.Map" resultMap="ClipUsersDTO" >
 		select a.id,a.uuid,b.is_master * 1,b.user_category * 1
-		from users a inner join user_policies b on a.id = b.uid   
+		from users a left join user_policies b on a.id = b.uid   
 		where 1 = 1  
 		and a.is_deleted = 0
 	</select>
 	
 	<select id="getUsersAccountCount" parameterType="java.util.Map" resultType="java.lang.Integer">
-		select count(a.id) from users a inner join user_policies b on a.id = b.uid
+		select count(a.id) from users a left join user_policies b on a.id = b.uid
 		where a.is_deleted = 0
+		<!-- 禁用的也需要算进去，2018-01-26以前的is_applied的值标识为99,26号以前的数据不统计禁用的 -->
+		and (b.state = 1 or (b.state=2 and b.is_applied!=99))
 		<if test="startCreatedTime != null and startCreatedTime != '' ">
-			and a.created_at &gt;= #{startCreatedTime,jdbcType=VARCHAR}
+			and unix_timestamp(a.created_at) &gt;= #{startCreatedTime,jdbcType=BIGINT}
 		</if>
-		
 		<if test="endCreatedTime != null and endCreatedTime != '' ">
-			and a.created_at &lt;= #{endCreatedTime,jdbcType=VARCHAR}
+			and unix_timestamp(a.created_at) &lt; #{endCreatedTime,jdbcType=BIGINT}
+		</if>
+		<if test="userPoliciesState != null and userPoliciesState != ''">
+			and b.state = #{userPoliciesState,jdbcType=INTEGER}
 		</if>
 		<if test="userType != null and userType != '' ">
 			and b.user_type in(${userType})
 		</if>
-		
-		
+		<if test="notUserType != null and notUserType != '' ">
+			and b.user_type not in(${notUserType})
+		</if>
+	</select>
+	<select id="getUserOperationLogsCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select count(a.id) from user_operation_logs a 
+		where 1=1
+		<if test="startTime != null and startTime != '' ">
+			and a.created_timestamp &gt;= #{startTime,jdbcType=BIGINT}
+		</if>
+		<if test="endTime != null and endTime != '' ">
+			and a.created_timestamp &lt; #{endTime,jdbcType=BIGINT}
+		</if>
+		<if test="state != null and state != ''">
+			and a.state = #{state,jdbcType=INTEGER}
+		</if>
+		<if test="isStartUsing != null and isStartUsing != ''">
+			and a.is_start_using = #{isStartUsing,jdbcType=INTEGER}
+		</if>
+		<if test="userType != null and userType != '' ">
+			and a.user_type in(${userType})
+		</if>
+		<if test="notUserType != null and notUserType != '' ">
+			and a.user_type not in(${notUserType})
+		</if>
 	</select>
 	
 	

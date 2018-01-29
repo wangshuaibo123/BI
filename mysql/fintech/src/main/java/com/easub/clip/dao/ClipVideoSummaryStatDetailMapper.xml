@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.easub.clip.dao.ClipVideoSummaryStatDetailDao">
+<resultMap id="ClipVideoSummaryStatDetailDTO" type="com.easub.clip.dto.ClipVideoSummaryStatDetailDTO">
+				<result property="id" column="id" jdbcType="DECIMAL" />
+				<result property="type" column="type" jdbcType="DECIMAL" />
+				<result property="sourceType" column="source_type" jdbcType="DECIMAL" />
+				<result property="count" column="count" jdbcType="DECIMAL" />
+				<result property="shareCount" column="share_count" jdbcType="DECIMAL" />
+				<result property="summaryDate" column="summary_date" jdbcType="TIMESTAMP" />
+				<result property="summaryDateMillisecond" column="summary_date_millisecond" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 clip_video_summary_stat_detail -->	
+<select id="searchClipVideoSummaryStatDetailByPaging" parameterType="java.util.Map" resultMap="ClipVideoSummaryStatDetailDTO">
+    	 		select 
+						t1.id                             ,
+						t1.type                           ,
+						t1.source_type                    ,
+						t1.count                          ,
+						t1.share_count                    ,
+						t1.summary_date                   ,
+						t1.summary_date_millisecond       
+					
+				from clip_video_summary_stat_detail 	t1
+				where 1=1
+				<if test="dto != null">
+	    			<if test="dto.id != null and dto.id != ''">
+							and t1.id =#{dto.id}
+	    			</if>
+	    			<if test="dto.type != null and dto.type != ''">
+							and t1.type =#{dto.type}
+	    			</if>
+	    			<if test="dto.sourceType != null and dto.sourceType != ''">
+							and t1.source_type =#{dto.sourceType}
+	    			</if>
+	    			<if test="dto.count != null and dto.count != ''">
+							and t1.count =#{dto.count}
+	    			</if>
+	    			<if test="dto.shareCount != null and dto.shareCount != ''">
+							and t1.share_count =#{dto.shareCount}
+	    			</if>
+	    			<if test="dto.summaryDate != null and dto.summaryDate != ''">
+							and t1.summary_date =#{dto.summaryDate}
+	    			</if>
+	    			<if test="dto.summaryDateMillisecond != null and dto.summaryDateMillisecond != ''">
+							and t1.summary_date_millisecond =#{dto.summaryDateMillisecond}
+	    			</if>
+				</if>
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 clip_video_summary_stat_detail  -->
+<select id="searchClipVideoSummaryStatDetail" parameterType="java.util.Map" resultMap="ClipVideoSummaryStatDetailDTO">
+    	     select 
+						t1.id                             ,
+						t1.type                           ,
+						t1.source_type                    ,
+						t1.count                          ,
+						t1.share_count                    ,
+						t1.summary_date                   ,
+						t1.summary_date_millisecond       
+				from clip_video_summary_stat_detail 		t1
+				where 1=1
+				<if test="dto != null">
+	    			<if test="dto.id != null and dto.id != ''">
+							and t1.id = #{dto.id}
+	    			</if>
+	    			<if test="dto.type != null and dto.type != ''">
+							and t1.type = #{dto.type}
+	    			</if>
+	    			<if test="dto.sourceType != null and dto.sourceType != ''">
+							and t1.source_type = #{dto.sourceType}
+	    			</if>
+	    			<if test="dto.count != null and dto.count != ''">
+							and t1.count = #{dto.count}
+	    			</if>
+	    			<if test="dto.shareCount != null and dto.shareCount != ''">
+							and t1.share_count = #{dto.shareCount}
+	    			</if>
+	    			<if test="dto.summaryDate != null and dto.summaryDate != ''">
+							and t1.summary_date = #{dto.summaryDate}
+	    			</if>
+	    			<if test="dto.summaryDateMillisecond != null and dto.summaryDateMillisecond != ''">
+							and t1.summary_date_millisecond = #{dto.summaryDateMillisecond}
+	    			</if>
+    			</if>
+    			<if test="startSummaryDateMillisecond != null and startSummaryDateMillisecond != ''">
+						and t1.summary_date_millisecond &gt;= #{startSummaryDateMillisecond}
+    			</if>
+    			<if test="endSummaryDateMillisecond != null and endSummaryDateMillisecond != ''">
+						and t1.summary_date_millisecond &lt;= #{endSummaryDateMillisecond}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  clip_video_summary_stat_detail -->
+<select id="findClipVideoSummaryStatDetailByPrimaryKey" parameterType="java.util.Map" resultMap="ClipVideoSummaryStatDetailDTO">
+   	 		select 
+					t1.id                             ,
+					t1.type                           ,
+					t1.source_type                    ,
+					t1.count                          ,
+					t1.share_count                    ,
+					t1.summary_date                   ,
+					t1.summary_date_millisecond       
+			from clip_video_summary_stat_detail 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 clip_video_summary_stat_detail -->
+<insert id="insertClipVideoSummaryStatDetail" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="dto.id">
+			insert into clip_video_summary_stat_detail
+			(   		
+						id                             ,
+						type                           ,
+						source_type                    ,
+						count                          ,
+						share_count                    ,
+						summary_date                   ,
+						summary_date_millisecond       
+			)
+			values(
+						#{dto.id,jdbcType=DECIMAL}
+						,
+						#{dto.type,jdbcType=DECIMAL}
+						,
+						#{dto.sourceType,jdbcType=DECIMAL}
+						,
+						#{dto.count,jdbcType=DECIMAL}
+						,
+						#{dto.shareCount,jdbcType=DECIMAL}
+						,
+						#{dto.summaryDate,jdbcType=TIMESTAMP}
+						,
+						#{dto.summaryDateMillisecond,jdbcType=DECIMAL}
+						
+			)
+</insert>
+    
+<!-- 更新对象 clip_video_summary_stat_detail -->
+<update id="updateClipVideoSummaryStatDetail" parameterType="java.util.Map">
+	     update clip_video_summary_stat_detail t1
+	           set 
+			           t1.id                             =#{dto.id,jdbcType=DECIMAL},
+			           t1.type                           =#{dto.type,jdbcType=DECIMAL},
+			           t1.source_type                    =#{dto.sourceType,jdbcType=DECIMAL},
+			           t1.count                          =#{dto.count,jdbcType=DECIMAL},
+			           t1.share_count                    =#{dto.shareCount,jdbcType=DECIMAL},
+			           t1.summary_date                   =#{dto.summaryDate,jdbcType=TIMESTAMP},
+			           t1.summary_date_millisecond       =#{dto.summaryDateMillisecond,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 clip_video_summary_stat_detail -->
+<delete id="deleteClipVideoSummaryStatDetailByID" parameterType="java.util.Map">
+    	delete from clip_video_summary_stat_detail where id in (${ids} )
+</delete>
+<!-- 主键假删除 clip_video_summary_stat_detail -->
+<update id="deleteClipVideoSummaryStatDetailByPrimaryKey" parameterType="java.util.Map">
+	     update clip_video_summary_stat_detail t1
+	           set   t1.VALIDATE_STATE='0'	
+	     where t1.id in( ${ids})
+</update>
+
+
+
+
+<insert id="batchInsert" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="dto.id">
+		insert into clip_video_summary_stat_detail
+		(   		
+					id                             ,
+					type                           ,
+					source_type                    ,
+					count                          ,
+					share_count                    ,
+					summary_date                   ,
+					summary_date_millisecond       
+		)
+		values
+		<foreach item="dto" collection="dtoList" separator=",">
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+		    	#{dto.id,jdbcType=DECIMAL}
+				,
+				#{dto.type,jdbcType=DECIMAL}
+				,
+				#{dto.sourceType,jdbcType=DECIMAL}
+				,
+				#{dto.count,jdbcType=DECIMAL}
+				,
+				#{dto.shareCount,jdbcType=DECIMAL}
+				,
+				#{dto.summaryDate,jdbcType=TIMESTAMP}
+				,
+				#{dto.summaryDateMillisecond,jdbcType=DECIMAL}
+		    </trim>
+   	 	</foreach>
+			
+</insert>
+<delete id="deleteClipVideoSummaryStatDetail" parameterType="java.util.Map">
+	delete from clip_video_summary_stat_detail 
+	where 1=1
+	<if test="id != null and id != ''">
+		and id = #{id}
+	</if>
+	<if test="type != null and type != ''">
+		and type = #{type}
+	</if>
+	<if test="sourceType != null and sourceType != ''">
+		and source_type = #{sourceType}
+	</if>
+	<if test="summaryDate != null and summaryDate != ''">
+		and summary_date = #{summaryDate}
+	</if>
+	<if test="summaryDateMillisecond != null and summaryDateMillisecond != ''">
+		and summary_date_millisecond = #{summaryDateMillisecond}
+	</if>
+</delete>
+
+</mapper>

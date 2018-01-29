@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fintech.platform.core.mybatis.MyBatisRepository;
 
 @MyBatisRepository
+@SuppressWarnings("all")
 public interface BIDao {
 
 	List getShopsList(Map<String,Object> map);
@@ -21,7 +22,14 @@ public interface BIDao {
 	 * @param map
 	 * @return
 	 */
+	
 	List getVideoCopyrightStat(Map<String,Object> map);
+	/**
+	 * 按条件统计视频数和时长（秒）
+	 * @param map
+	 * @return
+	 */
+	Map<String,Object> getVideoStatCount(Map<String,Object> map);
 	
 	
 	/**
@@ -67,7 +75,7 @@ public interface BIDao {
 	 * @param map
 	 * @return
 	 */
-	Integer getVideoVV(Map<String,Object> map);
+	Long getVideoVV(Map<String,Object> map);
 	
 	/**
 	 * 按视频来源和时间分组统计视频数量

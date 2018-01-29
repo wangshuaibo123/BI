@@ -38,34 +38,62 @@ public class TrackLogUtils {
 		if(!dir.exists()) {
 			return new HashMap();
 		}
-		
+		getTrackLog(dir, startTime, endTime, trackLogMap);
+//		if(dir.isDirectory()) {
+//			File[] fileList = dir.listFiles();
+//			for(File file : fileList) {
+//				if(file.isDirectory() || file.isHidden()) {
+//					continue;
+//				}
+//				String fileName = file.getName();
+//				String extendName = getExtendName(fileName);
+//				Date tempDate = DateUtil.getDateFromString(extendName);
+//				if(tempDate == null) {
+//					continue;
+//				}
+//				CalendarUtils.clearHMS(tempDate);
+//				if(tempDate.getTime() >= startTime.getTime() && tempDate.getTime() <= endTime.getTime()) {
+//					List<TrackLog> list = parseTrackLogFile(file);
+//					trackLogMap.put(tempDate, list);
+//				}
+//			}
+//		}
+		return trackLogMap;
+	}
+	
+	private static void getTrackLog(File dir,Date startTime,Date endTime,Map<Date,List<TrackLog>> trackLogMap) {
 		if(dir.isDirectory()) {
 			File[] fileList = dir.listFiles();
 			for(File file : fileList) {
-				if(file.isDirectory() || file.isHidden()) {
+				if(file.isHidden()) {
 					continue;
 				}
-				String fileName = file.getName();
-				String extendName = getExtendName(fileName);
-				Date tempDate = DateUtil.getDateFromString(extendName);
-				if(tempDate == null) {
-					continue;
-				}
-				CalendarUtils.clearHMS(tempDate);
-				if(tempDate.getTime() >= startTime.getTime() && tempDate.getTime() <= endTime.getTime()) {
-					List<TrackLog> list = parseTrackLogFile(file);
-					trackLogMap.put(tempDate, list);
+				if(file.isFile()) {
+					String fileName = file.getName();
+					String extendName = getExtendName(fileName);
+					Date tempDate = DateUtil.getDateFromString(extendName);
+					if(tempDate == null) {
+						continue;
+					}
+					CalendarUtils.clearHMS(tempDate);
+					if(tempDate.getTime() >= startTime.getTime() && tempDate.getTime() <= endTime.getTime()) {
+						List<TrackLog> list = parseTrackLogFile(file);
+						trackLogMap.put(tempDate, list);
+					}
+				}else if(file.isDirectory()) {
+					getTrackLog(file, startTime, endTime, trackLogMap);
 				}
 			}
 		}
-		return trackLogMap;
 	}
+	
+	
 	
 	public static void main(String[] args) {
 //		String extendName = getExtendName("sa.log.2018-01-08");
 //		System.out.println(extendName);
 		String path = "C:\\Users\\jiangshuncheng\\Desktop\\项目文件\\埋点文件";
-		getTrackLogFileListByTime(path, "2018-01-01", "2018-01-10");
+		Map map = getTrackLogFileListByTime(path, "2018-01-01", "2018-01-10");
 	}
 	
 	private static String getExtendName(String fileName) {

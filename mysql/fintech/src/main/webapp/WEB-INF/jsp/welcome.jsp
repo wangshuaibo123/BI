@@ -139,15 +139,15 @@ function viewSysVer(vId){
 <script type="text/javascript">
 	$(function(){
 		//PVUV图表
-		initPVUVDataFun();
+		//initPVUVDataFun();
 		//用户活跃图
-		initActiveDataFun();
+		//initActiveDataFun();
 		//剪视频剪直播活跃用户数
-		initClipLiveVideoActiveDataFun();
+		//initClipLiveVideoActiveDataFun();
 		//上传素材量趋势图
-		initUploadMaterialsDataFun();
+		//initUploadMaterialsDataFun();
 		//上传素材活跃用户
-		initUploadMaterialsActiveUserStatDataFun();
+		//initUploadMaterialsActiveUserStatDataFun();
 	});
 	function initPVUVDataFun(){
 		var myChart = echarts.init(document.getElementById('pvuvDIV'));
@@ -605,7 +605,7 @@ function viewSysVer(vId){
 <body>
 	<div style="position: absolute;top:0px; bottom:0px; left:0px;right:0px;overflow:auto;padding:10px;">
 	
-	
+	<!-- 
 		<div class="winSwarp oneOfTwo">
 			<div class="titleContent">一周内PV/UV趋势图</div>
 			<div class="winContent" id="pvuvDIV" style="height: 300px;">
@@ -645,6 +645,10 @@ function viewSysVer(vId){
 			
 			</div>
 		</div>
+	-->
+	
+	
+	
 	
 		<!-- 
 		<div class="winSwarp oneOfTwo">

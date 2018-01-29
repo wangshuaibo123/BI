@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.easub.clip.dao.ClipVideoCopyrightSummaryStatDao">
+<resultMap id="ClipVideoCopyrightSummaryStatDTO" type="com.easub.clip.dto.ClipVideoCopyrightSummaryStatDTO">
+				<result property="id" column="id" jdbcType="DECIMAL" />
+				<result property="abroadCount" column="abroad_count" jdbcType="DECIMAL" />
+				<result property="abroadLength" column="abroad_length" jdbcType="DECIMAL" />
+				<result property="homeCount" column="home_count" jdbcType="DECIMAL" />
+				<result property="homeLength" column="home_length" jdbcType="DECIMAL" />
+				<result property="summaryDate" column="summary_date" jdbcType="TIMESTAMP" />
+				<result property="summaryDateMillisecond" column="summary_date_millisecond" jdbcType="DECIMAL" />
+</resultMap>
+				
+<!-- 分页查询 clip_video_copyright_summary_stat -->	
+<select id="searchClipVideoCopyrightSummaryStatByPaging" parameterType="java.util.Map" resultMap="ClipVideoCopyrightSummaryStatDTO">
+    	 		select 
+						t1.id                             ,
+						t1.abroad_count                   ,
+						t1.abroad_length                  ,
+						t1.home_count                     ,
+						t1.home_length                    ,
+						t1.summary_date                   ,
+						t1.summary_date_millisecond       
+					
+				from clip_video_copyright_summary_stat 	t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.id =#{dto.id}
+    			</if>
+    			<if test="dto.abroadCount != null and dto.abroadCount != ''">
+						and t1.abroad_count =#{dto.abroadCount}
+    			</if>
+    			<if test="dto.abroadLength != null and dto.abroadLength != ''">
+						and t1.abroad_length =#{dto.abroadLength}
+    			</if>
+    			<if test="dto.homeCount != null and dto.homeCount != ''">
+						and t1.home_count =#{dto.homeCount}
+    			</if>
+    			<if test="dto.homeLength != null and dto.homeLength != ''">
+						and t1.home_length =#{dto.homeLength}
+    			</if>
+    			<if test="dto.summaryDate != null and dto.summaryDate != ''">
+						and t1.summary_date =#{dto.summaryDate}
+    			</if>
+    			<if test="dto.summaryDateMillisecond != null and dto.summaryDateMillisecond != ''">
+						and t1.summary_date_millisecond =#{dto.summaryDateMillisecond}
+    			</if>
+				
+				order by t1.id desc
+</select>
+  
+<!-- 查询列表 clip_video_copyright_summary_stat  -->
+<select id="searchClipVideoCopyrightSummaryStat" parameterType="java.util.Map" resultMap="ClipVideoCopyrightSummaryStatDTO">
+    	     select 
+						t1.id                             ,
+						t1.abroad_count                   ,
+						t1.abroad_length                  ,
+						t1.home_count                     ,
+						t1.home_length                    ,
+						t1.summary_date                   ,
+						t1.summary_date_millisecond       
+				from clip_video_copyright_summary_stat 		t1
+				where 1=1
+    			<if test="dto.id != null and dto.id != ''">
+						and t1.id = #{dto.id}
+    			</if>
+    			<if test="dto.abroadCount != null and dto.abroadCount != ''">
+						and t1.abroad_count = #{dto.abroadCount}
+    			</if>
+    			<if test="dto.abroadLength != null and dto.abroadLength != ''">
+						and t1.abroad_length = #{dto.abroadLength}
+    			</if>
+    			<if test="dto.homeCount != null and dto.homeCount != ''">
+						and t1.home_count = #{dto.homeCount}
+    			</if>
+    			<if test="dto.homeLength != null and dto.homeLength != ''">
+						and t1.home_length = #{dto.homeLength}
+    			</if>
+    			<if test="dto.summaryDate != null and dto.summaryDate != ''">
+						and t1.summary_date = #{dto.summaryDate}
+    			</if>
+    			<if test="dto.summaryDateMillisecond != null and dto.summaryDateMillisecond != ''">
+						and t1.summary_date_millisecond = #{dto.summaryDateMillisecond}
+    			</if>
+</select>
+  
+<!-- 主键查询对象  clip_video_copyright_summary_stat -->
+<select id="findClipVideoCopyrightSummaryStatByPrimaryKey" parameterType="java.util.Map" resultMap="ClipVideoCopyrightSummaryStatDTO">
+   	 		select 
+					t1.id                             ,
+					t1.abroad_count                   ,
+					t1.abroad_length                  ,
+					t1.home_count                     ,
+					t1.home_length                    ,
+					t1.summary_date                   ,
+					t1.summary_date_millisecond       
+			from clip_video_copyright_summary_stat 		t1
+			where 
+				t1.id = #{id}
+</select>
+  
+<!-- 新增对象 clip_video_copyright_summary_stat -->
+<insert id="insertClipVideoCopyrightSummaryStat" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="dto.id">
+			insert into clip_video_copyright_summary_stat
+			(   		
+						id                             ,
+						abroad_count                   ,
+						abroad_length                  ,
+						home_count                     ,
+						home_length                    ,
+						summary_date                   ,
+						summary_date_millisecond       
+			)
+			values(
+						#{dto.id,jdbcType=DECIMAL}
+						,
+						#{dto.abroadCount,jdbcType=DECIMAL}
+						,
+						#{dto.abroadLength,jdbcType=DECIMAL}
+						,
+						#{dto.homeCount,jdbcType=DECIMAL}
+						,
+						#{dto.homeLength,jdbcType=DECIMAL}
+						,
+						#{dto.summaryDate,jdbcType=TIMESTAMP}
+						,
+						#{dto.summaryDateMillisecond,jdbcType=DECIMAL}
+						
+			)
+</insert>
+    
+<!-- 更新对象 clip_video_copyright_summary_stat -->
+<update id="updateClipVideoCopyrightSummaryStat" parameterType="java.util.Map">
+	     update clip_video_copyright_summary_stat t1
+	           set 
+			           t1.id                             =#{dto.id,jdbcType=DECIMAL},
+			           t1.abroad_count                   =#{dto.abroadCount,jdbcType=DECIMAL},
+			           t1.abroad_length                  =#{dto.abroadLength,jdbcType=DECIMAL},
+			           t1.home_count                     =#{dto.homeCount,jdbcType=DECIMAL},
+			           t1.home_length                    =#{dto.homeLength,jdbcType=DECIMAL},
+			           t1.summary_date                   =#{dto.summaryDate,jdbcType=TIMESTAMP},
+			           t1.summary_date_millisecond       =#{dto.summaryDateMillisecond,jdbcType=DECIMAL}
+	     where t1.id = #{dto.id}
+</update>
+   
+<!-- 主键删除 clip_video_copyright_summary_stat -->
+<delete id="deleteClipVideoCopyrightSummaryStatByID" parameterType="java.util.Map">
+    	delete from clip_video_copyright_summary_stat where id in (${ids} )
+</delete>
+<!-- 主键假删除 clip_video_copyright_summary_stat -->
+<update id="deleteClipVideoCopyrightSummaryStatByPrimaryKey" parameterType="java.util.Map">
+	     update clip_video_copyright_summary_stat t1
+	           set   t1.VALIDATE_STATE='0'	
+	     where t1.id in( ${ids})
+</update>
+
+<delete id="deleteClipVideoCopyrightSummaryStat" parameterType="java.util.Map">
+	delete from clip_video_summary_stat 
+	where 1=1
+	<if test="id != null and id != ''">
+		and id = #{id}
+	</if>
+	<if test="summaryDate != null and summaryDate != ''">
+		and summary_date = #{summaryDate}
+	</if>
+	<if test="summaryDateMillisecond != null and summaryDateMillisecond != ''">
+		and summary_date_millisecond = #{summaryDateMillisecond}
+	</if>
+</delete>
+
+
+</mapper>

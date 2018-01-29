@@ -27,19 +27,21 @@
 	</bean> -->
 
 	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
-		<property name="maxTotal" value="200" />
-		<property name="maxIdle" value="100" />
-		<property name="maxWaitMillis" value="50000" />
-		<property name="testOnBorrow" value="true" />
+		<property name="maxTotal" value="${redis.pool.maxTotal}" />
+		<property name="maxIdle" value="${redis.pool.maxIdle}" />
+		<property name="maxWaitMillis" value="${redis.pool.maxWaitMillis}" />
+		<property name="testOnBorrow" value="${redis.pool.testOnBorrow}" />
 	</bean>
-	
     <bean id="jedisShardInfoDefault" class="redis.clients.jedis.JedisShardInfo">  
-        <constructor-arg index="0" value="127.0.0.1" />
-        <constructor-arg index="1" type="int" value="6379" />
-        <constructor-arg index="2" type="java.lang.String" value="127.0.0.1" />
-        <!-- <property name="password" value="000000aA"/> -->
+    	<!-- <constructor-arg name="host" value="redis://:@127.0.0.1:6379/0"></constructor-arg> -->
+    	<!-- schema://username:password@ip:port/dbindex -->
+    	<constructor-arg name="host" value="${redis.hosturl}"></constructor-arg>
+        <!-- <constructor-arg index="0" value="${redis.host}" />
+        <constructor-arg index="1" type="int" value="${redis.port}" />
+        <constructor-arg index="2" type="java.lang.String" value="${redis.host}" />-->
+        <property name="password" value="${redis.password}"/>
     </bean>  
-    
+     
     <bean id="jedisSentinelPool" class="redis.clients.jedis.ShardedJedisPool">  
         <constructor-arg index="0" ref="jedisPoolConfig" />  
         <constructor-arg index="1">  
@@ -47,8 +49,7 @@
                 <ref bean="jedisShardInfoDefault" />  
             </list>  
         </constructor-arg>
-    </bean> 
-    
+    </bean>
     
 	 <!-- 采用redis的进行缓存配置  start -->
     <bean id="methodCacheInterceptor" class="com.fintech.platform.core.ehcache.MethodRedisCacheInterceptor">  

@@ -47,7 +47,7 @@
     秒 分 小时 日 月 周几 年
     每季的第3个月第15天23点30分调度的表达式0 30 23 15 3,6,9,12 ? *
      0 00 02 * * ?如下为每天0 00 02 * * ?开始执行  暂时停止定时任务 -->
-    
+    <!--
     <bean id="扫描获取业务系统错误日志" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail">
             <ref bean="ExcuteAppErrorInfoTask"/>
@@ -56,6 +56,7 @@
             <value>0 0/2 * * * ?</value>
         </property>
     </bean>
+    
     <bean name="ExcuteAppErrorInfoTask" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
     	<property name="durability" value="true" />
         <property name="jobClass">
@@ -77,8 +78,8 @@
             <value>com.portal.modules.logmonitor.sysapperrorinfo.job.ExcuteAppSendErrorInfoTask</value>
         </property>
     </bean> 
-    
-    <!-- 扫描日中任务分组定义-->
+    -->
+    <!-- 扫描日中任务分组定义
      <bean id="扫描日中任务分组定义" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail">
         	<ref bean="QueryJobGroupDefTask"/>
@@ -93,7 +94,8 @@
             <value>com.fintech.modules.quartzJob.core.job.QueryJobGroupDefTask</value>
         </property>
     </bean>
-    <!-- 扫描日中任务组实例 -->
+    -->
+    <!-- 扫描日中任务组实例 
     <bean id="扫描日中任务组实例" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail">
         	<ref bean="ExcuteGroupInstanceTask"/>
@@ -108,13 +110,15 @@
             <value>com.fintech.modules.quartzJob.core.job.ExcuteGroupInstanceTask</value>
         </property>
     </bean>
-	 <!-- 工作流历史数据归档 -->
+    -->
+    
+	 <!-- 工作流历史数据归档
     <bean id="archiveTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail">
         	<ref bean="archiveTaskJob"/>
         </property>
         <property name="cronExpression">
-            <value>0 1 1 * * ?</value><!-- 0 1 1 * * ? -->
+            <value>0 1 1 * * ?</value>
         </property>
     </bean>
 	<bean id="archiveTaskJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
@@ -123,8 +127,8 @@
             <value>com.portal.modules.archive.timer.ArchiveTask</value>
         </property>
     </bean>
-    
-    <!-- 统一异步发送短信 -->
+     -->
+    <!-- 统一异步发送短信
     <bean id="excSMSAsynJobTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail">
         	<ref bean="excSMSAsynJobTask"/>
@@ -139,8 +143,8 @@
             <value>com.fintech.modules.platform.sysasynjob.service.ExcSMSAsynJobTask</value>
         </property>
     </bean>
-    
-	<!-- 统一异步接口任务调用  -->
+     -->
+	<!-- 统一异步接口任务调用  
 	<bean id="excSysAsynJobTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail">
         	<ref bean="excSysAsynJobTask"/>
@@ -155,7 +159,17 @@
             <value>com.fintech.modules.platform.sysasynjob.service.ExcSysAsynJobTask</value>
         </property>
     </bean>
-    
+    -->
+    <!-- 每天定时查询视频累计数据
+    <bean id="cumulativeVideoDataStatJobTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+    	<property name="jobDetail" ref="cumulativeVideoDataStatJobTask"></property>
+    	<property name="cronExpression" value="0 0 1 * * ?"></property>
+    </bean>
+    <bean id="cumulativeVideoDataStatJobTask" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+    	<property name="durability" value="true"></property>
+    	<property name="jobClass" value="com.easub.bi.quartzjob.CumulativeVideoDataStatJobTask"></property>
+    </bean>
+     -->
     <aop:aspectj-autoproxy />
     
 	<!-- 配置异步任务接口统一处理AOP -->

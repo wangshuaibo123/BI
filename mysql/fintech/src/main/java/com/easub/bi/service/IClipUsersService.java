@@ -15,4 +15,8 @@ public interface IClipUsersService {
 	 * @return
 	 */
 	public Integer getUsersAccountCount(Map<String,Object> map);
+	
+	public Integer getUserOperationLogsCount(Map<String,Object> map);
+	
+	
 }
